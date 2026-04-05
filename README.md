@@ -4,8 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Gateway Variants](https://img.shields.io/badge/AI_Gateway-12_variants-blue.svg)](#pattern-01-unified-ai-gateway)
-[![RAG Variants](https://img.shields.io/badge/RAG-5_variants-green.svg)](#pattern-02-rag-for-regulated-data)
-[![Interactive](https://img.shields.io/badge/visualizations-interactive-purple.svg)](#how-it-works)
+[![RAG Variants](https://img.shields.io/badge/RAG-10_variants-green.svg)](#pattern-02-rag-for-regulated-data)
+[![Interactive](https://img.shields.io/badge/22_visualizations-interactive-purple.svg)](#how-it-works)
 
 ---
 
@@ -23,63 +23,73 @@ This repository collects architecture patterns designed and validated across 18+
 
 **Interactive visualization** - Open the HTML file in any browser. Click scenario buttons to watch data flow through the architecture end-to-end. Click any section to expand and explore sub-components. No install, no dependencies.
 
-**Production deployment guide** - Comprehensive documentation covering component specs, deployment topology, security controls, regulatory mapping, implementation checklist, and cost model.
-
 ### GitHub Pages
 
-All interactive demos are live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
+All 22 interactive demos are live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
 
 ---
 
 ## Pattern 01: Unified AI Gateway
 
-Route all LLM and ML traffic through a single governance-aware control plane for policy enforcement, intelligent routing, and full observability. **12 variants** covering every major cloud, platform, topology, and deployment model.
+Route all LLM and ML traffic through a single governance-aware control plane. **12 variants.**
 
-**Cloud-native variants:**
+**Cloud-native:**
 
-| Variant | Stack | Cost/mo | Demo |
-|---------|-------|---------|------|
-| [Azure Native](patterns/01-unified-ai-gateway/azure-native/) | Azure APIM + Azure OpenAI + Content Safety + Entra ID | ~$900 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/azure-native/index.html) |
-| [AWS Native](patterns/01-unified-ai-gateway/aws-native/) | API Gateway + Bedrock + Guardrails for AI + IAM | ~$850 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/aws-native/index.html) |
-| [GCP Native](patterns/01-unified-ai-gateway/gcp-native/) | Apigee + Vertex AI + Gemini + Model Armor | ~$850 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/gcp-native/index.html) |
+| Variant | Stack | Demo |
+|---------|-------|------|
+| [Azure Native](patterns/01-unified-ai-gateway/azure-native/) | Azure APIM + Azure OpenAI + Content Safety | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/azure-native/index.html) |
+| [AWS Native](patterns/01-unified-ai-gateway/aws-native/) | API Gateway + Bedrock + Guardrails for AI | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/aws-native/index.html) |
+| [GCP Native](patterns/01-unified-ai-gateway/gcp-native/) | Apigee + Vertex AI + Gemini + Model Armor | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/gcp-native/index.html) |
 
-**Platform-native variants:**
+**Platform-native:**
 
-| Variant | Stack | Cost/mo | Demo |
-|---------|-------|---------|------|
-| [Databricks Native](patterns/01-unified-ai-gateway/databricks-native/) | Mosaic AI GW + FMAPI + Unity Catalog | ~$800 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/databricks-native/index.html) |
-| [Snowflake Native](patterns/01-unified-ai-gateway/snowflake-native/) | Cortex + Snowpark + Arctic + Streamlit | ~$700 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/snowflake-native/index.html) |
+| Variant | Stack | Demo |
+|---------|-------|------|
+| [Databricks Native](patterns/01-unified-ai-gateway/databricks-native/) | Mosaic AI GW + FMAPI + Unity Catalog | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/databricks-native/index.html) |
+| [Snowflake Native](patterns/01-unified-ai-gateway/snowflake-native/) | Cortex + Snowpark + Arctic + Streamlit | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/snowflake-native/index.html) |
 
-**Multi-platform variants:**
+**Multi-platform:**
 
-| Variant | Stack | Cost/mo | Demo |
-|---------|-------|---------|------|
-| [Multi-Platform](patterns/01-unified-ai-gateway/multi-platform/) | Databricks + Azure AI Foundry + Snowflake | ~$1,400 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/multi-platform/index.html) |
-| [Multi-Cloud](patterns/01-unified-ai-gateway/multi-cloud/) | Kong + Azure OpenAI + AWS Bedrock + GCP Vertex AI | ~$1,200 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/multi-cloud/index.html) |
-| [Hybrid](patterns/01-unified-ai-gateway/hybrid/) | Cloud general + on-prem for sensitive data | ~$1,600 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/hybrid/index.html) |
+| Variant | Stack | Demo |
+|---------|-------|------|
+| [Multi-Platform](patterns/01-unified-ai-gateway/multi-platform/) | Databricks + Azure AI Foundry + Snowflake | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/multi-platform/index.html) |
+| [Multi-Cloud](patterns/01-unified-ai-gateway/multi-cloud/) | Kong + Azure + AWS + GCP | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/multi-cloud/index.html) |
+| [Hybrid](patterns/01-unified-ai-gateway/hybrid/) | Cloud + on-prem dual-tier | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/hybrid/index.html) |
 
 **Self-hosted and specialized:**
 
-| Variant | Stack | Cost/mo | Demo |
-|---------|-------|---------|------|
-| [Open Source](patterns/01-unified-ai-gateway/open-source/) | LiteLLM + vLLM/Ollama + Llama/Mistral | ~$400 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/open-source/index.html) |
-| [Starter](patterns/01-unified-ai-gateway/starter/) | Single provider + reverse proxy + basic logging | ~$50-200 | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/starter/index.html) |
-| [Federated](patterns/01-unified-ai-gateway/federated/) | Multi-BU gateways + central governance plane | ~$2,000+ | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/federated/index.html) |
-| [Edge](patterns/01-unified-ai-gateway/edge/) | On-device SLM + local proxy + offline-capable | ~$100-300/device | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/edge/index.html) |
+| Variant | Stack | Demo |
+|---------|-------|------|
+| [Open Source](patterns/01-unified-ai-gateway/open-source/) | LiteLLM + vLLM/Ollama + Llama/Mistral | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/open-source/index.html) |
+| [Starter](patterns/01-unified-ai-gateway/starter/) | Single provider + reverse proxy | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/starter/index.html) |
+| [Federated](patterns/01-unified-ai-gateway/federated/) | Multi-BU gateways + central governance | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/federated/index.html) |
+| [Edge](patterns/01-unified-ai-gateway/edge/) | On-device SLM + offline-capable | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/01-unified-ai-gateway/edge/index.html) |
 
 ---
 
 ## Pattern 02: RAG for Regulated Data
 
-Retrieval-augmented generation with compliance boundaries at every pipeline stage. **5 variants** covering different retrieval architectures from standard vector search to self-correcting agentic retrieval.
+Retrieval-augmented generation with compliance boundaries at every stage. **10 variants.** Each variant is cloud-agnostic with a [platform mapping table](patterns/02-rag-regulated-data/) for Azure, AWS, GCP, Databricks, and open-source stacks.
 
-| Variant | Architecture | Key Capability | Demo |
-|---------|-------------|---------------|------|
-| [Standard RAG](patterns/02-rag-regulated-data/standard-rag/) | Vector search + chunking + generation | Baseline RAG with guardrails | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/standard-rag/index.html) |
-| [GraphRAG](patterns/02-rag-regulated-data/graph-rag/) | Knowledge graph traversal + entity resolution | Multi-hop reasoning over relationships | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/graph-rag/index.html) |
-| [Agentic RAG](patterns/02-rag-regulated-data/agentic-rag/) | Self-correcting retrieval (CRAG / Self-RAG) | Re-retrieves on low confidence | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/agentic-rag/index.html) |
-| [Multi-Source RAG](patterns/02-rag-regulated-data/multi-source-rag/) | Federated retrieval across platforms | Unified search across Databricks + Snowflake + more | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/multi-source-rag/index.html) |
-| [Sensitive Data RAG](patterns/02-rag-regulated-data/sensitive-data-rag/) | PHI/PII-aware with classification at every stage | Zero-trust retrieval with audit trail | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/sensitive-data-rag/index.html) |
+**Core RAG architectures:**
+
+| Variant | Architecture | Demo |
+|---------|-------------|------|
+| [Standard RAG](patterns/02-rag-regulated-data/standard-rag/) | Vector search + chunking + generation with guardrails | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/standard-rag/index.html) |
+| [GraphRAG](patterns/02-rag-regulated-data/graph-rag/) | Knowledge graph traversal + entity resolution | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/graph-rag/index.html) |
+| [Agentic RAG](patterns/02-rag-regulated-data/agentic-rag/) | Self-correcting retrieval (CRAG / Self-RAG) | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/agentic-rag/index.html) |
+| [Sensitive Data RAG](patterns/02-rag-regulated-data/sensitive-data-rag/) | PHI/PII-aware with zero-trust retrieval | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/sensitive-data-rag/index.html) |
+
+**Specialized RAG architectures:**
+
+| Variant | Architecture | Demo |
+|---------|-------------|------|
+| [Conversational RAG](patterns/02-rag-regulated-data/conversational-rag/) | Multi-turn with conversation history + follow-up detection | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/conversational-rag/index.html) |
+| [Hybrid SQL+Vector](patterns/02-rag-regulated-data/hybrid-sql-vector-rag/) | Text-to-SQL + vector search in a single query | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/hybrid-sql-vector-rag/index.html) |
+| [Multimodal RAG](patterns/02-rag-regulated-data/multimodal-rag/) | Images, charts, medical scans + text retrieval | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/multimodal-rag/index.html) |
+| [Multi-Source RAG](patterns/02-rag-regulated-data/multi-source-rag/) | Federated retrieval across platforms | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/multi-source-rag/index.html) |
+| [Real-Time RAG](patterns/02-rag-regulated-data/realtime-rag/) | Streaming ingestion, seconds-to-searchable | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/realtime-rag/index.html) |
+| [RAG Evaluation](patterns/02-rag-regulated-data/evaluation-rag/) | Automated quality testing + regression detection | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/evaluation-rag/index.html) |
 
 ---
 
@@ -91,16 +101,6 @@ Retrieval-augmented generation with compliance boundaries at every pipeline stag
 | 04 | Governance-as-Architecture | Planned |
 | 05 | Contamination-Resistant Pipeline | Planned |
 | 06 | Risk-Tiered AI Deployment | Planned |
-
----
-
-## Architecture Coverage
-
-Every pattern maps to a complete enterprise AI/ML reference architecture:
-
-**Pattern 01 (Gateway):** 10 sections across Build Pipeline and Runtime Pipeline with 4 cross-cutting governance layers.
-
-**Pattern 02 (RAG):** 11 sections across Ingestion Pipeline and Query Pipeline with data classification and retrieval quality observability.
 
 ---
 
