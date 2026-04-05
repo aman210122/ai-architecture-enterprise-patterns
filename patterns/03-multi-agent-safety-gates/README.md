@@ -1,6 +1,6 @@
 # Pattern 03: Multi-Agent Pipeline with Safety Gates
 
-**Chain specialized LLM agents with safety checkpoints. 11 variants covering every orchestration topology.**
+**Chain specialized LLM agents with safety checkpoints. 11 variants covering every orchestration topology. Central orchestrator, per-agent cost/latency, conditional routing, checkpoint/resume, model failover.**
 
 ## Which Variant Should You Use?
 
@@ -16,16 +16,16 @@
 | Iterative self-improvement | [Reflection Loop](reflection-loop/) |
 | Many agents, no coordinator | [Swarm](swarm/) |
 | Non-blocking safety observer | [Parallel Monitor](parallel-monitor/) |
-| Deterministic regulated workflows | [State Machine Agent](state-machine-agent/) |
+| Deterministic regulated workflows | [State Machine](state-machine-agent/) |
 
 ## GAIF-4 Metrics for Multi-Agent
 
-| Metric | Multi-Agent Application |
-|--------|------------------------|
-| T1PR | Contaminated outputs passing inter-agent gates |
-| CFR | Policy violations in agent communication |
-| EMR | Emergent dangerous content at pipeline level (EMG paper) |
-| GDR | Gate effectiveness degrading over time |
+| Metric | Application | Safe | Critical |
+|--------|------------|------|----------|
+| T1PR | Contaminated outputs passing gates | < 0.05 | > 0.15 |
+| CFR | Policy violations per agent | 0.00 | > 0.01 |
+| EMR | Emergent content at pipeline level | < 0.05 | > 0.15 |
+| GDR | Gate effectiveness degrading | < 0.03 | > 0.05 |
 
 ## Platform Mapping
 

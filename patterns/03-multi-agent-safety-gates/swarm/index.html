@@ -3,274 +3,364 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pattern 03: Swarm | AI Architecture Enterprise Patterns</title>
+<title>Pattern 03: Linear Chain | AI Architecture Enterprise Patterns</title>
 <style>
-:root{--bg:#fafaf8;--bg2:#f1efe8;--bg3:#e6e4dd;--text:#2c2c2a;--text2:#5f5e5a;--text3:#888780;--border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.16);--ac:#EF9F27;--ac50:#FAEEDA;--p50:#EEEDFE;--p400:#7F77DD;--t50:#E1F5EE;--t400:#1D9E75;--b50:#E6F1FB;--b400:#378ADD;--c50:#FAECE7;--c400:#D85A30;--am50:#FAEEDA;--am400:#EF9F27;--g50:#EAF3DE;--g400:#639922;--r50:#FCEBEB;--r400:#E24B4A;--nv:#1F3864;--nv2:#1B4F72;--gwc:#2980B9;--agc:#D79B00;--llc:#9673A6;--llb:#E1D5E7;--mlc:#6C8EBF;--sfc:#B85450;--gate:#2980B9;--gate50:#D4E6F1;--f:'Segoe UI',system-ui,-apple-system,sans-serif;--m:'SF Mono','Cascadia Code',monospace;--r:10px;--rl:14px}
-@media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#222;--bg3:#2e2e2e;--text:#e0ddd5;--text2:#a09e96;--text3:#6e6d68;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--ac:#FAC775;--ac50:#412402;--p50:#26215C;--p400:#AFA9EC;--t50:#04342C;--t400:#5DCAA5;--b50:#042C53;--b400:#85B7EB;--c50:#4A1B0C;--c400:#F0997B;--am50:#412402;--am400:#FAC775;--g50:#173404;--g400:#97C459;--r50:#501313;--r400:#F09595;--nv:#8BADD4;--nv2:#6C9BC4;--gwc:#5AAFE6;--agc:#E6B44C;--llc:#B89FD4;--llb:#2D1F3D;--mlc:#7CADD4;--sfc:#E88A8A;--gate:#5AAFE6;--gate50:#1A3A52}}
-*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:var(--f);line-height:1.5}.pg{max-width:1200px;margin:0 auto;padding:1.5rem}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border)}.brand-ico{width:36px;height:36px;border-radius:10px;background:var(--ac);display:flex;align-items:center;justify-content:center}.brand-ico svg{width:20px;height:20px}.brand-t{font-size:15px;font-weight:700;letter-spacing:-0.3px}.brand-s{font-size:9px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;font-weight:600}
-.hdr{margin-bottom:1.2rem}.hdr-tag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ac);margin-bottom:4px}.hdr h1{font-size:22px;font-weight:700;line-height:1.3;margin-bottom:3px}.hdr p{font-size:12px;color:var(--text2)}.plats{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.pl{font-size:8px;font-weight:700;padding:3px 10px;border-radius:6px;letter-spacing:0.4px;background:var(--ac50);color:var(--ac);border:0.5px solid var(--ac)}
-.sc-lbl{font-size:8px;color:var(--text3);margin-bottom:4px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px}.sc-lbl-arr{font-size:10px;animation:bounceR 1.5s ease-in-out infinite}@keyframes bounceR{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
-.sc-bar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}.sc-btn{background:var(--bg);border:0.5px solid var(--border2);border-radius:7px;padding:7px 14px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;font-family:var(--f);font-size:11px;color:var(--text2)}.sc-btn:hover{border-color:var(--ac);color:var(--text);background:var(--ac50);transform:translateY(-1px)}.sc-btn.active{background:var(--ac50);border-color:var(--ac);color:var(--ac);font-weight:600}.sc-btn:disabled{opacity:0.35;cursor:not-allowed}.sc-btn:disabled:hover{transform:none;background:var(--bg)}.sc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.stbar{display:flex;align-items:center;margin-bottom:1rem;background:var(--bg);border-radius:7px;padding:5px 6px;border:0.5px solid var(--border);overflow-x:auto}.st{flex:1;text-align:center;font-size:7px;font-weight:500;color:var(--text3);padding:4px 2px;border-radius:5px;white-space:nowrap;transition:all 0.35s}.st.on{background:var(--ac50);color:var(--ac);font-weight:700}.st.ok{color:var(--t400);font-weight:600}.st.no{background:var(--r50);color:var(--r400);font-weight:700}.sta{color:var(--text3);font-size:7px;padding:0 1px;flex-shrink:0;opacity:0.3}.sta.lit{opacity:1;color:var(--ac)}.sta.blk{opacity:1;color:var(--r400)}
-.xb{border-radius:var(--r);padding:7px 14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:8px;font-weight:600;letter-spacing:0.5px;margin-bottom:4px}.xb-gov{background:var(--nv);color:#fff}.xb-obs{background:var(--nv2);color:#fff;margin-top:4px}.xb-i{background:rgba(255,255,255,0.12);padding:2px 8px;border-radius:4px;font-weight:500;font-size:7px}
-.cvs{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);padding:1rem;margin-bottom:1rem;overflow-x:auto}.cvs-top{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.ldot{width:5px;height:5px;border-radius:50%;background:var(--t400);animation:pls 2s ease-in-out infinite}@keyframes pls{0%,100%{opacity:1}50%{opacity:0.3}}
-.pipe-lbl{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin:10px 0 6px;display:flex;align-items:center;gap:6px}.pipe-lbl-line{flex:1;height:0.5px;background:var(--border2)}.pipe-connect{display:flex;justify-content:center;padding:4px 0;font-size:14px;color:var(--border2);letter-spacing:20px}
-.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-items:start}
-.chain{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr 40px 1fr 40px 1fr 40px 1fr 40px 1fr;gap:0;align-items:start;margin:6px 0}
-@media(max-width:1100px){.chain{grid-template-columns:repeat(13,100px)}}
-.sec{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--r);padding:8px 10px;transition:all 0.3s;cursor:pointer;user-select:none}.sec:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.06)}.sec.hl{box-shadow:0 0 0 2px var(--ac),0 4px 16px rgba(216,90,48,0.15)}.sec.hl-r{box-shadow:0 0 0 2px var(--r400)}.sec.hl-g{box-shadow:0 0 0 2px var(--gate)}.sec.dim{opacity:0.2;pointer-events:none}
-.sec-hd{display:flex;align-items:center;gap:5px;margin-bottom:3px}.sec-ic{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.sec-ic svg{width:10px;height:10px}.sec-nm{font-size:7px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;display:flex;align-items:center;gap:3px}.sec-ti{font-size:9px;font-weight:700;color:var(--text)}.spip{width:5px;height:5px;border-radius:50%;background:var(--text3);opacity:0.25;transition:all 0.3s}.spip.on{background:var(--t400);opacity:1;animation:pls 1.5s ease-in-out infinite}.spip.blk{background:var(--r400);opacity:1}
-.sec-pv{display:flex;flex-direction:column;gap:1px;margin-top:2px}.pvi{font-size:7px;color:var(--text2);display:flex;align-items:center;gap:3px}.pvd{width:3px;height:3px;border-radius:50%;flex-shrink:0}
-.cht{display:flex;align-items:center;gap:3px;font-size:6px;color:var(--text3);margin-top:2px;opacity:0.5;transition:opacity 0.2s}.sec:hover .cht{opacity:1;color:var(--ac)}.chv{font-size:7px;transition:transform 0.3s}.sec.exp .chv{transform:rotate(90deg)}
-.sec-xb{height:2px;background:var(--border);border-radius:1px;margin-top:3px;position:relative;overflow:hidden}.sec-xb::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:var(--ac);transition:width 0.3s}.sec:hover .sec-xb::after{width:100%}
-.sec-dt{max-height:0;overflow:hidden;transition:max-height 0.4s ease}.sec.exp .sec-dt{max-height:300px;margin-top:4px;border-top:0.5px solid var(--border);padding-top:4px}.dtg{display:flex;flex-direction:column;gap:1px}.dti{font-size:7px;color:var(--text2);display:flex;align-items:center;gap:3px;padding:1px 0}.dtd{width:4px;height:4px;border-radius:50%;flex-shrink:0}.dtl{font-size:6px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;margin-bottom:1px}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.08);--border2:rgba(139,149,168,0.15);
+--ag:#e8943a;--agBg:rgba(232,148,58,0.07);--agGl:rgba(232,148,58,0.25);
+--gt:#22b8cf;--gtBg:rgba(34,184,207,0.07);--gtGl:rgba(34,184,207,0.35);
+--orch:#c4cad8;--orchBg:rgba(196,202,216,0.06);
+--ok:#34d399;--okBg:rgba(52,211,153,0.07);
+--err:#f87171;--errBg:rgba(248,113,113,0.07);
+--warn:#fbbf24;--warnBg:rgba(251,191,36,0.07);
+--ops:#38bdf8;--eco:#fb923c;
+--f:'Plus Jakarta Sans',sans-serif;--m:'IBM Plex Mono',monospace;--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:var(--f);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(232,148,58,0.02),transparent 50%),radial-gradient(ellipse at 70% 70%,rgba(34,184,207,0.02),transparent 50%);pointer-events:none}
+.pg{max-width:1500px;margin:0 auto;padding:1.5rem;position:relative;z-index:1}
 
-/* Safety Gate special styling */
-.gate{background:var(--gate50);border:1.5px solid var(--gate);border-radius:var(--r);padding:6px 4px;text-align:center;align-self:center;transition:all 0.3s;min-height:60px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px}
-.gate.pass{border-color:var(--t400);background:var(--t50)}.gate.fail{border-color:var(--r400);background:var(--r50)}
-.gate-icon{font-size:14px}.gate-lbl{font-size:6px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--gate)}.gate.pass .gate-lbl{color:var(--t400)}.gate.fail .gate-lbl{color:var(--r400)}
-.gate-status{font-size:6px;font-weight:600;color:var(--text3)}
+.hdr{margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}.hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.hdr-badge{background:linear-gradient(135deg,var(--ag),var(--gt));padding:6px 12px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#000}
+.hdr h1{font-size:24px;font-weight:800;letter-spacing:-0.5px}.hdr p{font-size:12px;color:var(--text2);max-width:900px;line-height:1.6;margin-top:2px}
 
-/* Flow arrows */
-.fa-chain{text-align:center;font-size:12px;color:var(--border2);transition:all 0.3s;align-self:center}.fa-chain.lit{color:var(--ac)}.fa-chain.blk{color:var(--r400)}
+.sc-bar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}.sc-lbl{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-right:4px}
+.sc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 13px;cursor:pointer;font-family:var(--f);font-size:10px;font-weight:500;color:var(--text2);transition:all 0.2s;display:flex;align-items:center;gap:5px}
+.sc-btn:hover{border-color:var(--ag);color:var(--text);transform:translateY(-1px)}.sc-btn.active{border-color:var(--ag);color:var(--ag);background:var(--agBg);font-weight:600}.sc-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none}
+.sc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sc-reset{margin-left:auto;background:none;border:1px solid var(--border);border-radius:7px;padding:5px 10px;cursor:pointer;font-family:var(--f);font-size:9px;color:var(--text3)}
 
-.rsp{background:var(--bg);border:1px dashed var(--border2);border-radius:var(--r);padding:8px 12px;margin-top:6px;transition:all 0.3s}.rsp.rok{border:1px solid var(--t400);background:var(--t50)}.rsp.rwn{border:1px solid var(--am400);background:var(--am50)}.rsp.rer{border:1px solid var(--r400);background:var(--r50)}.rsp-in{display:flex;align-items:center;gap:12px;font-size:10px}.rsp-l{font-weight:700}.rsp-d{color:var(--text2);font-size:9px}
-.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:1rem}@media(max-width:640px){.mets{grid-template-columns:repeat(2,1fr)}}.met{background:var(--bg2);border-radius:var(--r);border:0.5px solid var(--border);padding:10px 12px}.met-l{font-size:8px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.met-v{font-size:18px;font-weight:700;font-family:var(--m);margin-top:1px}.met-b{height:3px;border-radius:2px;background:var(--bg3);margin-top:5px;overflow:hidden}.met-f{height:100%;border-radius:2px;transition:width 0.5s,background 0.3s}.met-n{font-size:8px;color:var(--text3);margin-top:3px}
-.log{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);overflow:hidden;margin-bottom:1rem}.log-h{padding:8px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:9px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.log-b{max-height:200px;overflow-y:auto;padding:4px 0;font-family:var(--m);font-size:9px}.lr{padding:2px 14px;display:flex;gap:8px;animation:fi 0.25s ease}@keyframes fi{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}.lt{color:var(--text3);min-width:72px}.lp{min-width:60px;font-weight:700}.lp.l-agent{color:var(--agc)}.lp.l-gate{color:var(--gate)}.lp.l-pass{color:var(--t400)}.lp.l-block{color:var(--r400)}.lp.l-warn{color:var(--am400)}.lp.l-tool{color:var(--llc)}.lp.l-resp{color:var(--t400)}.lm{color:var(--text2);flex:1}.clr{background:none;border:0.5px solid var(--border2);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--text3);cursor:pointer;font-family:var(--f)}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}@media(max-width:640px){.info-grid{grid-template-columns:1fr}}.info-box{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);padding:14px 16px}.info-title{font-size:9px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}.info-row{display:flex;align-items:start;gap:6px;margin-bottom:4px;font-size:10px;color:var(--text2);line-height:1.5}.info-tag{font-weight:700;flex-shrink:0}.lg-row{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--text2);margin-bottom:4px}.lg-box{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.wm{position:fixed;bottom:12px;right:16px;font-size:9px;color:var(--text3);opacity:0.35;font-family:var(--f);pointer-events:none;z-index:999}.footer{text-align:center;padding:1rem 0;font-size:9px;color:var(--text3)}.footer a{color:var(--ac);text-decoration:none}
+.cvs{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:1rem;position:relative}
+.cvs::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent)}
+
+/* Cross-cutting bars */
+.xbar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:10px;font-weight:700;letter-spacing:0.6px;margin-bottom:6px;flex-wrap:wrap}
+.xbar.gov{background:linear-gradient(90deg,rgba(34,184,207,0.12),rgba(232,148,58,0.12));border:1px solid rgba(34,184,207,0.25)}
+.xbar.obs{background:linear-gradient(90deg,rgba(52,211,153,0.12),rgba(56,189,248,0.12));border:1px solid rgba(52,211,153,0.25)}
+.xbar.ops{background:linear-gradient(90deg,rgba(56,189,248,0.12),rgba(34,184,207,0.12));border:1px solid rgba(56,189,248,0.25)}
+.xbar.eco{background:linear-gradient(90deg,rgba(251,146,60,0.12),rgba(251,191,36,0.12));border:1px solid rgba(251,146,60,0.25)}
+.xdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.xtag{background:rgba(255,255,255,0.08);padding:2px 7px;border-radius:3px;font-weight:400;font-size:8px;color:var(--text3)}
+
+/* ORCHESTRATOR */
+.orch{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;margin:10px 0;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:10px;position:relative}
+.orch::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ag),var(--gt));border-radius:12px 12px 0 0}
+.orch-main{grid-row:span 1}.orch-lbl{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orch);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.orch-lbl::before{content:'';width:5px;height:5px;border-radius:50%;animation:op 2s ease-in-out infinite}@keyframes op{0%,100%{opacity:1;background:var(--ok)}50%{opacity:0.4;background:var(--ok)}}
+.orch-ti{font-size:13px;font-weight:700;margin-bottom:4px}
+.orch-it{font-size:8px;color:var(--text3);line-height:1.5;display:flex;align-items:baseline;gap:4px}.orch-it::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--text3);flex-shrink:0;margin-top:4px}
+.orch-card{background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:10px 12px;transition:all 0.3s}
+.orch-card.hl{border-color:var(--ag);box-shadow:0 0 12px var(--agBg)}
+.oc-lbl{font-size:8px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+.oc-ti{font-size:10px;font-weight:600;margin-bottom:3px}
+.oc-it{font-size:8.5px;color:var(--text3);line-height:1.4}
+
+/* PIPELINE SECTION LABEL */
+.plbl{display:flex;align-items:center;gap:8px;margin:12px 0 8px}.plbl-dot{width:7px;height:7px;border-radius:50%;animation:op 2s ease-in-out infinite}
+.plbl-nm{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}.plbl-desc{font-size:9px;color:var(--text3);margin-left:auto}
+
+/* EXECUTION CHAIN - completely different layout from Pattern 02 */
+.chain{display:flex;gap:0;align-items:stretch;margin:0}
+@media(max-width:1300px){.chain{overflow-x:auto;padding-bottom:8px}}
+
+/* AGENT CARD - visually distinct from RAG stages */
+.agent{flex:1;min-width:130px;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:12px;transition:all 0.35s;cursor:pointer;position:relative;overflow:hidden}
+.agent::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ag);border-radius:12px 12px 0 0;opacity:0;transition:opacity 0.3s}
+.agent:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.agent.hl{border-color:var(--ag);box-shadow:0 0 0 1px var(--ag),0 8px 20px rgba(232,148,58,0.12)}.agent.hl::before{opacity:1}
+.agent.hl-d{border-color:var(--err);box-shadow:0 0 0 1px var(--err),0 8px 20px rgba(248,113,113,0.12)}.agent.hl-d::before{opacity:1;background:var(--err)}
+.agent.dim{opacity:0.1;pointer-events:none}
+.agent-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.agent-ico{width:28px;height:28px;border-radius:8px;background:var(--agBg);border:1px solid rgba(232,148,58,0.2);display:flex;align-items:center;justify-content:center;font-size:13px}
+.agent-model{font-size:8px;font-family:var(--m);padding:2px 6px;border-radius:4px;background:var(--bg4);border:1px solid var(--border);color:var(--text3)}
+.agent-st{position:absolute;top:8px;right:8px;width:5px;height:5px;border-radius:50%;background:var(--text3);opacity:0.15;transition:all 0.3s}.agent-st.on{opacity:1;background:var(--ok);box-shadow:0 0 6px var(--okBg)}.agent-st.er{opacity:1;background:var(--err);box-shadow:0 0 6px var(--errBg)}
+.agent-nm{font-size:8px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ag);margin-bottom:2px}
+.agent-role{font-size:11px;font-weight:700;margin-bottom:4px}
+.agent-items{display:flex;flex-direction:column;gap:1px}.agent-it{font-size:8.5px;color:var(--text3);display:flex;align-items:baseline;gap:4px;line-height:1.3}.agent-it::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--ag);opacity:0.4;flex-shrink:0;margin-top:4px}
+.agent-stats{display:flex;gap:6px;margin-top:6px;padding-top:5px;border-top:1px solid var(--border)}.agent-sv{text-align:center;flex:1}.agent-sv-v{font-size:10px;font-weight:700;font-family:var(--m)}.agent-sv-l{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:0.3px}
+.agent-dt{max-height:0;overflow:hidden;transition:max-height 0.4s}.agent.exp .agent-dt{max-height:200px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+.dt-it{font-size:8.5px;color:var(--text2);padding:1px 0}
+
+/* SAFETY GATE - completely different visual from agents */
+.gate-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;width:60px;flex-shrink:0;position:relative}
+.gate{width:48px;background:var(--bg4);border:2px solid var(--gt);border-radius:10px;padding:8px 4px;text-align:center;transition:all 0.3s;position:relative}
+.gate.pass{border-color:var(--ok);background:var(--okBg);box-shadow:0 0 12px rgba(52,211,153,0.15)}.gate.fail{border-color:var(--err);background:var(--errBg);box-shadow:0 0 12px rgba(248,113,113,0.15)}.gate.route{border-color:var(--warn);background:var(--warnBg);box-shadow:0 0 12px rgba(251,191,36,0.15)}
+.gate-ico{font-size:16px;margin-bottom:2px}.gate-nm{font-size:8px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--gt)}.gate.pass .gate-nm{color:var(--ok)}.gate.fail .gate-nm{color:var(--err)}.gate.route .gate-nm{color:var(--warn)}
+.gate-val{font-size:8px;font-family:var(--m);color:var(--text3);margin-top:1px}
+/* Error/routing path indicator below gate */
+.gate-path{font-size:8px;color:var(--text3);margin-top:4px;opacity:0;transition:opacity 0.3s;text-align:center;max-width:60px}.gate-path.show{opacity:1}
+.gate-path.err-path{color:var(--err)}.gate-path.route-path{color:var(--warn)}
+
+/* Connector arrows between agents and gates */
+.cn{display:flex;align-items:center;justify-content:center;width:20px;flex-shrink:0;position:relative}
+.cn-l{width:100%;height:2px;position:relative}.cn-l::before{content:'';position:absolute;inset:0;height:2px;background:var(--border);border-radius:1px}
+.cn.li .cn-l::before{background:var(--ag);box-shadow:0 0 6px var(--agGl)}.cn.li-g .cn-l::before{background:var(--gt);box-shadow:0 0 6px var(--gtGl)}.cn.li-d .cn-l::before{background:var(--err)}
+.cn .dot{position:absolute;width:4px;height:4px;border-radius:50%;top:-1px;left:-4px;opacity:0}
+.cn.li .dot{animation:fR 0.5s ease forwards;background:var(--ag);box-shadow:0 0 6px var(--agGl)}
+.cn.li-g .dot{animation:fR 0.5s ease forwards;background:var(--gt);box-shadow:0 0 6px var(--gtGl)}
+@keyframes fR{0%{left:0;opacity:1}100%{left:calc(100% - 4px);opacity:0.2}}
+
+/* RESPONSE */
+.rsp{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 16px;margin-top:10px;display:flex;align-items:center;gap:12px;transition:all 0.3s;flex-wrap:wrap}
+.rsp.ok{border-color:var(--ok);background:var(--okBg)}.rsp.er{border-color:var(--err);background:var(--errBg)}.rsp.wn{border-color:var(--warn);background:var(--warnBg)}
+.rsp-code{font-family:var(--m);font-size:13px;font-weight:600}.rsp-msg{font-size:10px;color:var(--text2);flex:1}.rsp-cost{font-family:var(--m);font-size:10px;color:var(--eco);white-space:nowrap}
+
+/* Feedback loop */
+.fb{display:flex;align-items:center;justify-content:center;margin-top:8px;gap:8px;opacity:0.25;transition:opacity 0.3s;font-size:8px;color:var(--text3)}.fb.lit{opacity:1;color:var(--ok)}
+
+/* METRICS */
+.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}@media(max-width:768px){.mets{grid-template-columns:repeat(2,1fr)}}
+.met{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.met-l{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:5px}
+.met-b{font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600}
+.met-v{font-size:22px;font-weight:700;font-family:var(--m);line-height:1.2}
+.met-bar{height:3px;border-radius:2px;background:var(--bg4);margin-top:5px;overflow:hidden}.met-f{height:100%;border-radius:2px;transition:width 0.5s,background 0.3s}
+.met-n{font-size:8px;color:var(--text3);margin-top:3px}
+
+.amets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}@media(max-width:768px){.amets{grid-template-columns:repeat(2,1fr)}}
+.amet{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px}
+.amet-l{font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.amet-v{font-size:18px;font-weight:700;font-family:var(--m);color:var(--ag)}.amet-n{font-size:8px;color:var(--text3);margin-top:2px}
+
+/* LOG */
+.log{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:1rem}
+.log-h{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.log-t{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:5px}.log-t::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ok);animation:op 2s ease-in-out infinite}
+.log-clr{background:none;border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:8px;color:var(--text3);cursor:pointer;font-family:var(--f)}
+.log-b{max-height:200px;overflow-y:auto;padding:3px 0;font-family:var(--m);font-size:9px}.log-b::-webkit-scrollbar{width:3px}.log-b::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+.lr{padding:2px 14px;display:flex;gap:8px;animation:fi 0.2s ease}@keyframes fi{from{opacity:0;transform:translateY(-3px)}to{opacity:1}}
+.lr-t{color:var(--text3);min-width:70px}.lr-p{min-width:65px;font-weight:600}.lr-m{color:var(--text2);flex:1}
+.lr-p.ag{color:var(--ag)}.lr-p.gt{color:var(--gt)}.lr-p.orch{color:var(--orch)}.lr-p.ok{color:var(--ok)}.lr-p.err{color:var(--err)}.lr-p.warn{color:var(--warn)}.lr-p.ops{color:var(--ops)}.lr-p.eco{color:var(--eco)}
+
+/* INFO */
+.info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}@media(max-width:768px){.info{grid-template-columns:1fr}}
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.info-tl{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.info-r{font-size:10px;color:var(--text2);margin-bottom:4px;display:flex;align-items:start;gap:5px;line-height:1.5}.info-tag{font-weight:700;flex-shrink:0;font-size:9px}
+.plat-r{display:flex;align-items:center;gap:7px;font-size:9px;color:var(--text2);margin-bottom:4px}.plat-d{width:7px;height:7px;border-radius:3px;flex-shrink:0}
+
+.footer{text-align:center;padding:1rem 0;font-size:9px;color:var(--text3)}.footer a{color:var(--ag);text-decoration:none}
+.wm{position:fixed;bottom:8px;right:12px;font-size:8px;color:var(--text3);opacity:0.15;font-family:var(--m);pointer-events:none;z-index:999}
 </style>
 </head>
 <body>
 <div class="wm">Designed by Aman Sharma</div>
 <div class="pg">
-<div class="brand"><div class="brand-ico"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div><div class="brand-t">AI Architecture Enterprise Patterns</div><div class="brand-s">Interactive reference architectures for regulated enterprises</div></div></div>
+<div class="hdr"><div class="hdr-top"><div class="hdr-badge">Pattern 03 / Swarm</div></div><h1>Swarm Pipeline</h1><p>Many lightweight agents with no central coordinator. Emergent coordination through shared state and handoff protocols. Inspired by OpenAI Swarm pattern. Scales horizontally.</p></div>
 
-<div class="hdr">
-  <div class="hdr-tag">Pattern 03 - Swarm</div>
-  <h1>Multi-Agent Pipeline with Shared State</h1>
-  <p>Many lightweight agents with no central coordinator. Emergent coordination through shared state and handoff protocols. Inspired by OpenAI Swarm pattern.
-  <div class="plats"><span class="pl">Decentralized</span><span class="pl">Shared State</span><span class="pl">Handoff Protocol</span></div>
-</div>
-
-<div class="sc-lbl"><span class="sc-lbl-arr">&#9758;</span> Click a scenario to simulate the agent pipeline</div>
-<div class="sc-bar">
-  <button class="sc-btn" onclick="run('clean')" id="btn-handoff"><div class="sc-dot" style="background:var(--t400)"></div>Smooth handoff</button>
-  <button class="sc-btn" onclick="run('contam')" id="btn-badhand"><div class="sc-dot" style="background:var(--r400)"></div>Bad handoff caught</button>
-  <button class="sc-btn" onclick="run('escalate')" id="btn-stuck"><div class="sc-dot" style="background:var(--am400)"></div>Swarm stuck</button>
-  <button class="sc-btn" onclick="run('tools')" id="btn-multihand"><div class="sc-dot" style="background:var(--llc)"></div>Multi-agent handoff</button>
-  <button class="sc-btn" onclick="run('timeout')" id="btn-swarmto"><div class="sc-dot" style="background:var(--text3)"></div>Swarm timeout</button>
-  <button class="sc-btn" style="margin-left:auto;font-size:10px;color:var(--text3)" onclick="resetAll()">&#8634; Reset</button>
-</div>
-
-<div class="stbar"><div class="st" id="s-req">Request</div><div class="sta" id="a1">&#9654;</div><div class="st" id="s-ag1">Agent 1</div><div class="sta" id="a2">&#9654;</div><div class="st" id="s-g1">Gate 1</div><div class="sta" id="a3">&#9654;</div><div class="st" id="s-ag2">Agent 2</div><div class="sta" id="a4">&#9654;</div><div class="st" id="s-g2">Gate 2</div><div class="sta" id="a5">&#9654;</div><div class="st" id="s-ag3">Agent 3</div><div class="sta" id="a6">&#9654;</div><div class="st" id="s-g3">Gate 3</div><div class="sta" id="a7">&#9654;</div><div class="st" id="s-final">Final</div></div>
+<div class="sc-bar"><span class="sc-lbl">Scenarios</span>
+<button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--ok)"></div>Clean pipeline</button>
+<button class="sc-btn" onclick="run('contam')" id="btn-contam"><div class="sc-dot" style="background:var(--err)"></div>Gate blocks contamination</button>
+<button class="sc-btn" onclick="run('route')" id="btn-route"><div class="sc-dot" style="background:var(--warn)"></div>Conditional routing</button>
+<button class="sc-btn" onclick="run('resume')" id="btn-resume"><div class="sc-dot" style="background:var(--ops)"></div>Checkpoint resume</button>
+<button class="sc-btn" onclick="run('failover')" id="btn-failover"><div class="sc-dot" style="background:var(--ag)"></div>Model failover</button>
+<button class="sc-reset" onclick="resetAll()">&#8634; Reset</button></div>
 
 <div class="cvs">
-  <div class="cvs-top"><div class="ldot"></div><span>Swarm with handoff coordination</span><span style="margin-left:auto;font-size:8px;opacity:0.5">Click any section to explore</span></div>
-  <div class="xb xb-gov"><span style="font-size:10px">Agent Governance</span><span class="xb-i">Permission Boundaries</span><span class="xb-i">Tool Authorization</span><span class="xb-i">Output Policies</span><span class="xb-i">Inter-Agent Isolation</span><span class="xb-i">Handoff Protocol</span><span class="xb-i">Audit Trail</span></div>
+<!-- CROSS-CUTTING BARS (top 2) -->
+<div class="xbar gov"><div class="xdot" style="background:var(--gt)"></div><span style="color:var(--gt)">Governance</span><div class="xtag">GAIF-4 per Gate</div><div class="xtag">T1PR at Each Checkpoint</div><div class="xtag">EMR Pipeline-Level</div><div class="xtag">Decision Audit</div><div class="xtag">Agent Versioning</div><div class="xtag">Compliance per Output</div></div>
+<div class="xbar obs"><div class="xdot" style="background:var(--ok)"></div><span style="color:var(--ok)">Observability</span><div class="xtag">Per-Agent Spans</div><div class="xtag">Inter-Agent Messages</div><div class="xtag">Decision Reasoning</div><div class="xtag">Latency per Agent</div><div class="xtag">Token Usage per Agent</div><div class="xtag">OpenTelemetry</div></div>
 
-  <!-- AGENT CONFIGURATION -->
-  <div class="pipe-lbl"><span>Agent configuration</span><div class="pipe-lbl-line"></div><span style="font-size:7px;font-weight:500">Offline: agent definitions, tools, and safety rules</span></div>
-  <div class="row4">
-    <div class="sec" id="sec-adef" onclick="tog('adef')"><div class="sec-hd"><div class="sec-ic" style="background:var(--agc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="sec-nm" style="color:var(--agc)">Agent Definitions <div class="spip" id="st-adef"></div></div><div class="sec-ti">Roles & Prompts</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--agc)"></div>Agent role + system prompt</div><div class="pvi"><div class="pvd" style="background:var(--agc)"></div>Model selection per agent</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Input/output schemas</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Agent name + role description</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>System prompt (versioned)</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Model: GPT-4o / Claude / DBRX per agent</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Input/output JSON schema</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Max tokens per agent</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Temperature + sampling config</div></div></div></div>
-
-    <div class="sec" id="sec-tools" onclick="tog('tools')"><div class="sec-hd"><div class="sec-ic" style="background:var(--llc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div><div><div class="sec-nm" style="color:var(--llc)">Tool Registry <div class="spip" id="st-tools"></div></div><div class="sec-ti">MCP / Functions</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Available tools per agent</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Permission scopes</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>MCP / A2A / function calling</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Tool definitions (name, schema, endpoint)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Per-agent tool permissions</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>MCP server connections</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>A2A agent cards</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Function calling definitions</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Rate limits per tool</div></div></div></div>
-
-    <div class="sec" id="sec-rules" onclick="tog('rules')"><div class="sec-hd"><div class="sec-ic" style="background:var(--sfc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="sec-nm" style="color:var(--sfc)">Safety Rules <div class="spip" id="st-rules"></div></div><div class="sec-ti">Gate Config</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Content policy per gate</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Contamination thresholds</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Escalation rules</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Content safety rules per gate</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>T1PR threshold (block if > 0.15)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>EMR threshold (block if > 0.05)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Escalation: auto vs human review</div><div class="dti"><div class="dtd" style="background:var(--am400)"></div>Swarm timeout: timeout + max retries</div></div></div></div>
-
-    <div class="sec" id="sec-perms" onclick="tog('perms')"><div class="sec-hd"><div class="sec-ic" style="background:var(--gwc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div><div class="sec-nm" style="color:var(--gwc)">Permissions <div class="spip" id="st-perms"></div></div><div class="sec-ti">Boundaries</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--gwc)"></div>Data access per agent</div><div class="pvi"><div class="pvd" style="background:var(--gwc)"></div>Output constraints</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Inter-agent isolation</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--gwc)"></div>Data scope per agent (what it can see)</div><div class="dti"><div class="dtd" style="background:var(--gwc)"></div>Output constraints (max tokens, format)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Inter-agent isolation (no shared state)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Least privilege per agent</div></div></div></div>
-  </div>
-
-  <div class="pipe-connect">&#8595; &#8595; &#8595;</div>
-
-  <!-- EXECUTION CHAIN -->
-  <div class="pipe-lbl"><span>Execution chain</span><div class="pipe-lbl-line"></div><span style="font-size:7px;font-weight:500">Online: request flows through agents with safety gates between each</span></div>
-
-  <div class="chain">
-    <!-- Request -->
-    <div class="sec" id="sec-req" onclick="tog('req')"><div class="sec-hd"><div class="sec-ic" style="background:var(--text2)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div><div class="sec-nm" style="color:var(--text2)">Request <div class="spip" id="st-req"></div></div><div class="sec-ti">Input</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--mlc)"></div>User query</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Classification</div></div><div class="sec-xb"></div></div>
-
-    <div class="fa-chain" id="f1">&#10148;</div>
-
-    <!-- Agent 1 -->
-    <div class="sec" id="sec-ag1" onclick="tog('ag1')"><div class="sec-hd"><div class="sec-ic" style="background:var(--agc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0114 0v2"/></svg></div><div><div class="sec-nm" style="color:var(--agc)">Agent 1 <div class="spip" id="st-ag1"></div></div><div class="sec-ti">Agent Alpha</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--agc)"></div>Extract key info</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Tool: DB query</div></div><div class="sec-xb"></div></div>
-
-    <div class="fa-chain" id="f2">&#10148;</div>
-
-    <!-- Safety Gate 1 -->
-    <div class="gate" id="gate1"><div class="gate-icon">&#128737;</div><div class="gate-lbl">Safety Gate 1</div><div class="gate-status" id="gs1">Waiting</div></div>
-
-    <div class="fa-chain" id="f3">&#10148;</div>
-
-    <!-- Agent 2 -->
-    <div class="sec" id="sec-ag2" onclick="tog('ag2')"><div class="sec-hd"><div class="sec-ic" style="background:var(--p400)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div><div><div class="sec-nm" style="color:var(--p400)">Agent 2 <div class="spip" id="st-ag2"></div></div><div class="sec-ti">Agent Beta</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--p400)"></div>Analyze + reason</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Tool: calculation</div></div><div class="sec-xb"></div></div>
-
-    <div class="fa-chain" id="f4">&#10148;</div>
-
-    <!-- Safety Gate 2 -->
-    <div class="gate" id="gate2"><div class="gate-icon">&#128737;</div><div class="gate-lbl">Safety Gate 2</div><div class="gate-status" id="gs2">Waiting</div></div>
-
-    <div class="fa-chain" id="f5">&#10148;</div>
-
-    <!-- Agent 3 -->
-    <div class="sec" id="sec-ag3" onclick="tog('ag3')"><div class="sec-hd"><div class="sec-ic" style="background:var(--b400)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="sec-nm" style="color:var(--b400)">Agent 3 <div class="spip" id="st-ag3"></div></div><div class="sec-ti">Agent Gamma</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--b400)"></div>Synthesize output</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Tool: formatter</div></div><div class="sec-xb"></div></div>
-
-    <div class="fa-chain" id="f6">&#10148;</div>
-
-    <!-- Safety Gate 3 (Final) -->
-    <div class="gate" id="gate3"><div class="gate-icon">&#128737;</div><div class="gate-lbl">Final Gate</div><div class="gate-status" id="gs3">Waiting</div></div>
-  </div>
-
-  <div class="rsp" id="rsp"><div class="rsp-in"><span class="rsp-l" id="rsp-l">Waiting</span><span class="rsp-d" id="rsp-d">Select a scenario to simulate the agent pipeline</span></div></div>
-  <div class="xb xb-obs"><span style="font-size:10px">Pipeline Observability</span><span class="xb-i">Agent traces</span><span class="xb-i">Gate decisions</span><span class="xb-i">Token usage/agent</span><span class="xb-i">Latency/stage</span><span class="xb-i">Tool calls</span><span class="xb-i">Contamination events</span></div>
+<!-- ORCHESTRATOR -->
+<div class="orch" id="orch">
+  <div class="orch-main"><div class="orch-lbl">Orchestrator</div><div class="orch-ti">Central Coordinator</div><div class="orch-it">Manages execution order, routes tasks, handles failures</div><div class="orch-it">Decides: sequential, parallel, skip, retry, escalate</div><div class="orch-it">Maintains global pipeline state across all agents</div></div>
+  <div class="orch-card" id="oc-plan"><div class="oc-lbl">Task Planning</div><div class="oc-ti">Decompose & Track</div><div class="oc-it">Break request into subtasks, assign to agents, track completion, revise plan on failure</div></div>
+  <div class="orch-card" id="oc-state"><div class="oc-lbl">State Management</div><div class="oc-ti">Checkpoint & Resume</div><div class="oc-it">Save state after each agent. If pipeline fails, resume from last checkpoint without re-running completed agents</div></div>
+  <div class="orch-card" id="oc-mem"><div class="oc-lbl">Agent Memory</div><div class="oc-ti">Short + Long Term</div><div class="oc-it">Short-term: within this pipeline. Long-term: persistent across invocations. Shared vs isolated per agent</div></div>
 </div>
 
+<!-- EXECUTION CHAIN -->
+<div class="plbl"><div class="plbl-dot" style="background:var(--ag)"></div><span class="plbl-nm" style="color:var(--ag)">Execution Chain</span><span class="plbl-desc">Request flows through agents with safety gates and conditional routing between each</span></div>
+
+<div class="chain">
+  <!-- INPUT -->
+  <div class="agent" id="a-in" onclick="tg('in')"><div class="agent-st" id="st-in"></div><div class="agent-hd"><div class="agent-ico">&#128172;</div><div class="agent-model">input</div></div><div class="agent-nm" style="color:var(--orch)">Request</div><div class="agent-role">Task Input</div><div class="agent-items"><div class="agent-it">Query + user context</div><div class="agent-it">Permission scope</div><div class="agent-it">Priority + deadline</div></div></div>
+
+  <div class="cn" id="c0"><div class="cn-l"><div class="dot"></div></div></div>
+
+  <!-- AGENT 1 -->
+  <div class="agent" id="a-1" onclick="tg('1')"><div class="agent-st" id="st-1"></div><div class="agent-hd"><div class="agent-ico">&#129302;</div><div class="agent-model" id="am-1">claude-haiku</div></div><div class="agent-nm">Agent 1</div><div class="agent-role">Agent Alpha</div><div class="agent-items"><div class="agent-it">Extract key information</div><div class="agent-it">Structured data output</div><div class="agent-it">Tool: DB query, API call</div></div><div class="agent-stats"><div class="agent-sv"><div class="agent-sv-v" id="a1-lat">--</div><div class="agent-sv-l">Latency</div></div><div class="agent-sv"><div class="agent-sv-v" id="a1-tok">--</div><div class="agent-sv-l">Tokens</div></div><div class="agent-sv"><div class="agent-sv-v" id="a1-cost">--</div><div class="agent-sv-l">Cost</div></div></div><div class="agent-dt"><div class="dt-it">System prompt v3.2 | Max tokens: 2048</div><div class="dt-it">Tools: SQL read-only, internal API</div><div class="dt-it">Fallback: cached extraction result</div></div></div>
+
+  <div class="cn" id="c1"><div class="cn-l"><div class="dot"></div></div></div>
+
+  <!-- GATE 1 -->
+  <div class="gate-wrap"><div class="gate" id="g-1"><div class="gate-ico">&#128737;</div><div class="gate-nm">Gate 1</div><div class="gate-val" id="gv-1">T1PR: --</div></div><div class="gate-path" id="gp-1"></div></div>
+
+  <div class="cn" id="c2"><div class="cn-l"><div class="dot"></div></div></div>
+
+  <!-- AGENT 2 -->
+  <div class="agent" id="a-2" onclick="tg('2')"><div class="agent-st" id="st-2"></div><div class="agent-hd"><div class="agent-ico">&#129504;</div><div class="agent-model" id="am-2">gpt-4o</div></div><div class="agent-nm">Agent 2</div><div class="agent-role">Agent Beta</div><div class="agent-items"><div class="agent-it">Reason over extracted data</div><div class="agent-it">Compute metrics + trends</div><div class="agent-it">Tool: calculator, chart gen</div></div><div class="agent-stats"><div class="agent-sv"><div class="agent-sv-v" id="a2-lat">--</div><div class="agent-sv-l">Latency</div></div><div class="agent-sv"><div class="agent-sv-v" id="a2-tok">--</div><div class="agent-sv-l">Tokens</div></div><div class="agent-sv"><div class="agent-sv-v" id="a2-cost">--</div><div class="agent-sv-l">Cost</div></div></div><div class="agent-dt"><div class="dt-it">System prompt v2.8 | Max tokens: 4096</div><div class="dt-it">Tools: calculator, pandas exec</div><div class="dt-it">Failover: claude-sonnet</div></div></div>
+
+  <div class="cn" id="c3"><div class="cn-l"><div class="dot"></div></div></div>
+
+  <!-- GATE 2 -->
+  <div class="gate-wrap"><div class="gate" id="g-2"><div class="gate-ico">&#128737;</div><div class="gate-nm">Gate 2</div><div class="gate-val" id="gv-2">T1PR: --</div></div><div class="gate-path" id="gp-2"></div></div>
+
+  <div class="cn" id="c4"><div class="cn-l"><div class="dot"></div></div></div>
+
+  <!-- AGENT 3 -->
+  <div class="agent" id="a-3" onclick="tg('3')"><div class="agent-st" id="st-3"></div><div class="agent-hd"><div class="agent-ico">&#128221;</div><div class="agent-model" id="am-3">gpt-4o</div></div><div class="agent-nm">Agent 3</div><div class="agent-role">Agent Gamma</div><div class="agent-items"><div class="agent-it">Combine into final output</div><div class="agent-it">Citations + formatting</div><div class="agent-it">Executive summary</div></div><div class="agent-stats"><div class="agent-sv"><div class="agent-sv-v" id="a3-lat">--</div><div class="agent-sv-l">Latency</div></div><div class="agent-sv"><div class="agent-sv-v" id="a3-tok">--</div><div class="agent-sv-l">Tokens</div></div><div class="agent-sv"><div class="agent-sv-v" id="a3-cost">--</div><div class="agent-sv-l">Cost</div></div></div><div class="agent-dt"><div class="dt-it">System prompt v4.1 | Max tokens: 4096</div><div class="dt-it">Tools: formatter, template engine</div><div class="dt-it">Failover: claude-sonnet</div></div></div>
+
+  <div class="cn" id="c5"><div class="cn-l"><div class="dot"></div></div></div>
+
+  <!-- GATE 3 (FINAL) -->
+  <div class="gate-wrap"><div class="gate" id="g-3"><div class="gate-ico">&#128737;</div><div class="gate-nm">Final Gate</div><div class="gate-val" id="gv-3">EMR: --</div></div><div class="gate-path" id="gp-3"></div></div>
+</div>
+
+<div class="rsp" id="rsp"><span class="rsp-code" id="rsp-c">---</span><span class="rsp-msg" id="rsp-m">Select a scenario to simulate the multi-agent pipeline</span><span class="rsp-cost" id="rsp-$"></span></div>
+<div class="fb" id="fb"><span>&#8634;</span> Feedback: quality signals improve agent prompts and gate thresholds over time</div>
+
+<!-- Bottom 2 bars -->
+<div class="xbar ops" style="margin-top:8px"><div class="xdot" style="background:var(--ops)"></div><span style="color:var(--ops)">Operations</span><div class="xtag">Circuit Breaker</div><div class="xtag">Retry + Backoff</div><div class="xtag">Inter-Agent Cache</div><div class="xtag">Checkpoint/Resume</div><div class="xtag">Agent Health Monitor</div><div class="xtag">Model Failover</div><div class="xtag">Conditional Routing</div></div>
+<div class="xbar eco"><div class="xdot" style="background:var(--eco)"></div><span style="color:var(--eco)">Economics</span><div class="xtag">Per-Agent Model Cost</div><div class="xtag">Token Cost per Agent</div><div class="xtag">Total Pipeline Cost</div><div class="xtag">Model Selection Optimization</div><div class="xtag">Caching Savings</div><div class="xtag">Budget per Pipeline</div></div>
+</div>
+
+<!-- GAIF-4 -->
 <div class="mets">
-  <div class="met"><div class="met-l">Pipeline success</div><div class="met-v" id="m-suc">0.94</div><div class="met-b"><div class="met-f" id="mf-suc" style="width:94%;background:var(--t400)"></div></div><div class="met-n">Requests completing all gates</div></div>
-  <div class="met"><div class="met-l">Gate block rate</div><div class="met-v" id="m-blk">0.04</div><div class="met-b"><div class="met-f" id="mf-blk" style="width:4%;background:var(--t400)"></div></div><div class="met-n">Requests blocked by safety gates</div></div>
-  <div class="met"><div class="met-l">Contamination caught</div><div class="met-v" id="m-con">0.02</div><div class="met-b"><div class="met-f" id="mf-con" style="width:2%;background:var(--t400)"></div></div><div class="met-n">Inter-agent contamination detected</div></div>
-  <div class="met"><div class="met-l">Avg pipeline latency</div><div class="met-v" id="m-lat">4.2<span style="font-size:10px;color:var(--text3)">s</span></div><div class="met-b"><div class="met-f" id="mf-lat" style="width:42%;background:var(--t400)"></div></div><div class="met-n">End-to-end across all agents</div></div>
+<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:var(--okBg);color:var(--ok)">SAFE</span></div><div class="met-v" id="m-t" style="color:var(--ok)">0.03</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:3%;background:var(--ok)"></div></div><div class="met-n">Contaminated outputs passing gates</div></div>
+<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:var(--okBg);color:var(--ok)">SAFE</span></div><div class="met-v" id="m-c" style="color:var(--ok)">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:var(--ok)"></div></div><div class="met-n">Compliance violations per agent</div></div>
+<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:var(--okBg);color:var(--ok)">SAFE</span></div><div class="met-v" id="m-e" style="color:var(--ok)">0.01</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:1%;background:var(--ok)"></div></div><div class="met-n">Emergent dangerous content at pipeline level</div></div>
+<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:var(--okBg);color:var(--ok)">STABLE</span></div><div class="met-v" id="m-g" style="color:var(--ok)">0.02</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:2%;background:var(--ok)"></div></div><div class="met-n">Gate effectiveness degrading over time</div></div>
 </div>
 
-<div class="log"><div class="log-h"><span>Agent pipeline log</span><button class="clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
-
-<div class="info-grid">
-  <div class="info-box"><div class="info-title">When to use this variant</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> Large-scale processing across many lightweight agents (extract, analyze, synthesize)</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> Agents self-coordinate through shared state</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> No central bottleneck, scales horizontally you need to prevent</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> Document processing, distributed analysis at scale</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--r400)">Skip</span> Central orchestrator is needed (see hierarchical)</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--r400)">Skip</span> Few agents are sufficient (see linear-chain)</div>
-  </div>
-  <div class="info-box"><div class="info-title">Platform mapping</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--b400)"></div>Azure: Semantic Kernel agents + Content Safety gates</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--am400)"></div>AWS: Bedrock Agents + Guardrails between steps</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--t400)"></div>GCP: Vertex AI Agent Builder + Model Armor gates</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--c400)"></div>Databricks: Mosaic AI Agents + Gateway guardrails</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--g400)"></div>Open Source: LangGraph + NeMo Guardrails</div>
-  </div>
+<div class="amets">
+<div class="amet"><div class="amet-l">Agent Output Quality</div><div class="amet-v" id="aq-q">0.94</div><div class="amet-n">Avg quality across all agents</div></div>
+<div class="amet"><div class="amet-l">Gate Pass Rate</div><div class="amet-v" id="aq-p">0.96</div><div class="amet-n">Requests passing all gates</div></div>
+<div class="amet"><div class="amet-l">Pipeline Completion</div><div class="amet-v" id="aq-c">0.93</div><div class="amet-n">Requests completing all agents</div></div>
+<div class="amet"><div class="amet-l">Total Pipeline Cost</div><div class="amet-v" id="aq-$">$0.031</div><div class="amet-n">Avg cost per pipeline execution</div></div>
 </div>
+
+<div class="log"><div class="log-h"><div class="log-t">Agent Pipeline Log</div><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
+
+<div class="info">
+<div class="info-box"><div class="info-tl">When to use linear chain</div>
+<div class="info-r"><span class="info-tag" style="color:var(--ok)">Use</span> Large-scale processing, many lightweight agents</div>
+<div class="info-r"><span class="info-tag" style="color:var(--ok)">Use</span> Each agent output must be validated before the next agent sees it</div>
+<div class="info-r"><span class="info-tag" style="color:var(--ok)">Use</span> Regulatory audit requires inter-agent validation evidence</div>
+<div class="info-r"><span class="info-tag" style="color:var(--err)">Skip</span> Central coordinator needed (see Hierarchical)</div>
+<div class="info-r"><span class="info-tag" style="color:var(--err)">Skip</span> Need multiple opinions (see Consensus / Debate)</div></div>
+<div class="info-box"><div class="info-tl">Platform mapping</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--ops)"></div>Azure: Semantic Kernel + Content Safety gates</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--warn)"></div>AWS: Bedrock Agents + Guardrails between steps</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--ok)"></div>GCP: Vertex Agent Builder + Model Armor gates</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--ag)"></div>Databricks: Mosaic AI Agents + Gateway guardrails</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--gt)"></div>OSS: LangGraph + NeMo Guardrails</div></div></div>
 
 <div class="footer">AI Architecture Enterprise Patterns &mdash; <a href="https://github.com/aman210122/ai-architecture-enterprise-patterns">GitHub</a> &mdash; <a href="https://linkedin.com/in/amansharmaarchitect">Aman Sharma</a><br>Governance: <a href="https://github.com/aman210122/gaif-governance-observatory">GAIF Governance Observatory</a></div>
 </div>
 
 <script>
-let busy=false;const $=id=>document.getElementById(id);const W=ms=>new Promise(r=>setTimeout(r,ms));
-const CFG=['adef','tools','rules','perms'];const CHAIN=['req','ag1','ag2','ag3'];const ALL=[...CFG,...CHAIN];
-function log(tp,msg){const el=$('logB');const now=new Date();const ts=now.toLocaleTimeString('en-US',{hour12:false})+'.'+String(now.getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lt">${ts}</span><span class="lp l-${tp}">${tp.toUpperCase()}</span><span class="lm">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>50)el.removeChild(el.lastChild)}
-function clearLog(){$('logB').innerHTML=''}
-function ss(id,c){const e=$('s-'+id);if(e)e.className='st '+c}
-function sa(n,l,c){const e=$('a'+n);if(e)e.className='sta'+(l?(' lit'+(c?' blk':'')):'')}
-function fc(n,l,c){const e=$('f'+n);if(e)e.className='fa-chain'+(l?(' lit'+(c?' blk':'')):'')}
-function gp(n,s){const g=$('gate'+n);const gs=$('gs'+n);if(s==='pass'){g.className='gate pass';gs.textContent='PASS'}else if(s==='fail'){g.className='gate fail';gs.textContent='BLOCKED'}else{g.className='gate';gs.textContent='Waiting'}}
-function resetS(){['req','ag1','g1','ag2','g2','ag3','g3','final'].forEach(s=>ss(s,''));[1,2,3,4,5,6,7].forEach(n=>sa(n,false));[1,2,3,4,5,6].forEach(n=>fc(n,false));[1,2,3].forEach(n=>gp(n,'wait'))}
-function resetSec(){ALL.forEach(id=>{const el=$('sec-'+id);if(el)el.classList.remove('hl','hl-r','hl-g','dim');const p=$('st-'+id);if(p)p.className='spip'})}
-function resetResp(){$('rsp').className='rsp';$('rsp-l').textContent='Waiting';$('rsp-d').textContent=''}
-function setB(d){document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=d)}
-function resp(c,l,d){$('rsp').className='rsp '+c;$('rsp-l').textContent=l;$('rsp-d').textContent=d}
-function mets(s,b,c,l){$('m-suc').textContent=s.toFixed(2);$('m-blk').textContent=b.toFixed(2);$('m-con').textContent=c.toFixed(2);$('m-lat').innerHTML=l+'<span style="font-size:10px;color:var(--text3)">s</span>';$('mf-suc').style.width=s*100+'%';$('mf-suc').style.background=s>.9?'var(--t400)':s>.7?'var(--am400)':'var(--r400)';$('mf-blk').style.width=Math.min(b*500,100)+'%';$('mf-blk').style.background=b<.05?'var(--t400)':b<.15?'var(--am400)':'var(--r400)';$('mf-con').style.width=Math.min(c*500,100)+'%';$('mf-con').style.background=c<.03?'var(--t400)':c<.1?'var(--am400)':'var(--r400)';$('mf-lat').style.width=Math.min(l*10,100)+'%';$('mf-lat').style.background=l<5?'var(--t400)':l<10?'var(--am400)':'var(--r400)'}
-function hl(id){const el=$('sec-'+id);if(el)el.classList.add('hl');const p=$('st-'+id);if(p)p.className='spip on'}
-function tog(id){const el=$('sec-'+id);if(!el)return;const was=el.classList.contains('exp');ALL.forEach(s=>{const e=$('sec-'+s);if(e)e.classList.remove('exp')});if(!was)el.classList.add('exp')}
-function resetAll(){if(busy)return;resetS();resetSec();resetResp();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'))}
+const $=id=>document.getElementById(id);const W=ms=>new Promise(r=>setTimeout(r,ms));let busy=false;
+const AG=['in','1','2','3'];const CN=['c0','c1','c2','c3','c4','c5'];const GT=['g-1','g-2','g-3'];
 
-async function run(t){if(busy)return;busy=true;setB(true);document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));$('btn-'+t).classList.add('active');resetS();resetSec();resetResp();
-if(t==='clean')await fClean();else if(t==='contam')await fContam();else if(t==='escalate')await fEscalate();else if(t==='tools')await fTools();else if(t==='timeout')await fTimeout();
-busy=false;setB(false)}
+function log(tp,msg){const el=$('logB');const now=new Date();const ts=now.toLocaleTimeString('en-US',{hour12:false})+'.'+String(now.getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lr-t">${ts}</span><span class="lr-p ${tp}">${tp.toUpperCase().padEnd(8)}</span><span class="lr-m">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>80)el.removeChild(el.lastChild)}
+function clearLog(){$('logB').innerHTML=''}
+function hl(id){const e=$('a-'+id);if(e)e.classList.add('hl');const s=$('st-'+id);if(s)s.classList.add('on')}
+function hlE(id){const e=$('a-'+id);if(e)e.classList.add('hl-d');const s=$('st-'+id);if(s){s.classList.remove('on');s.classList.add('er')}}
+function dim(id){const e=$('a-'+id);if(e)e.classList.add('dim')}
+function lc(id,c){const e=$(id);if(e)e.classList.add(c||'li')}
+function gp(n,s,v){const g=$('g-'+n);if(!g)return;g.className='gate '+s;$('gv-'+n).textContent=v||''}
+function gpp(n,msg,cls){const p=$('gp-'+n);if(p){p.textContent=msg;p.className='gate-path show '+(cls||'')}}
+function astat(n,lat,tok,cost){$('a'+n+'-lat').textContent=lat;$('a'+n+'-tok').textContent=tok;$('a'+n+'-cost').textContent=cost}
+function orchHl(id){const e=$(id);if(e)e.classList.add('hl')}
+function rst(){AG.forEach(id=>{const e=$('a-'+id);if(e)e.className='agent';const s=$('st-'+id);if(s)s.className='agent-st'});CN.forEach(id=>{const e=$(id);if(e)e.className='cn'});GT.forEach(id=>{const e=$(id);if(e)e.className='gate'});['gv-1','gv-2','gv-3'].forEach(id=>{const e=$(id);if(e)e.textContent='T1PR: --'});['gp-1','gp-2','gp-3'].forEach(id=>{const e=$(id);if(e){e.textContent='';e.className='gate-path'}});['oc-plan','oc-state','oc-mem'].forEach(id=>{const e=$(id);if(e)e.classList.remove('hl')});[1,2,3].forEach(n=>astat(n,'--','--','--'));$('am-1').textContent='claude-haiku';$('am-2').textContent='gpt-4o';$('am-3').textContent='gpt-4o';$('fb').classList.remove('lit');$('rsp').className='rsp';$('rsp-c').textContent='---';$('rsp-m').textContent='';$('rsp-$').textContent=''}
+function tg(id){const e=$('a-'+id);if(!e)return;const w=e.classList.contains('exp');AG.forEach(s=>{const el=$('a-'+s);if(el)el.classList.remove('exp')});if(!w)e.classList.add('exp')}
+function rsp(c,code,msg,cost){$('rsp').className='rsp '+c;$('rsp-c').textContent=code;$('rsp-m').textContent=msg;$('rsp-$').textContent=cost||''}
+function sM(t,c,e,g){const mk=(id,v,thL,thH,safe)=>{$(id).textContent=v.toFixed(2);const fid=id.replace('m-','mf-');const bid=id.replace('m-','mb-');$(fid).style.width=Math.min(v*500,100)+'%';const ok=v<=thL;const mid=v<=thH;$(fid).style.background=ok?'var(--ok)':mid?'var(--warn)':'var(--err)';$(id).style.color=ok?'var(--ok)':mid?'var(--warn)':'var(--err)';$(bid).textContent=ok?safe:mid?'WARN':'CRITICAL';$(bid).style.background=ok?'var(--okBg)':mid?'var(--warnBg)':'var(--errBg)';$(bid).style.color=ok?'var(--ok)':mid?'var(--warn)':'var(--err)'};mk('m-t',t,0.05,0.15,'SAFE');mk('m-c',c,0.005,0.01,'SAFE');mk('m-e',e,0.05,0.15,'SAFE');mk('m-g',g,0.03,0.05,'STABLE')}
+function resetAll(){if(busy)return;rst();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));sM(0.03,0.00,0.01,0.02)}
+
+async function run(t){if(busy)return;busy=true;document.querySelectorAll('.sc-btn').forEach(b=>{b.classList.remove('active');b.disabled=true});$('btn-'+t).classList.add('active');rst();
+if(t==='clean')await fClean();else if(t==='contam')await fContam();else if(t==='route')await fRoute();else if(t==='resume')await fResume();else if(t==='failover')await fFailover();
+document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
 
 async function fClean(){
-  ss('req','on');hl('req');log('agent','Request: "Analyze Q3 earnings and summarize key trends"');await W(300);ss('req','ok');sa(1,true);fc(1,true);
-  ss('ag1','on');hl('ag1');log('agent','Agent 1 (Agent Alpha): extracting financial data from 3 reports');await W(400);
-  log('tool','Tool call: DB query -> Q3 revenue, margins, headcount');await W(350);
-  log('agent','Agent 1 output: 847 tokens | Structured financial data');await W(200);ss('ag1','ok');sa(2,true);fc(2,true);
-  ss('g1','on');log('gate','Gate 1: checking output for contamination, policy, hallucination');await W(400);
-  log('pass','Gate 1: PASS | T1PR: 0.02 | Content: CLEAR | Schema: valid');await W(200);gp(1,'pass');ss('g1','ok');sa(3,true);fc(3,true);
-  ss('ag2','on');hl('ag2');log('agent','Agent 2 (Agent Beta): analyzing trends, computing YoY changes');await W(450);
-  log('tool','Tool call: calculation -> YoY growth: +12.3%, margin expansion: +2.1pp');await W(350);
-  log('agent','Agent 2 output: 1,203 tokens | Trend analysis with calculations');await W(200);ss('ag2','ok');sa(4,true);fc(4,true);
-  ss('g2','on');log('gate','Gate 2: checking for factual consistency with Agent 1 data');await W(400);
-  log('pass','Gate 2: PASS | Numbers consistent | No hallucinated metrics');await W(200);gp(2,'pass');ss('g2','ok');sa(5,true);fc(5,true);
-  ss('ag3','on');hl('ag3');log('agent','Agent 3 (Agent Gamma): creating executive summary');await W(450);
-  log('agent','Agent 3 output: 623 tokens | Executive summary with citations');await W(200);ss('ag3','ok');sa(6,true);fc(6,true);
-  ss('g3','on');log('gate','Final Gate: comprehensive validation before delivery');await W(400);
-  log('pass','Final Gate: PASS | Grounded: 0.97 | Citations: 4/4 valid | PHI: CLEAR');await W(200);gp(3,'pass');ss('g3','ok');sa(7,true);
-  ss('final','ok');resp('rok','200 OK','3 agents | 3 gates passed | 2,673 tokens total | 4.2s');mets(0.94,0.04,0.02,4.2);
-}
+log('orch','Request: "Analyze Q3 earnings and summarize key trends"');orchHl('oc-plan');
+log('orch','Task plan: [1] Extract financial data [2] Analyze trends [3] Synthesize summary');await W(250);
+hl('in');lc('c0','li');await W(200);
+log('ag','Agent 1 (Extractor/claude-haiku): extracting from 3 financial reports');await W(300);hl('1');
+log('ag','Tool call: DB query -> Q3 revenue, margins, headcount');await W(250);astat(1,'0.8s','847','$0.001');
+lc('c1','li');await W(150);log('gt','Gate 1: T1PR check on extraction output');await W(250);
+gp(1,'pass','T1PR: 0.02');log('ok','Gate 1: PASS | T1PR: 0.02 | Schema: valid | No contamination');await W(200);
+orchHl('oc-state');log('orch','Checkpoint saved: Agent 1 complete');await W(150);
+lc('c2','li-g');await W(150);log('ag','Agent 2 (Analyzer/gpt-4o): computing YoY changes, trend analysis');await W(350);hl('2');
+log('ag','Tool call: calculator -> YoY growth +12.3%, margin +2.1pp');await W(250);astat(2,'1.4s','1,847','$0.018');
+lc('c3','li');await W(150);log('gt','Gate 2: factual consistency with Agent 1 data');await W(250);
+gp(2,'pass','T1PR: 0.01');log('ok','Gate 2: PASS | Numbers consistent | No hallucinated metrics');await W(200);
+orchHl('oc-state');log('orch','Checkpoint saved: Agent 2 complete');await W(150);
+lc('c4','li-g');await W(150);log('ag','Agent 3 (Synthesizer/gpt-4o): creating executive summary');await W(350);hl('3');
+log('ag','Output: 623 tokens | 3 citations | Executive format');await W(250);astat(3,'1.2s','623','$0.012');
+lc('c5','li');await W(150);log('gt','Final Gate: comprehensive pipeline-level validation');await W(250);
+gp(3,'pass','EMR: 0.00');log('ok','Final Gate: PASS | EMR: 0.00 | Grounded | Citations verified');await W(200);
+$('fb').classList.add('lit');log('eco','Pipeline cost: A1 $0.001 + A2 $0.018 + A3 $0.012 = $0.031 | 3.4s total');
+rsp('ok','200 OK','3 agents | 3 gates passed | All checkpoints saved | 3.4s','$0.031');
+sM(0.03,0.00,0.01,0.02);$('aq-q').textContent='0.94';$('aq-$').textContent='$0.031'}
 
 async function fContam(){
-  ss('req','on');hl('req');log('agent','Request: "Review patient medication interactions"');await W(300);ss('req','ok');sa(1,true);fc(1,true);
-  ss('ag1','on');hl('ag1');log('agent','Agent 1 (Agent Alpha): pulling medication lists from patient records');await W(400);
-  log('agent','Agent 1 output: medication list with dosages');await W(200);ss('ag1','ok');sa(2,true);fc(2,true);
-  ss('g1','on');log('gate','Gate 1: validating medication data');await W(400);
-  log('pass','Gate 1: PASS | Data format valid | PHI handled per policy');await W(200);gp(1,'pass');ss('g1','ok');sa(3,true);fc(3,true);
-  ss('ag2','on');hl('ag2');log('agent','Agent 2 (Agent Beta): checking drug interactions');await W(450);
-  log('warn','Agent 2: generated interaction claim NOT in source data');await W(350);
-  log('agent','Agent 2 output: includes fabricated drug interaction warning');await W(200);ss('ag2','ok');sa(4,true);fc(4,true);
-  ss('g2','on');$('sec-ag2').classList.add('hl-r');log('gate','Gate 2: CONTAMINATION CHECK running');await W(400);
-  log('block','Gate 2: BLOCKED | Claim "metformin-lisinopril severe interaction" not in source');await W(350);
-  log('block','Gate 2: T1PR violation | Hallucinated drug interaction detected');await W(250);
-  gp(2,'fail');ss('g2','no');sa(5,false);
-  ['ag3','g3','final'].forEach(s=>ss(s,''));
-  resp('rer','BLOCKED (Gate 2)','Contamination: hallucinated drug interaction caught by safety gate | Pipeline halted');mets(0.94,0.04,0.08,2.8);
-}
+log('orch','Request: "Review patient medication interactions"');orchHl('oc-plan');await W(200);
+hl('in');lc('c0','li');await W(200);log('ag','Agent 1: pulling medication lists');await W(300);hl('1');astat(1,'0.9s','924','$0.001');
+lc('c1','li');await W(150);gp(1,'pass','T1PR: 0.03');log('ok','Gate 1: PASS | Medication data validated');await W(200);
+lc('c2','li-g');await W(150);log('ag','Agent 2 (Analyzer/gpt-4o): checking drug interactions');await W(350);hl('2');
+log('err','Agent 2: generated interaction claim NOT in source data');await W(250);astat(2,'1.6s','2,103','$0.021');
+log('warn','Agent 2 output contains: "metformin-lisinopril severe interaction" (fabricated)');await W(200);
+lc('c3','li');await W(150);log('gt','Gate 2: T1PR check + factual verification');await W(300);
+log('err','Gate 2: T1PR VIOLATION | Hallucinated drug interaction detected');await W(200);
+gp(2,'fail','T1PR: 0.31');gpp(2,'BLOCKED','err-path');hlE('2');
+dim('3');$('c4').style.opacity='0.1';$('c5').style.opacity='0.1';
+log('err','Pipeline HALTED at Gate 2 | Contaminated clinical information blocked');
+log('eco','Cost incurred: A1 $0.001 + A2 $0.021 = $0.022 (A3 not executed)');
+rsp('er','BLOCKED','Gate 2: hallucinated drug interaction | T1PR: 0.31 | Pipeline halted | Patient safety preserved','$0.022');
+sM(0.03,0.00,0.08,0.02);$('aq-q').textContent='0.62';$('aq-p').textContent='0.96';$('aq-$').textContent='$0.022'}
 
-async function fEscalate(){
-  ss('req','on');hl('req');log('agent','Request: "Draft termination notice for vendor contract"');await W(300);ss('req','ok');sa(1,true);fc(1,true);
-  ss('ag1','on');hl('ag1');log('agent','Agent 1 (Agent Alpha): pulling contract terms and breach evidence');await W(400);
-  log('agent','Agent 1 output: contract clauses + breach timeline');await W(200);ss('ag1','ok');sa(2,true);fc(2,true);
-  ss('g1','on');log('gate','Gate 1: validating legal document references');await W(400);
-  log('pass','Gate 1: PASS | All clauses verified against contract PDF');await W(200);gp(1,'pass');ss('g1','ok');sa(3,true);fc(3,true);
-  ss('ag2','on');hl('ag2');log('agent','Agent 2 (Agent Beta): drafting termination language');await W(450);
-  log('agent','Agent 2 output: draft notice with legal implications');await W(200);ss('ag2','ok');sa(4,true);fc(4,true);
-  ss('g2','on');log('gate','Gate 2: HIGH-RISK content detected (legal action)');await W(400);
-  log('warn','Gate 2: ESCALATION | Legal document requires human review');await W(350);
-  log('warn','Gate 2: Routing to legal team approval queue');await W(250);
-  gp(2,'pass');$('gs2').textContent='ESCALATED';ss('g2','ok');sa(5,true);fc(5,true);
-  ss('ag3','on');hl('ag3');log('agent','Agent 3: PAUSED pending human approval');await W(500);
-  log('pass','Human reviewer: APPROVED with minor edits');await W(500);
-  log('agent','Agent 3 (Agent Gamma): finalizing with human edits incorporated');await W(400);ss('ag3','ok');sa(6,true);fc(6,true);
-  ss('g3','on');log('gate','Final Gate: human-approved content, final check');await W(300);
-  log('pass','Final Gate: PASS | Human-reviewed | Audit trail complete');await W(200);gp(3,'pass');ss('g3','ok');sa(7,true);
-  ss('final','ok');resp('rwn','200 OK (Escalated)','Human review inserted at Gate 2 | Legal team approved | 12.4s total');mets(0.94,0.04,0.02,12.4);
-}
+async function fRoute(){
+log('orch','Request: "Draft termination notice for vendor contract"');orchHl('oc-plan');await W(200);
+hl('in');lc('c0','li');await W(200);log('ag','Agent 1: extracting contract terms + breach evidence');await W(300);hl('1');astat(1,'1.1s','1,204','$0.002');
+lc('c1','li');await W(150);gp(1,'pass','T1PR: 0.01');log('ok','Gate 1: PASS | Contract clauses verified');await W(200);
+lc('c2','li-g');await W(150);log('ag','Agent 2: drafting termination language');await W(350);hl('2');astat(2,'1.8s','2,847','$0.028');
+lc('c3','li');await W(150);log('gt','Gate 2: content risk assessment');await W(300);
+log('warn','Gate 2: HIGH-RISK content (legal action) | Confidence: 0.68 (threshold: 0.75)');await W(250);
+gp(2,'route','Conf: 0.68');gpp(2,'&#8594; HUMAN REVIEW','route-path');
+log('warn','CONDITIONAL ROUTE: confidence below threshold, routing to human reviewer');await W(250);
+log('orch','Orchestrator: pausing pipeline, queuing for legal team review');await W(300);orchHl('oc-state');
+log('ok','Human reviewer: APPROVED with 2 edits (clause 4.2, notice period)');await W(400);
+lc('c4','li-g');await W(150);log('ag','Agent 3: incorporating human edits into final draft');await W(350);hl('3');astat(3,'1.0s','547','$0.011');
+lc('c5','li');await W(150);gp(3,'pass','EMR: 0.00');log('ok','Final Gate: PASS | Human-reviewed content');await W(200);
+$('fb').classList.add('lit');log('eco','Cost: A1 $0.002 + A2 $0.028 + Human + A3 $0.011 = $0.041 + human time');
+rsp('wn','200 OK (Routed)','Gate 2 routed to human (confidence 0.68) | Legal review approved | 2 edits incorporated','$0.041');
+sM(0.03,0.00,0.01,0.02);$('aq-q').textContent='0.91';$('aq-$').textContent='$0.041'}
 
-async function fTools(){
-  ss('req','on');hl('req');log('agent','Request: "Research competitor pricing and generate comparison report"');await W(300);ss('req','ok');sa(1,true);fc(1,true);
-  ss('ag1','on');hl('ag1');log('agent','Agent 1 (Agent Alpha): gathering pricing data');await W(350);
-  log('tool','MCP tool call 1: internal pricing DB -> 47 products');await W(300);
-  log('tool','MCP tool call 2: competitor API -> 3 competitor price lists');await W(350);
-  log('tool','MCP tool call 3: market data API -> industry benchmarks');await W(300);
-  log('agent','Agent 1: 3 tool calls complete | 2,341 tokens extracted');await W(200);ss('ag1','ok');sa(2,true);fc(2,true);
-  ss('g1','on');log('gate','Gate 1: validating tool outputs + data freshness');await W(400);
-  log('pass','Gate 1: PASS | All 3 tool results validated | Data < 24h old');await W(200);gp(1,'pass');ss('g1','ok');sa(3,true);fc(3,true);
-  ss('ag2','on');hl('ag2');log('agent','Agent 2 (Agent Beta): computing price differentials');await W(400);
-  log('tool','Function call: spreadsheet calculation -> price matrices');await W(350);
-  log('agent','Agent 2: competitive analysis with 12 metrics');await W(200);ss('ag2','ok');sa(4,true);fc(4,true);
-  ss('g2','on');log('gate','Gate 2: verifying calculations against source data');await W(400);
-  log('pass','Gate 2: PASS | Calculations verified | No data drift');await W(200);gp(2,'pass');ss('g2','ok');sa(5,true);fc(5,true);
-  ss('ag3','on');hl('ag3');log('agent','Agent 3 (Agent Gamma): generating comparison report');await W(450);
-  log('tool','Tool call: chart generator -> 3 comparison visualizations');await W(350);
-  log('agent','Agent 3: report with tables, charts, recommendations');await W(200);ss('ag3','ok');sa(6,true);fc(6,true);
-  ss('g3','on');log('gate','Final Gate: complete report validation');await W(400);
-  log('pass','Final Gate: PASS | 6 tool calls audited | All data sourced');await W(200);gp(3,'pass');ss('g3','ok');sa(7,true);
-  ss('final','ok');resp('rok','200 OK','3 agents | 6 tool calls | 3 gates passed | Full audit trail | 6.8s');mets(0.94,0.04,0.02,6.8);
-}
+async function fResume(){
+log('orch','Request: "Comprehensive market analysis for 12 sectors"');orchHl('oc-plan');await W(200);
+hl('in');lc('c0','li');await W(200);log('ag','Agent 1: processing 12 sectors...');await W(300);hl('1');astat(1,'3.2s','4,847','$0.006');
+lc('c1','li');await W(150);gp(1,'pass','T1PR: 0.02');log('ok','Gate 1: PASS');orchHl('oc-state');log('orch','Checkpoint 1 saved');await W(200);
+lc('c2','li-g');await W(150);log('ag','Agent 2 (gpt-4o): analyzing trends across 12 sectors...');await W(400);
+log('err','Agent 2: MODEL TIMEOUT after 30s (rate limit hit)');await W(300);hlE('2');astat(2,'30s','--','$0.008');
+log('ops','Circuit breaker triggered | Agent 2 failed');await W(200);
+log('orch','Orchestrator: loading checkpoint 1 (Agent 1 result preserved)');await W(300);orchHl('oc-state');
+log('ops','RETRY: Agent 2 with backoff (attempt 2/3)');await W(300);
+$('a-2').className='agent';$('st-2').className='agent-st';
+log('ag','Agent 2 (retry): processing with reduced batch size (4 sectors per call)');await W(400);hl('2');
+astat(2,'4.2s','3,204','$0.032');log('ok','Agent 2: completed on retry | 3 batch calls');await W(200);
+lc('c3','li');await W(150);gp(2,'pass','T1PR: 0.03');log('ok','Gate 2: PASS');orchHl('oc-state');log('orch','Checkpoint 2 saved');await W(200);
+lc('c4','li-g');await W(150);log('ag','Agent 3: synthesizing 12-sector report');await W(350);hl('3');astat(3,'2.1s','1,847','$0.018');
+lc('c5','li');await W(150);gp(3,'pass','EMR: 0.00');log('ok','Final Gate: PASS');await W(150);
+$('fb').classList.add('lit');log('eco','Cost: A1 $0.006 + A2 $0.040 (incl retry) + A3 $0.018 = $0.064');
+rsp('ok','200 OK (Resumed)','Agent 2 failed, resumed from checkpoint 1 | Retry succeeded | No re-execution of Agent 1','$0.064');
+sM(0.03,0.00,0.01,0.02);$('aq-c').textContent='0.93';$('aq-$').textContent='$0.064'}
 
-async function fTimeout(){
-  ss('req','on');hl('req');log('agent','Request: "Comprehensive market analysis for 12 sectors"');await W(300);ss('req','ok');sa(1,true);fc(1,true);
-  ss('ag1','on');hl('ag1');log('agent','Agent 1 (Agent Alpha): processing 12 sectors...');await W(400);
-  log('tool','Tool call: market data API -> sector 1/12...');await W(500);
-  log('tool','Tool call: market data API -> sector 4/12...');await W(500);
-  log('warn','Agent 1: 8.2s elapsed (timeout threshold: 10s)');await W(500);
-  log('tool','Tool call: market data API -> sector 7/12...');await W(500);
-  log('block','CIRCUIT BREAKER: Agent 1 exceeded 10s timeout');await W(300);
-  $('sec-ag1').classList.add('hl-r');ss('ag1','no');
-  ['ag2','g1','g2','ag3','g3','final'].forEach(s=>ss(s,''));
-  ['sec-ag2','sec-ag3'].forEach(id=>{const e=$(id);if(e)e.classList.add('dim')});
-  [1,2,3].forEach(n=>gp(n,'wait'));
-  resp('rer','TIMEOUT','Swarm timeout: Agent 1 exceeded 10s limit | 7/12 sectors processed | Pipeline halted');mets(0.94,0.04,0.02,10.0);
-}
+async function fFailover(){
+log('orch','Request: "Summarize patient discharge instructions"');orchHl('oc-plan');await W(200);
+hl('in');lc('c0','li');await W(200);log('ag','Agent 1 (claude-haiku): extracting discharge data');await W(300);hl('1');astat(1,'0.7s','634','$0.001');
+lc('c1','li');await W(150);gp(1,'pass','T1PR: 0.01');log('ok','Gate 1: PASS');await W(200);
+lc('c2','li-g');await W(150);log('ag','Agent 2 (gpt-4o): analyzing medication instructions...');await W(250);
+log('err','Agent 2: gpt-4o endpoint UNAVAILABLE (503 Service Unavailable)');await W(250);
+log('ops','FAILOVER: switching Agent 2 from gpt-4o to claude-sonnet');await W(200);
+$('am-2').textContent='claude-sonnet';$('am-2').style.color='var(--warn)';
+log('ag','Agent 2 (claude-sonnet/failover): analyzing medication instructions');await W(350);hl('2');
+astat(2,'1.6s','1,423','$0.009');log('ok','Agent 2: completed on failover model');await W(200);
+lc('c3','li');await W(150);gp(2,'pass','T1PR: 0.02');log('ok','Gate 2: PASS (failover model quality acceptable)');await W(200);
+lc('c4','li-g');await W(150);log('ag','Agent 3 (gpt-4o): creating patient-friendly summary');await W(350);hl('3');astat(3,'1.1s','847','$0.008');
+lc('c5','li');await W(150);gp(3,'pass','EMR: 0.00');log('ok','Final Gate: PASS');await W(150);
+$('fb').classList.add('lit');log('eco','Cost: A1 $0.001 + A2 $0.009 (failover, cheaper) + A3 $0.008 = $0.018');
+log('ops','Note: failover saved $0.009 vs primary model (claude-sonnet < gpt-4o)');
+rsp('ok','200 OK (Failover)','Agent 2 failed over gpt-4o -> claude-sonnet | Quality maintained | Cost actually lower','$0.018');
+sM(0.03,0.00,0.01,0.02);$('aq-$').textContent='$0.018'}
 </script>
 </body>
 </html>

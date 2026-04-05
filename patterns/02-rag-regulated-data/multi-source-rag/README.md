@@ -1,10 +1,6 @@
-# Variant: Multi-Source Federated RAG
-
-**Search across Databricks + Azure AI Search + Snowflake + SharePoint simultaneously.**
-
+# Variant: Multi-Source RAG
+**Federated retrieval across Databricks + Azure + Snowflake.**
 ## Live Demo
 **[Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/multi-source-rag/index.html)**
-
-5 interactive scenarios with per-stage latency tracking, token cost breakdown, GAIF-4 metrics, and RAG quality metrics.
-
+5 scenarios with per-stage latency, token cost, GAIF-4 metrics, and RAG quality metrics.
 *[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
