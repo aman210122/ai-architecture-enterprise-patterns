@@ -7,7 +7,8 @@
 [![RAG](https://img.shields.io/badge/RAG-10-green.svg)](#pattern-02-rag-for-regulated-data-10-variants)
 [![Agents](https://img.shields.io/badge/Multi--Agent-10-orange.svg)](#pattern-03-multi-agent-pipeline-with-safety-gates-10-variants)
 [![Tools](https://img.shields.io/badge/Tool_Gov-8-purple.svg)](#pattern-04-agentic-ai-with-tool-governance-8-variants)
-[![Interactive](https://img.shields.io/badge/40_visualizations-interactive-purple.svg)](#)
+[![LLMOps](https://img.shields.io/badge/LLMOps-6-red.svg)](#pattern-05-llmops-pipeline-6-variants)
+[![Interactive](https://img.shields.io/badge/46_visualizations-interactive-purple.svg)](#)
 
 ---
 
@@ -21,7 +22,7 @@ This repository collects architecture patterns designed and validated across 18+
 
 ### GitHub Pages
 
-All 40 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
+All 46 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
 
 ---
 
@@ -36,18 +37,14 @@ Route all LLM and ML traffic through a single governance-aware control plane.
 | Multi-platform | [Multi-Platform](patterns/01-unified-ai-gateway/multi-platform/), [Multi-Cloud](patterns/01-unified-ai-gateway/multi-cloud/), [Hybrid](patterns/01-unified-ai-gateway/hybrid/) |
 | Self-hosted | [Open Source](patterns/01-unified-ai-gateway/open-source/), [Starter](patterns/01-unified-ai-gateway/starter/), [Federated](patterns/01-unified-ai-gateway/federated/), [Edge](patterns/01-unified-ai-gateway/edge/) |
 
----
-
 ## Pattern 02: RAG for Regulated Data (10 variants)
 
-Retrieval-augmented generation with compliance boundaries at every stage. [Platform mapping](patterns/02-rag-regulated-data/).
+Retrieval-augmented generation with compliance boundaries. [Platform mapping](patterns/02-rag-regulated-data/).
 
 | Category | Variants |
 |----------|---------|
-| Core RAG | [Standard](patterns/02-rag-regulated-data/standard-rag/), [GraphRAG](patterns/02-rag-regulated-data/graph-rag/), [Agentic](patterns/02-rag-regulated-data/agentic-rag/), [Sensitive Data](patterns/02-rag-regulated-data/sensitive-data-rag/) |
+| Core | [Standard](patterns/02-rag-regulated-data/standard-rag/), [GraphRAG](patterns/02-rag-regulated-data/graph-rag/), [Agentic](patterns/02-rag-regulated-data/agentic-rag/), [Sensitive](patterns/02-rag-regulated-data/sensitive-data-rag/) |
 | Specialized | [Conversational](patterns/02-rag-regulated-data/conversational-rag/), [SQL+Vector](patterns/02-rag-regulated-data/hybrid-sql-vector-rag/), [Multimodal](patterns/02-rag-regulated-data/multimodal-rag/), [Multi-Source](patterns/02-rag-regulated-data/multi-source-rag/), [Real-Time](patterns/02-rag-regulated-data/realtime-rag/), [Evaluation](patterns/02-rag-regulated-data/evaluation-rag/) |
-
----
 
 ## Pattern 03: Multi-Agent Pipeline with Safety Gates (10 variants)
 
@@ -55,21 +52,32 @@ Chain specialized LLM agents with safety checkpoints. [Platform mapping](pattern
 
 | Category | Variants |
 |----------|---------|
-| Gate-based | [Linear Chain](patterns/03-multi-agent-safety-gates/linear-chain/), [DAG](patterns/03-multi-agent-safety-gates/dag-orchestration/), [Hierarchical](patterns/03-multi-agent-safety-gates/hierarchical/), [Human-in-Loop](patterns/03-multi-agent-safety-gates/human-in-the-loop/) |
-| Decision-based | [Consensus](patterns/03-multi-agent-safety-gates/consensus/), [Adversarial](patterns/03-multi-agent-safety-gates/adversarial-red-blue/), [Debate](patterns/03-multi-agent-safety-gates/debate/) |
-| Advanced | [Reflection Loop](patterns/03-multi-agent-safety-gates/reflection-loop/), [Swarm](patterns/03-multi-agent-safety-gates/swarm/), [Parallel Monitor](patterns/03-multi-agent-safety-gates/parallel-monitor/) |
-
----
+| Gate-based | [Linear](patterns/03-multi-agent-safety-gates/linear-chain/), [DAG](patterns/03-multi-agent-safety-gates/dag-orchestration/), [Hierarchical](patterns/03-multi-agent-safety-gates/hierarchical/), [Human-in-Loop](patterns/03-multi-agent-safety-gates/human-in-the-loop/) |
+| Decision | [Consensus](patterns/03-multi-agent-safety-gates/consensus/), [Adversarial](patterns/03-multi-agent-safety-gates/adversarial-red-blue/), [Debate](patterns/03-multi-agent-safety-gates/debate/) |
+| Advanced | [Reflection](patterns/03-multi-agent-safety-gates/reflection-loop/), [Swarm](patterns/03-multi-agent-safety-gates/swarm/), [Monitor](patterns/03-multi-agent-safety-gates/parallel-monitor/) |
 
 ## Pattern 04: Agentic AI with Tool Governance (8 variants)
 
-Governance on what agents can DO, not just what they say. [Platform mapping](patterns/04-agentic-tool-governance/).
+Governance on what agents can DO. [Platform mapping](patterns/04-agentic-tool-governance/).
 
 | Category | Variants |
 |----------|---------|
 | Protocols | [MCP](patterns/04-agentic-tool-governance/mcp-protocol/), [A2A](patterns/04-agentic-tool-governance/a2a-protocol/), [Function Calling](patterns/04-agentic-tool-governance/function-calling/) |
-| Advanced execution | [Compound Tools](patterns/04-agentic-tool-governance/compound-tools/), [Sandboxed Execution](patterns/04-agentic-tool-governance/sandboxed-execution/) |
-| Enterprise governance | [Tool Escalation](patterns/04-agentic-tool-governance/tool-escalation/), [Multi-Tenant Isolation](patterns/04-agentic-tool-governance/multi-tenant-isolation/), [Tool Discovery](patterns/04-agentic-tool-governance/tool-discovery/) |
+| Execution | [Compound Tools](patterns/04-agentic-tool-governance/compound-tools/), [Sandboxed](patterns/04-agentic-tool-governance/sandboxed-execution/) |
+| Enterprise | [Escalation](patterns/04-agentic-tool-governance/tool-escalation/), [Multi-Tenant](patterns/04-agentic-tool-governance/multi-tenant-isolation/), [Discovery](patterns/04-agentic-tool-governance/tool-discovery/) |
+
+## Pattern 05: LLMOps Pipeline (6 variants)
+
+End-to-end LLM lifecycle: experiment, evaluate, deploy, monitor. Cloud-specific because each cloud has different MLOps tooling.
+
+| Variant | Stack | Demo |
+|---------|-------|------|
+| [Azure LLMOps](patterns/05-llmops-pipeline/azure-llmops/) | Azure ML + Azure DevOps + AI Foundry | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/azure-llmops/index.html) |
+| [AWS LLMOps](patterns/05-llmops-pipeline/aws-llmops/) | SageMaker + CodePipeline + Bedrock | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/aws-llmops/index.html) |
+| [GCP LLMOps](patterns/05-llmops-pipeline/gcp-llmops/) | Vertex AI + Cloud Build + Model Garden | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/gcp-llmops/index.html) |
+| [Databricks LLMOps](patterns/05-llmops-pipeline/databricks-llmops/) | MLflow + Asset Bundles + Unity Catalog | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/databricks-llmops/index.html) |
+| [Open Source LLMOps](patterns/05-llmops-pipeline/open-source-llmops/) | MLflow + GitHub Actions + RAGAS + ArgoCD | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/open-source-llmops/index.html) |
+| [Hybrid LLMOps](patterns/05-llmops-pipeline/hybrid-llmops/) | Multi-cloud unified pipeline + Tekton | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/hybrid-llmops/index.html) |
 
 ---
 
@@ -77,7 +85,6 @@ Governance on what agents can DO, not just what they say. [Platform mapping](pat
 
 | # | Pattern | Variants | Status |
 |---|---------|----------|--------|
-| 05 | LLMOps Pipeline | Azure, AWS, GCP, Databricks, OSS, Hybrid | Planned |
 | 06 | Governance-as-Architecture | Embedded, Dashboard, Policy-as-Code, Decay | Planned |
 | 07 | Contamination-Resistant Pipeline | Isolation, Validation, Canary, Rollback | Planned |
 | 08 | Compliance-Aware Data Routing | Azure, AWS, GCP, Multi-Cloud, On-Prem | Planned |
@@ -86,24 +93,14 @@ Governance on what agents can DO, not just what they say. [Platform mapping](pat
 
 ---
 
-## Governance Integration
-
-Every pattern includes quantitative metrics from [GAIF-4](https://github.com/aman210122/gaif-governance-observatory): T1PR, CFR, EMR, GDR.
+## Governance: [GAIF-4](https://github.com/aman210122/gaif-governance-observatory) metrics (T1PR, CFR, EMR, GDR) in every pattern.
 
 ## Standards: NIST AI RMF, EU AI Act, WHO AI Ethics, HIPAA, SOX, PCI-DSS, GDPR, FedRAMP
-
----
 
 ## Author
 
 **Aman Sharma** - Principal Enterprise Architect, AI/ML | 18+ years in regulated industries
 
-[LinkedIn](https://linkedin.com/in/amansharmaarchitect) | [ORCID](https://orcid.org/0009-0005-5107-4485) | [GitHub](https://github.com/aman210122)
+[LinkedIn](https://linkedin.com/in/amansharmaarchitect) | [ORCID](https://orcid.org/0009-0005-5107-4485) | [GitHub](https://github.com/aman210122) | [GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory)
 
-**Related:** [GAIF Governance Observatory](https://github.com/aman210122/gaif-governance-observatory)
-
----
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for details.
+## License: MIT
