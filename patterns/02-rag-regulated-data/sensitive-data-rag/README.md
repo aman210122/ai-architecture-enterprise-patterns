@@ -1,24 +1,10 @@
-# Variant: Sensitive Data RAG
+# Variant: Sensitive Data RAG (Zero-Trust)
 
-**PHI/PII-aware retrieval with classification at every stage. Zero-trust access control.**
+**PHI/PII zero-trust. Field-level redaction, BAA endpoints, encryption everywhere.**
 
 ## Live Demo
+**[Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/sensitive-data-rag/index.html)**
 
-**[Launch interactive visualization](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/sensitive-data-rag/index.html)**
-
-Scenarios: PHI query, ACL-gated retrieval, minimum necessary, BAA routing, PHI-redacted audit.
-
-## When to Use
-
-**Use:** Documents contain PHI/PII. HIPAA/PCI/GDPR compliance. Chunk-level access control. PHI-redacted audit logs.
-
-**Skip:** Data is not sensitive (see standard-rag). No regulatory requirements (see standard-rag).
-
-## Files
-
-| File | Purpose |
-|------|---------|
-| [index.html](index.html) | Interactive visualization ([demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/sensitive-data-rag/index.html)) |
-| [../README.md](../README.md) | Decision guide for all RAG variants |
+5 interactive scenarios with per-stage latency tracking, token cost breakdown, GAIF-4 metrics, and RAG quality metrics.
 
 *[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

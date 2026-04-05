@@ -3,235 +3,334 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pattern 02: Multimodal RAG | AI Architecture Enterprise Patterns</title>
+<title>Pattern 02: Standard RAG | AI Architecture Enterprise Patterns</title>
 <style>
-:root{--bg:#fafaf8;--bg2:#f1efe8;--bg3:#e6e4dd;--text:#2c2c2a;--text2:#5f5e5a;--text3:#888780;--border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.16);--ac:#9673A6;--ac50:#EEEDFE;--p50:#EEEDFE;--p400:#7F77DD;--t50:#E1F5EE;--t400:#1D9E75;--b50:#E6F1FB;--b400:#378ADD;--c50:#FAECE7;--c400:#D85A30;--am50:#FAEEDA;--am400:#EF9F27;--g50:#EAF3DE;--g400:#639922;--r50:#FCEBEB;--r400:#E24B4A;--nv:#1F3864;--nv2:#1B4F72;--gwc:#2980B9;--agc:#D79B00;--llc:#9673A6;--llb:#E1D5E7;--mlc:#6C8EBF;--sfc:#B85450;--f:'Segoe UI',system-ui,-apple-system,sans-serif;--m:'SF Mono','Cascadia Code',monospace;--r:10px;--rl:14px}
-@media(prefers-color-scheme:dark){:root{--bg:#1a1a1a;--bg2:#222;--bg3:#2e2e2e;--text:#e0ddd5;--text2:#a09e96;--text3:#6e6d68;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--ac:#B89FD4;--ac50:#2D1F3D;--p50:#26215C;--p400:#AFA9EC;--t50:#04342C;--t400:#5DCAA5;--b50:#042C53;--b400:#85B7EB;--c50:#4A1B0C;--c400:#F0997B;--am50:#412402;--am400:#FAC775;--g50:#173404;--g400:#97C459;--r50:#501313;--r400:#F09595;--nv:#8BADD4;--nv2:#6C9BC4;--gwc:#5AAFE6;--agc:#E6B44C;--llc:#B89FD4;--llb:#2D1F3D;--mlc:#7CADD4;--sfc:#E88A8A}}
-*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:var(--f);line-height:1.5}.pg{max-width:1200px;margin:0 auto;padding:1.5rem}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border)}.brand-ico{width:36px;height:36px;border-radius:10px;background:var(--ac);display:flex;align-items:center;justify-content:center}.brand-ico svg{width:20px;height:20px}.brand-t{font-size:15px;font-weight:700;letter-spacing:-0.3px}.brand-s{font-size:9px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;font-weight:600}
-.hdr{margin-bottom:1.2rem}.hdr-tag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ac);margin-bottom:4px}.hdr h1{font-size:22px;font-weight:700;line-height:1.3;margin-bottom:3px}.hdr p{font-size:12px;color:var(--text2)}.plats{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.pl{font-size:8px;font-weight:700;padding:3px 10px;border-radius:6px;letter-spacing:0.4px;background:var(--ac50);color:var(--ac);border:0.5px solid var(--ac)}
-.sc-lbl{font-size:8px;color:var(--text3);margin-bottom:4px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px}.sc-lbl-arr{font-size:10px;animation:bounceR 1.5s ease-in-out infinite}@keyframes bounceR{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
-.sc-bar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}.sc-btn{background:var(--bg);border:0.5px solid var(--border2);border-radius:7px;padding:7px 14px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;font-family:var(--f);font-size:11px;color:var(--text2)}.sc-btn:hover{border-color:var(--ac);color:var(--text);background:var(--ac50);transform:translateY(-1px)}.sc-btn.active{background:var(--ac50);border-color:var(--ac);color:var(--ac);font-weight:600}.sc-btn:disabled{opacity:0.35;cursor:not-allowed}.sc-btn:disabled:hover{transform:none;background:var(--bg)}.sc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.stbar{display:flex;align-items:center;margin-bottom:1rem;background:var(--bg);border-radius:7px;padding:5px 6px;border:0.5px solid var(--border);overflow-x:auto}.st{flex:1;text-align:center;font-size:8px;font-weight:500;color:var(--text3);padding:4px 2px;border-radius:5px;white-space:nowrap;transition:all 0.35s}.st.on{background:var(--ac50);color:var(--ac);font-weight:700}.st.ok{color:var(--t400);font-weight:600}.sta{color:var(--text3);font-size:8px;padding:0 1px;flex-shrink:0;opacity:0.3}.sta.lit{opacity:1;color:var(--ac)}
-.xb{border-radius:var(--r);padding:7px 14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:8px;font-weight:600;letter-spacing:0.5px;margin-bottom:4px}.xb-gov{background:var(--nv);color:#fff}.xb-obs{background:var(--nv2);color:#fff;margin-top:4px}.xb-i{background:rgba(255,255,255,0.12);padding:2px 8px;border-radius:4px;font-weight:500;font-size:7px}
-.cvs{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);padding:1rem;margin-bottom:1rem;overflow-x:auto}.cvs-top{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.ldot{width:5px;height:5px;border-radius:50%;background:var(--t400);animation:pls 2s ease-in-out infinite}@keyframes pls{0%,100%{opacity:1}50%{opacity:0.3}}
-.pipe-lbl{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin:10px 0 6px;display:flex;align-items:center;gap:6px}.pipe-lbl-line{flex:1;height:0.5px;background:var(--border2)}.pipe-connect{display:flex;justify-content:center;padding:4px 0;font-size:14px;color:var(--border2);letter-spacing:20px}
-.row5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;align-items:start}
-.row6{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;align-items:start}
-@media(max-width:900px){.row5{grid-template-columns:repeat(5,160px)}.row6{grid-template-columns:repeat(6,150px)}}
-.fa-row5{display:grid;grid-template-columns:1fr 14px 1fr 14px 1fr 14px 1fr 14px 1fr;gap:0;align-items:center;margin:4px 0}
-.fa-row6{display:grid;grid-template-columns:1fr 14px 1fr 14px 1fr 14px 1fr 14px 1fr 14px 1fr;gap:0;align-items:center;margin:4px 0}
-.fa{text-align:center;font-size:12px;color:var(--border2);transition:all 0.3s}.fa.lit{color:var(--ac)}.fa-ph{visibility:hidden}
-.sec{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--r);padding:8px 10px;transition:all 0.3s;cursor:pointer;user-select:none}.sec:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.06)}.sec.hl{box-shadow:0 0 0 2px var(--ac),0 4px 16px rgba(29,158,117,0.15)}.sec.hl-r{box-shadow:0 0 0 2px var(--r400)}.sec.dim{opacity:0.2;pointer-events:none}
-.sec-hd{display:flex;align-items:center;gap:6px;margin-bottom:3px}.sec-ic{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center}.sec-ic svg{width:11px;height:11px}.sec-nm{font-size:7px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;display:flex;align-items:center;gap:3px}.sec-ti{font-size:10px;font-weight:700;color:var(--text)}.spip{width:5px;height:5px;border-radius:50%;background:var(--text3);opacity:0.25;transition:all 0.3s}.spip.on{background:var(--t400);opacity:1;animation:pls 1.5s ease-in-out infinite}
-.sec-pv{display:flex;flex-direction:column;gap:1px;margin-top:3px}.pvi{font-size:8px;color:var(--text2);display:flex;align-items:center;gap:4px}.pvd{width:4px;height:4px;border-radius:50%;flex-shrink:0}
-.cht{display:flex;align-items:center;gap:3px;font-size:7px;color:var(--text3);margin-top:3px;opacity:0.5;transition:opacity 0.2s}.sec:hover .cht{opacity:1;color:var(--ac)}.chv{font-size:8px;transition:transform 0.3s}.sec.exp .chv{transform:rotate(90deg)}
-.sec-xb{height:2px;background:var(--border);border-radius:1px;margin-top:4px;position:relative;overflow:hidden}.sec-xb::after{content:'';position:absolute;left:0;top:0;height:100%;width:0;background:var(--ac);transition:width 0.3s}.sec:hover .sec-xb::after{width:100%}
-.sec-dt{max-height:0;overflow:hidden;transition:max-height 0.4s ease}.sec.exp .sec-dt{max-height:350px;margin-top:5px;border-top:0.5px solid var(--border);padding-top:5px}.dtg{display:flex;flex-direction:column;gap:2px}.dti{font-size:8px;color:var(--text2);display:flex;align-items:center;gap:4px;padding:1px 0}.dtd{width:5px;height:5px;border-radius:50%;flex-shrink:0}.dtl{font-size:7px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-top:3px;margin-bottom:1px}
-.spl{font-size:6px;font-weight:700;padding:1px 5px;border-radius:3px;margin-top:3px;display:inline-block}
-.rsp{background:var(--bg);border:1px dashed var(--border2);border-radius:var(--r);padding:8px 12px;margin-top:6px;transition:all 0.3s}.rsp.rok{border:1px solid var(--t400);background:var(--t50)}.rsp.rwn{border:1px solid var(--am400);background:var(--am50)}.rsp.rer{border:1px solid var(--r400);background:var(--r50)}.rsp-in{display:flex;align-items:center;gap:12px;font-size:10px}.rsp-l{font-weight:700}.rsp-d{color:var(--text2);font-size:9px}
-.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:1rem}@media(max-width:640px){.mets{grid-template-columns:repeat(2,1fr)}}.met{background:var(--bg2);border-radius:var(--r);border:0.5px solid var(--border);padding:10px 12px}.met-l{font-size:8px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.met-v{font-size:18px;font-weight:700;font-family:var(--m);margin-top:1px}.met-b{height:3px;border-radius:2px;background:var(--bg3);margin-top:5px;overflow:hidden}.met-f{height:100%;border-radius:2px;transition:width 0.5s,background 0.3s}.met-n{font-size:8px;color:var(--text3);margin-top:3px}
-.log{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);overflow:hidden;margin-bottom:1rem}.log-h{padding:8px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:9px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.log-b{max-height:180px;overflow-y:auto;padding:4px 0;font-family:var(--m);font-size:9px}.lr{padding:2px 14px;display:flex;gap:8px;animation:fi 0.25s ease}@keyframes fi{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}.lt{color:var(--text3);min-width:72px}.lp{min-width:60px;font-weight:700}.lp.l-ingest{color:var(--b400)}.lp.l-query{color:var(--ac)}.lp.l-retrieve{color:var(--p400)}.lp.l-guard{color:var(--sfc)}.lp.l-gen{color:var(--llc)}.lp.l-resp{color:var(--t400)}.lp.l-warn{color:var(--am400)}.lp.l-block{color:var(--r400)}.lm{color:var(--text2);flex:1}.clr{background:none;border:0.5px solid var(--border2);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--text3);cursor:pointer;font-family:var(--f)}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}@media(max-width:640px){.info-grid{grid-template-columns:1fr}}.info-box{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);padding:14px 16px}.info-title{font-size:9px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}.info-row{display:flex;align-items:start;gap:6px;margin-bottom:4px;font-size:10px;color:var(--text2);line-height:1.5}.info-tag{font-weight:700;flex-shrink:0}.lg-row{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--text2);margin-bottom:4px}.lg-box{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.wm{position:fixed;bottom:12px;right:16px;font-size:9px;color:var(--text3);opacity:0.35;font-family:var(--f);pointer-events:none;z-index:999}.footer{text-align:center;padding:1rem 0;font-size:9px;color:var(--text3)}.footer a{color:var(--ac);text-decoration:none}
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+:root{--bg:#0a0e17;--bg2:#111827;--bg3:#1a2234;--bg4:#232d42;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--border:rgba(148,163,184,0.1);--border2:rgba(148,163,184,0.2);
+--ing:#10b981;--ingBg:rgba(16,185,129,0.08);--ingGl:rgba(16,185,129,0.3);
+--qry:#3b82f6;--qryBg:rgba(59,130,246,0.08);--qryGl:rgba(59,130,246,0.3);
+--vec:#a855f7;--vecBg:rgba(168,85,247,0.08);--vecGl:rgba(168,85,247,0.4);
+--grd:#f59e0b;--grdBg:rgba(245,158,11,0.08);
+--err:#ef4444;--errBg:rgba(239,68,68,0.08);
+--ok:#10b981;--okBg:rgba(16,185,129,0.08);
+--ops:#06b6d4;--opsBg:rgba(6,182,212,0.08);
+--eco:#f97316;--ecoBg:rgba(249,115,22,0.08);
+--f:'DM Sans',sans-serif;--m:'JetBrains Mono',monospace;--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:var(--f);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(16,185,129,0.03),transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(59,130,246,0.03),transparent 60%),radial-gradient(ellipse at 50% 80%,rgba(168,85,247,0.03),transparent 60%);pointer-events:none;z-index:0}
+.pg{max-width:1500px;margin:0 auto;padding:1.5rem;position:relative;z-index:1}
+
+.hdr{margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}.hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}.hdr-badge{background:linear-gradient(135deg,var(--ing),var(--qry));padding:6px 12px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#fff}
+.hdr h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--text),var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.hdr p{font-size:12px;color:var(--text2);max-width:900px;line-height:1.6;margin-top:2px}
+
+.sc-bar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}.sc-lbl{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-right:4px}
+.sc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:6px 13px;cursor:pointer;font-family:var(--f);font-size:10px;font-weight:500;color:var(--text2);transition:all 0.2s;display:flex;align-items:center;gap:5px}
+.sc-btn:hover{border-color:var(--qry);color:var(--text);transform:translateY(-1px)}.sc-btn.active{border-color:var(--qry);color:var(--qry);background:var(--qryBg);font-weight:600}.sc-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none}
+.sc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sc-reset{margin-left:auto;background:none;border:1px solid var(--border);border-radius:7px;padding:5px 10px;cursor:pointer;font-family:var(--f);font-size:9px;color:var(--text3)}
+
+.cvs{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:1rem;position:relative;overflow:hidden}
+.cvs::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent)}
+
+/* Cross-cutting bars */
+.xbar{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:7px;font-size:8px;font-weight:600;letter-spacing:0.6px;margin-bottom:6px;flex-wrap:wrap}
+.xbar.gov{background:linear-gradient(90deg,rgba(59,130,246,0.06),rgba(168,85,247,0.06));border:1px solid rgba(59,130,246,0.12)}.xbar.gov .xdot{background:var(--qry)}
+.xbar.obs{background:linear-gradient(90deg,rgba(16,185,129,0.06),rgba(6,182,212,0.06));border:1px solid rgba(16,185,129,0.12)}.xbar.obs .xdot{background:var(--ing)}
+.xbar.ops{background:linear-gradient(90deg,rgba(6,182,212,0.06),rgba(59,130,246,0.06));border:1px solid rgba(6,182,212,0.12)}.xbar.ops .xdot{background:var(--ops)}
+.xbar.eco{background:linear-gradient(90deg,rgba(249,115,22,0.06),rgba(245,158,11,0.06));border:1px solid rgba(249,115,22,0.12)}.xbar.eco .xdot{background:var(--eco)}
+.xdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}.xtag{background:rgba(255,255,255,0.04);padding:2px 7px;border-radius:3px;font-weight:400;font-size:7px;color:var(--text3)}
+
+/* Pipeline labels */
+.plbl{display:flex;align-items:center;gap:8px;margin:10px 0 8px}.plbl-dot{width:7px;height:7px;border-radius:50%;animation:pls 2s ease-in-out infinite}@keyframes pls{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
+.plbl-nm{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}.plbl-desc{font-size:9px;color:var(--text3);margin-left:auto}
+
+/* Stage row */
+.stages{display:flex;gap:0;align-items:stretch}
+@media(max-width:1200px){.stages{overflow-x:auto;padding-bottom:8px}}
+
+/* Connector */
+.cn{display:flex;align-items:center;justify-content:center;width:24px;flex-shrink:0;position:relative}
+.cn-l{width:100%;height:2px;position:relative}.cn-l::before{content:'';position:absolute;inset:0;height:2px;background:var(--border);border-radius:1px}.cn-l::after{content:'';position:absolute;right:-1px;top:-3px;border-left:5px solid var(--border);border-top:3px solid transparent;border-bottom:3px solid transparent}
+.cn.li .cn-l::before{background:var(--qry);box-shadow:0 0 6px var(--qryGl)}.cn.li .cn-l::after{border-left-color:var(--qry)}
+.cn.li-i .cn-l::before{background:var(--ing);box-shadow:0 0 6px var(--ingGl)}.cn.li-i .cn-l::after{border-left-color:var(--ing)}
+.cn.li-d .cn-l::before{background:var(--err)}.cn.li-d .cn-l::after{border-left-color:var(--err)}
+.cn .dot{position:absolute;width:5px;height:5px;border-radius:50%;top:-1.5px;left:-6px;opacity:0}
+.cn.li .dot,.cn.li-i .dot{animation:fR 0.6s ease forwards}.cn.li .dot{background:var(--qry);box-shadow:0 0 8px var(--qryGl)}.cn.li-i .dot{background:var(--ing);box-shadow:0 0 8px var(--ingGl)}
+@keyframes fR{0%{left:0;opacity:1}100%{left:calc(100% - 5px);opacity:0.2}}
+
+/* Stage card */
+.stg{flex:1;min-width:100px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 11px;transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden}
+.stg::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0;opacity:0;transition:opacity 0.3s}
+.stg:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+.stg.hl{border-color:var(--qry)}.stg.hl::before{opacity:1;background:var(--qry)}.stg.hl-i{border-color:var(--ing)}.stg.hl-i::before{opacity:1;background:var(--ing)}.stg.hl-v{border-color:var(--vec)}.stg.hl-v::before{opacity:1;background:var(--vec)}.stg.hl-g{border-color:var(--grd)}.stg.hl-g::before{opacity:1;background:var(--grd)}.stg.hl-d{border-color:var(--err)}.stg.hl-d::before{opacity:1;background:var(--err)}.stg.dim{opacity:0.12;pointer-events:none}
+.stg-hd{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.stg-ico{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.stg-nm{font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase}
+.stg-ti{font-size:10px;font-weight:600;color:var(--text);margin-bottom:3px}
+.stg-items{display:flex;flex-direction:column;gap:1px}.stg-it{font-size:7.5px;color:var(--text3);display:flex;align-items:baseline;gap:4px;line-height:1.3}.stg-it::before{content:'';width:3px;height:3px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.stg-st{position:absolute;top:6px;right:8px;width:5px;height:5px;border-radius:50%;background:var(--text3);opacity:0.15;transition:all 0.3s}.stg-st.on{opacity:1;background:var(--ok);box-shadow:0 0 6px var(--okBg)}.stg-st.er{opacity:1;background:var(--err);box-shadow:0 0 6px var(--errBg)}
+.stg-dt{max-height:0;overflow:hidden;transition:max-height 0.4s}.stg.exp .stg-dt{max-height:180px;margin-top:5px;padding-top:5px;border-top:1px solid var(--border)}.dt-it{font-size:7.5px;color:var(--text2);padding:1px 0;display:flex;align-items:baseline;gap:3px}.dt-it::before{content:'';width:3px;height:3px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.clk{font-size:7px;color:var(--text3);margin-top:3px;opacity:0;transition:opacity 0.2s}.stg:hover .clk{opacity:0.5}
+
+/* Vector Store Hub */
+.hub{margin:12px 0;display:flex;justify-content:center;position:relative}
+.hub::before{content:'';position:absolute;top:50%;left:5%;right:5%;height:1px;background:linear-gradient(90deg,transparent,var(--vecGl),transparent)}
+.hub-c{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:2px solid var(--vec);border-radius:14px;padding:14px 28px;text-align:center;box-shadow:0 0 30px rgba(168,85,247,0.08);transition:all 0.3s}
+.hub-c.hl{box-shadow:0 0 40px rgba(168,85,247,0.2);transform:scale(1.02)}
+.hub-ico{font-size:20px;margin-bottom:2px}.hub-nm{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--vec)}.hub-ti{font-size:13px;font-weight:700}.hub-sub{font-size:8px;color:var(--text3);margin-top:1px}
+.hub-stats{display:flex;gap:14px;margin-top:6px;justify-content:center}.hub-sv{text-align:center}.hub-sv-v{font-size:14px;font-weight:700;font-family:var(--m);color:var(--vec)}.hub-sv-l{font-size:7px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px}
+
+/* Feedback loop arrow */
+.fb{display:flex;align-items:center;justify-content:center;margin-top:8px;gap:8px;opacity:0.3;transition:opacity 0.3s;font-size:8px;color:var(--text3)}
+.fb.lit{opacity:1;color:var(--ok)}
+.fb-arrow{font-size:12px}
+
+/* Response */
+.rsp{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 16px;margin-top:10px;display:flex;align-items:center;gap:14px;transition:all 0.3s}.rsp.ok{border-color:var(--ok);background:var(--okBg)}.rsp.er{border-color:var(--err);background:var(--errBg)}.rsp.wn{border-color:var(--grd);background:var(--grdBg)}
+.rsp-code{font-family:var(--m);font-size:13px;font-weight:700}.rsp-msg{font-size:10px;color:var(--text2);flex:1}.rsp-cost{font-family:var(--m);font-size:10px;color:var(--eco);margin-left:auto;white-space:nowrap}
+
+/* GAIF-4 Metrics */
+.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}@media(max-width:768px){.mets{grid-template-columns:repeat(2,1fr)}}
+.met{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;position:relative}
+.met-l{font-size:7px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:5px}
+.met-b{font-size:6px;padding:1px 5px;border-radius:3px;font-weight:600}
+.met-v{font-size:22px;font-weight:700;font-family:var(--m);line-height:1.2}
+.met-bar{height:3px;border-radius:2px;background:var(--bg4);margin-top:5px;overflow:hidden}.met-f{height:100%;border-radius:2px;transition:width 0.5s,background 0.3s}
+.met-n{font-size:8px;color:var(--text3);margin-top:3px}
+
+/* RAG Quality Metrics */
+.rmets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}@media(max-width:768px){.rmets{grid-template-columns:repeat(2,1fr)}}
+.rmet{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px}
+.rmet-l{font-size:7px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3)}.rmet-v{font-size:18px;font-weight:700;font-family:var(--m);color:var(--qry)}.rmet-n{font-size:7px;color:var(--text3);margin-top:2px}
+
+/* Log */
+.log{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:1rem}
+.log-h{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.log-t{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:5px}.log-t::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ok);animation:pls 2s ease-in-out infinite}
+.log-clr{background:none;border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:8px;color:var(--text3);cursor:pointer;font-family:var(--f)}
+.log-b{max-height:200px;overflow-y:auto;padding:3px 0;font-family:var(--m);font-size:9px}.log-b::-webkit-scrollbar{width:3px}.log-b::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+.lr{padding:2px 14px;display:flex;gap:8px;animation:fi 0.2s ease}@keyframes fi{from{opacity:0;transform:translateY(-3px)}to{opacity:1}}
+.lr-t{color:var(--text3);min-width:70px}.lr-p{min-width:65px;font-weight:600}.lr-m{color:var(--text2);flex:1}
+.lr-p.ing{color:var(--ing)}.lr-p.qry{color:var(--qry)}.lr-p.vec{color:var(--vec)}.lr-p.grd{color:var(--grd)}.lr-p.ok{color:var(--ok)}.lr-p.err{color:var(--err)}.lr-p.ops{color:var(--ops)}.lr-p.eco{color:var(--eco)}
+
+/* Info */
+.info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}@media(max-width:768px){.info{grid-template-columns:1fr}}
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.info-tl{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.info-r{font-size:10px;color:var(--text2);margin-bottom:4px;display:flex;align-items:start;gap:5px;line-height:1.5}
+.info-tag{font-weight:700;flex-shrink:0;font-size:9px}
+.plat-r{display:flex;align-items:center;gap:7px;font-size:9px;color:var(--text2);margin-bottom:4px}.plat-d{width:7px;height:7px;border-radius:3px;flex-shrink:0}
+
+.footer{text-align:center;padding:1rem 0;font-size:9px;color:var(--text3)}.footer a{color:var(--qry);text-decoration:none}
+.wm{position:fixed;bottom:8px;right:12px;font-size:8px;color:var(--text3);opacity:0.15;font-family:var(--m);pointer-events:none;z-index:999}
 </style>
 </head>
 <body>
 <div class="wm">Designed by Aman Sharma</div>
 <div class="pg">
-<div class="brand"><div class="brand-ico"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg></div><div><div class="brand-t">AI Architecture Enterprise Patterns</div><div class="brand-s">Interactive reference architectures for regulated enterprises</div></div></div>
+<div class="hdr"><div class="hdr-top"><div class="hdr-badge">Pattern 02 / Multimodal RAG</div></div><h1>Multimodal RAG</h1><p>RAG over text, images, charts, tables, and DICOM medical images. Vision models for image understanding, chart data extraction, and multi-modal embedding for cross-modal retrieval.</p></div>
 
-<div class="hdr">
-  <div class="hdr-tag">Pattern 02 - Multimodal RAG</div>
-  <h1>RAG for Regulated Data</h1>
-  <p>Retrieval over images, PDFs with charts, medical imaging, and video transcripts. Multimodal embedding models and vision-language generation.</p>
-  <div class="plats"><span class="pl">Vision + Text</span><span class="pl">Multimodal Embedding</span><span class="pl">Cross-Modal Generation</span></div>
-</div>
-
-<div class="sc-lbl"><span class="sc-lbl-arr">&#9758;</span> Click a scenario to simulate the RAG pipeline</div>
-<div class="sc-bar">
-  <button class="sc-btn" onclick="run('factual')" id="btn-factual"><div class="sc-dot" style="background:var(--ac)"></div>Factual query</button>
-  <button class="sc-btn" onclick="run('multi')" id="btn-multi"><div class="sc-dot" style="background:var(--p400)"></div>Multi-doc synthesis</button>
-  <button class="sc-btn" onclick="run('sensitive')" id="btn-sensitive"><div class="sc-dot" style="background:var(--r400)"></div>Sensitive data (PHI)</button>
-  <button class="sc-btn" onclick="run('noresult')" id="btn-noresult"><div class="sc-dot" style="background:var(--am400)"></div>No relevant results</button>
-  <button class="sc-btn" onclick="run('cited')" id="btn-cited"><div class="sc-dot" style="background:var(--b400)"></div>Citation-grounded</button>
-  <button class="sc-btn" style="margin-left:auto;font-size:10px;color:var(--text3)" onclick="resetAll()">&#8634; Reset</button>
-</div>
-
-<div class="stbar"><div class="st" id="s-docs">Docs</div><div class="sta" id="a1">&#9654;</div><div class="st" id="s-extract">Extract</div><div class="sta" id="a2">&#9654;</div><div class="st" id="s-chunk">Chunk</div><div class="sta" id="a3">&#9654;</div><div class="st" id="s-query">Query</div><div class="sta" id="a4">&#9654;</div><div class="st" id="s-retrieve">Retrieve</div><div class="sta" id="a5">&#9654;</div><div class="st" id="s-assemble">Assemble</div><div class="sta" id="a6">&#9654;</div><div class="st" id="s-generate">Generate</div><div class="sta" id="a7">&#9654;</div><div class="st" id="s-post">Validate</div></div>
+<div class="sc-bar"><span class="sc-lbl">Scenarios</span>
+<button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--ok)"></div>Clean query</button>
+<button class="sc-btn" onclick="run('phi')" id="btn-phi"><div class="sc-dot" style="background:var(--err)"></div>PHI in retrieval</button>
+<button class="sc-btn" onclick="run('halluc')" id="btn-halluc"><div class="sc-dot" style="background:var(--grd)"></div>Hallucination caught</button>
+<button class="sc-btn" onclick="run('cache')" id="btn-cache"><div class="sc-dot" style="background:var(--vec)"></div>Cache hit</button>
+<button class="sc-btn" onclick="run('fail')" id="btn-fail"><div class="sc-dot" style="background:var(--text3)"></div>Fallback (0 results)</button>
+<button class="sc-reset" onclick="resetAll()">&#8634; Reset</button></div>
 
 <div class="cvs">
-  <div class="cvs-top"><div class="ldot"></div><span>Multimodal RAG pipeline</span><span style="margin-left:auto;font-size:8px;opacity:0.5">Click any section to explore</span></div>
-  <div class="xb xb-gov"><span style="font-size:10px">Data Classification & Compliance</span><span class="xb-i">Sensitivity Labeling</span><span class="xb-i">Access Control</span><span class="xb-i">PHI/PII Detection</span><span class="xb-i">Data Residency</span><span class="xb-i">Audit Trail</span><span class="xb-i">Retention Policy</span></div>
+<!-- 4 CROSS-CUTTING BARS (top 2) -->
+<div class="xbar gov"><div class="xdot"></div><span style="color:var(--qry)">Governance</span><div class="xtag">GAIF-4 (T1PR/CFR/EMR/GDR)</div><div class="xtag">Compliance Tagging</div><div class="xtag">Access Control</div><div class="xtag">PHI Detection</div><div class="xtag">Audit Trail</div><div class="xtag">Data Lineage</div></div>
+<div class="xbar obs"><div class="xdot"></div><span style="color:var(--ing)">Observability</span><div class="xtag">Distributed Tracing</div><div class="xtag">Per-Stage Latency</div><div class="xtag">Retrieval Precision</div><div class="xtag">Recall</div><div class="xtag">MRR</div><div class="xtag">Groundedness</div><div class="xtag">NDCG</div></div>
 
-  <!-- INGESTION PIPELINE -->
-  <div class="pipe-lbl"><span>Ingestion pipeline</span><div class="pipe-lbl-line"></div><span style="font-size:7px;font-weight:500">Offline: documents to indexed vectors</span></div>
-  <div class="fa-row5"><div class="fa-ph"></div><div class="fa" id="if1">&#10148;</div><div class="fa-ph"></div><div class="fa" id="if2">&#10148;</div><div class="fa-ph"></div><div class="fa" id="if3">&#10148;</div><div class="fa-ph"></div><div class="fa" id="if4">&#10148;</div><div class="fa-ph"></div></div>
-  <div class="row5">
-    <div class="sec" id="sec-docs" onclick="tog('docs')"><div class="sec-hd"><div class="sec-ic" style="background:var(--b400)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="sec-nm" style="color:var(--b400)">1. Document Sources <div class="spip" id="st-docs"></div></div><div class="sec-ti">Ingestion</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--mlc)"></div>Images, PDFs, video, audio</div><div class="pvi"><div class="pvd" style="background:var(--mlc)"></div>Medical imaging (DICOM)</div><div class="pvi"><div class="pvd" style="background:var(--g400)"></div>Engineering drawings, blueprints</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Images, PDFs, video, audio, TXT</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Structured databases</div><div class="dti"><div class="dtd" style="background:var(--g400)"></div>Enterprise APIs (FHIR, HL7, CDA)</div><div class="dti"><div class="dtd" style="background:var(--g400)"></div>SharePoint / OneDrive / GDrive</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Streaming data feeds</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Sensitivity classification at ingestion</div></div></div></div>
-
-    <div class="sec" id="sec-extract" onclick="tog('extract')"><div class="sec-hd"><div class="sec-ic" style="background:var(--llc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 3v18"/><path d="M8 7l4-4 4 4"/></svg></div><div><div class="sec-nm" style="color:var(--llc)">2. Extraction <div class="spip" id="st-extract"></div></div><div class="sec-ti">Parse & Clean</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Vision model extraction</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Chart/diagram understanding</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Image PHI detection (faces, labels)</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--llc)"></div>OCR (scanned documents)</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Table / chart extraction</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Metadata extraction</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Image PHI detection (faces, labels) + tagging</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Sensitivity label assignment</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Deduplication</div></div></div></div>
-
-    <div class="sec" id="sec-chunk" onclick="tog('chunk')"><div class="sec-hd"><div class="sec-ic" style="background:var(--ac)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div><div><div class="sec-nm" style="color:var(--ac)">3. Chunking <div class="spip" id="st-chunk"></div></div><div class="sec-ti">Split & Embed</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--ac)"></div>Image + text co-chunking</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Multimodal embedding (CLIP/BLIP)</div><div class="pvi"><div class="pvd" style="background:var(--ac)"></div>Cross-modal alignment</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtl">Chunking strategies</div><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Image region extraction</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Vision-text alignment</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Video frame sampling</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Audio transcription + segmentation</div></div><div class="dtl">Embedding</div><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Multimodal embeddings (CLIP/BLIP-2)</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Text-only embeddings (fallback)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Sensitivity label propagated to chunks</div></div></div></div>
-
-    <div class="sec" id="sec-vstore" onclick="tog('vstore')"><div class="sec-hd"><div class="sec-ic" style="background:var(--p400)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div><div><div class="sec-nm" style="color:var(--p400)">4. Vector Store <div class="spip" id="st-vstore"></div></div><div class="sec-ti">Index</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--p400)"></div>Vector index (HNSW)</div><div class="pvi"><div class="pvd" style="background:var(--p400)"></div>Keyword index (BM25)</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>ACL metadata stored</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--p400)"></div>Dense vector index (HNSW / IVF)</div><div class="dti"><div class="dtd" style="background:var(--p400)"></div>Sparse keyword index (BM25)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>ACL / sensitivity metadata per chunk</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Auto-sync from source (incremental)</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Multi-index support</div></div></div></div>
-
-    <div class="sec" id="sec-meta" onclick="tog('meta')"><div class="sec-hd"><div class="sec-ic" style="background:var(--agc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div><div><div class="sec-nm" style="color:var(--agc)">5. Metadata <div class="spip" id="st-meta"></div></div><div class="sec-ti">Catalog</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--agc)"></div>Source lineage</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Sensitivity labels</div><div class="pvi"><div class="pvd" style="background:var(--agc)"></div>Version tracking</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Source document lineage</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Sensitivity labels per chunk</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Version tracking (which doc version)</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Freshness score</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Retrieval quality metrics</div></div></div></div>
-  </div>
-
-  <div class="pipe-connect">&#8595; &#8595; &#8595;</div>
-
-  <!-- QUERY PIPELINE -->
-  <div class="pipe-lbl"><span>Query pipeline</span><div class="pipe-lbl-line"></div><span style="font-size:7px;font-weight:500">Online: user question to grounded answer</span></div>
-  <div class="fa-row6"><div class="fa-ph"></div><div class="fa" id="qf1">&#10148;</div><div class="fa-ph"></div><div class="fa" id="qf2">&#10148;</div><div class="fa-ph"></div><div class="fa" id="qf3">&#10148;</div><div class="fa-ph"></div><div class="fa" id="qf4">&#10148;</div><div class="fa-ph"></div><div class="fa" id="qf5">&#10148;</div><div class="fa-ph"></div></div>
-  <div class="row6">
-    <div class="sec" id="sec-query" onclick="tog('query')"><div class="sec-hd"><div class="sec-ic" style="background:var(--text2)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div><div class="sec-nm" style="color:var(--text2)">6. Query <div class="spip" id="st-query"></div></div><div class="sec-ti">Processing</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--mlc)"></div>Intent classification</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Sensitivity check</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Query rewriting</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Intent classification</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Query sensitivity screening</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Query rewriting / expansion</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Query decomposition (multi-hop)</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Multimodal embedding (CLIP/BLIP) for query</div></div></div></div>
-
-    <div class="sec" id="sec-retrieve" onclick="tog('retrieve')" style="background:var(--ac50);border:1.5px solid var(--ac)"><div class="sec-hd"><div class="sec-ic" style="background:var(--ac)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="sec-nm" style="color:var(--ac)">7. Retrieval <div class="spip" id="st-retrieve"></div></div><div class="sec-ti">Search</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--p400)"></div>Cross-modal similarity</div><div class="pvi"><div class="pvd" style="background:var(--p400)"></div>Image + text joint search</div><div class="pvi"><div class="pvd" style="background:var(--ac)"></div>Cross-modal re-ranking</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--p400)"></div>Cross-modal similarity search</div><div class="dti"><div class="dtd" style="background:var(--p400)"></div>Keyword search (BM25)</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Hybrid fusion (RRF)</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Re-ranking (MMR / cross-encoder)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>ACL filtering (user can only see authorized docs)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Sensitivity-based result filtering</div></div></div></div>
-
-    <div class="sec" id="sec-assemble" onclick="tog('assemble')"><div class="sec-hd"><div class="sec-ic" style="background:var(--agc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div><div><div class="sec-nm" style="color:var(--agc)">8. Assembly <div class="spip" id="st-assemble"></div></div><div class="sec-ti">Context</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--agc)"></div>Chunk selection</div><div class="pvi"><div class="pvd" style="background:var(--agc)"></div>Context window packing</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Relevance scoring</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Top-K chunk selection</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Deduplication</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Context window optimization</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Relevance threshold filtering</div><div class="dti"><div class="dtd" style="background:var(--agc)"></div>Source citation tagging</div></div></div></div>
-
-    <div class="sec" id="sec-generate" onclick="tog('generate')" style="background:var(--llb);border:1px solid var(--llc)"><div class="sec-hd"><div class="sec-ic" style="background:var(--llc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg></div><div><div class="sec-nm" style="color:var(--llc)">9. Generation <div class="spip" id="st-generate"></div></div><div class="sec-ti">LLM</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>Prompt construction</div><div class="pvi"><div class="pvd" style="background:var(--llc)"></div>LLM inference</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Input guardrails</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--llc)"></div>System prompt + context + query assembly</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Input guardrails (prompt injection)</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>LLM inference (via AI Gateway)</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Structured output enforcement</div><div class="dti"><div class="dtd" style="background:var(--llc)"></div>Token budget management</div></div></div></div>
-
-    <div class="sec" id="sec-post" onclick="tog('post')"><div class="sec-hd"><div class="sec-ic" style="background:var(--sfc)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="sec-nm" style="color:var(--sfc)">10. Validation <div class="spip" id="st-post"></div></div><div class="sec-ti">Post-Process</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Groundedness check</div><div class="pvi"><div class="pvd" style="background:var(--sfc)"></div>Hallucination detection</div><div class="pvi"><div class="pvd" style="background:var(--ac)"></div>Citation extraction</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Groundedness score (is answer in context?)</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Hallucination detection</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>PHI/PII leakage check</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Citation extraction + source links</div><div class="dti"><div class="dtd" style="background:var(--sfc)"></div>Output guardrails</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Confidence score</div></div></div></div>
-
-    <div class="sec" id="sec-response" onclick="tog('response')"><div class="sec-hd"><div class="sec-ic" style="background:var(--t400)"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="sec-nm" style="color:var(--t400)">11. Response <div class="spip" id="st-response"></div></div><div class="sec-ti">Delivery</div></div></div><div class="sec-pv"><div class="pvi"><div class="pvd" style="background:var(--t400)"></div>Grounded answer</div><div class="pvi"><div class="pvd" style="background:var(--ac)"></div>Source citations</div><div class="pvi"><div class="pvd" style="background:var(--mlc)"></div>Audit logged</div></div><div class="cht"><span class="chv">&#9654;</span> Explore</div><div class="sec-xb"></div><div class="sec-dt"><div class="dtg"><div class="dti"><div class="dtd" style="background:var(--t400)"></div>Answer with inline citations</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Source document links</div><div class="dti"><div class="dtd" style="background:var(--ac)"></div>Confidence indicator</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>Full audit trail logged</div><div class="dti"><div class="dtd" style="background:var(--mlc)"></div>User feedback collection</div></div></div></div>
-  </div>
-
-  <div class="rsp" id="rsp"><div class="rsp-in"><span class="rsp-l" id="rsp-l">Waiting</span><span class="rsp-d" id="rsp-d">Select a scenario to animate the RAG pipeline</span></div></div>
-  <div class="xb xb-obs"><span style="font-size:10px">Retrieval Quality & Observability</span><span class="xb-i">Retrieval precision</span><span class="xb-i">Groundedness score</span><span class="xb-i">Latency (p50/p99)</span><span class="xb-i">Context utilization</span><span class="xb-i">Citation accuracy</span><span class="xb-i">Feedback loop</span></div>
+<!-- INGESTION PIPELINE (7 stages) -->
+<div class="plbl"><div class="plbl-dot" style="background:var(--ing)"></div><span class="plbl-nm" style="color:var(--ing)">Ingestion Pipeline</span><span class="plbl-desc">Offline: documents to governed vectors</span></div>
+<div class="stages">
+<div class="stg" id="s-src" onclick="tg('src')"><div class="stg-st" id="st-src"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--ingBg);color:var(--ing)">&#128451;</div><div class="stg-nm" style="color:var(--ing)">Sources</div></div><div class="stg-ti">Multi-Modal Sources</div><div class="stg-items"><div class="stg-it">&#8226; Documents + images + DICOM</div><div class="stg-it">&#8226; Charts, diagrams, slides</div><div class="stg-it">&#8226; Video frame extraction</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Connector per source type</div><div class="dt-it">&#8226; Incremental change detection</div><div class="dt-it">&#8226; Source access audit</div><div class="dt-it">&#8226; Scheduling (cron/event)</div></div></div>
+<div class="cn" id="ci1"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-ext" onclick="tg('ext')"><div class="stg-st" id="st-ext"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--ingBg);color:var(--ing)">&#128196;</div><div class="stg-nm" style="color:var(--ing)">Extract</div></div><div class="stg-ti">Parse Documents</div><div class="stg-items"><div class="stg-it">&#8226; PDF, DOCX, HTML</div><div class="stg-it">&#8226; Table extraction</div><div class="stg-it">&#8226; Metadata preserve</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Layout-aware parsing</div><div class="dt-it">&#8226; Language detection</div><div class="dt-it">&#8226; Encoding normalization</div></div></div>
+<div class="cn" id="ci2"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-proc" onclick="tg('proc')"><div class="stg-st" id="st-proc"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--ingBg);color:var(--ing)">&#9881;</div><div class="stg-nm" style="color:var(--ing)">Process</div></div><div class="stg-ti">Vision Processing</div><div class="stg-items"><div class="stg-it">&#8226; DICOM to findings text (GPT-4V)</div><div class="stg-it">&#8226; Chart data extraction</div><div class="stg-it">&#8226; DICOM to findings text</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Tesseract / Azure DI</div><div class="dt-it">&#8226; DICOM handling</div><div class="dt-it">&#8226; Chart data extraction</div></div></div>
+<div class="cn" id="ci3"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-chunk" onclick="tg('chunk')"><div class="stg-st" id="st-chunk"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--ingBg);color:var(--ing)">&#9638;</div><div class="stg-nm" style="color:var(--ing)">Chunk</div></div><div class="stg-ti">Split & Overlap</div><div class="stg-items"><div class="stg-it">&#8226; Semantic boundaries</div><div class="stg-it">&#8226; 512-1024 tokens</div><div class="stg-it">&#8226; 10-20% overlap</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Parent-child relationships</div><div class="dt-it">&#8226; Metadata per chunk</div><div class="dt-it">&#8226; Token-aware splitting</div></div></div>
+<div class="cn" id="ci4"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-emb" onclick="tg('emb')"><div class="stg-st" id="st-emb"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--ingBg);color:var(--ing)">&#10070;</div><div class="stg-nm" style="color:var(--ing)">Embed</div></div><div class="stg-ti">Multi-Modal Embed</div><div class="stg-items"><div class="stg-it">&#8226; CLIP / multi-modal embedder</div><div class="stg-it">&#8226; Shared embedding space</div><div class="stg-it">&#8226; Text + image alignment</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Rate limit handling</div><div class="dt-it">&#8226; Embedding cache (dedup)</div><div class="dt-it">&#8226; Dimension reduction opt</div></div></div>
+<div class="cn" id="ci5"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-comp" onclick="tg('comp')"><div class="stg-st" id="st-comp"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--grdBg);color:var(--grd)">&#128737;</div><div class="stg-nm" style="color:var(--grd)">Compliance</div></div><div class="stg-ti">Tag & Label</div><div class="stg-items"><div class="stg-it">&#8226; PHI/PII detection</div><div class="stg-it">&#8226; Sensitivity levels</div><div class="stg-it">&#8226; Access control labels</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Presidio / DLP API</div><div class="dt-it">&#8226; Public/Internal/Conf/Restricted</div><div class="dt-it">&#8226; Per-chunk compliance meta</div></div></div>
+<div class="cn" id="ci6"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-qval" onclick="tg('qval')"><div class="stg-st" id="st-qval"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--okBg);color:var(--ok)">&#10003;</div><div class="stg-nm" style="color:var(--ok)">Quality</div></div><div class="stg-ti">Validate & Score</div><div class="stg-items"><div class="stg-it">&#8226; Chunk quality score</div><div class="stg-it">&#8226; Dedup detection</div><div class="stg-it">&#8226; Coverage analysis</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Min quality: 0.70</div><div class="dt-it">&#8226; Reject malformed chunks</div><div class="dt-it">&#8226; Completeness check</div></div></div>
 </div>
 
+<!-- VECTOR STORE HUB -->
+<div class="hub"><div class="hub-c" id="s-vs"><div class="hub-ico">&#128312;</div><div class="hub-nm">Governed Vector Store</div><div class="hub-ti">Compliance-Tagged Index</div><div class="hub-sub">Vectors + metadata + access control + sensitivity labels + versioning</div><div class="hub-stats"><div class="hub-sv"><div class="hub-sv-v">24.3K</div><div class="hub-sv-l">Documents</div></div><div class="hub-sv"><div class="hub-sv-v">186K</div><div class="hub-sv-l">Chunks</div></div><div class="hub-sv"><div class="hub-sv-v">3072</div><div class="hub-sv-l">Dimensions</div></div><div class="hub-sv"><div class="hub-sv-v">v3.2</div><div class="hub-sv-l">Index Version</div></div><div class="hub-sv"><div class="hub-sv-v">2h</div><div class="hub-sv-l">Freshness</div></div></div></div></div>
+
+<!-- QUERY PIPELINE (8 stages) -->
+<div class="plbl"><div class="plbl-dot" style="background:var(--qry)"></div><span class="plbl-nm" style="color:var(--qry)">Query Pipeline</span><span class="plbl-desc">Online: user query to governed, cited response</span></div>
+<div class="stages">
+<div class="stg" id="s-qin" onclick="tg('qin')"><div class="stg-st" id="st-qin"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--qryBg);color:var(--qry)">&#128172;</div><div class="stg-nm" style="color:var(--qry)">Input</div></div><div class="stg-ti">Sanitize & Auth</div><div class="stg-items"><div class="stg-it">&#8226; Injection detection</div><div class="stg-it">&#8226; User identity + role</div><div class="stg-it">&#8226; Rate limit check</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Prompt injection classifier</div><div class="dt-it">&#8226; Token length validation</div><div class="dt-it">&#8226; Session context load</div></div></div>
+<div class="cn" id="cq1"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-cls" onclick="tg('cls')"><div class="stg-st" id="st-cls"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--qryBg);color:var(--qry)">&#9776;</div><div class="stg-nm" style="color:var(--qry)">Classify</div></div><div class="stg-ti">Query Type</div><div class="stg-items"><div class="stg-it">&#8226; Factual / Analytical</div><div class="stg-it">&#8226; Comparison / How-to</div><div class="stg-it">&#8226; Conversational follow-up</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Routes retrieval strategy</div><div class="dt-it">&#8226; Sets reranking weights</div><div class="dt-it">&#8226; Adjusts generation prompt</div></div></div>
+<div class="cn" id="cq2"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-enh" onclick="tg('enh')"><div class="stg-st" id="st-enh"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--qryBg);color:var(--qry)">&#10024;</div><div class="stg-nm" style="color:var(--qry)">Enhance</div></div><div class="stg-ti">Query Rewrite</div><div class="stg-items"><div class="stg-it">&#8226; HyDE generation</div><div class="stg-it">&#8226; Multi-query expansion</div><div class="stg-it">&#8226; History-aware rewrite</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Step-back prompting</div><div class="dt-it">&#8226; Synonym expansion</div><div class="dt-it">&#8226; Conversation memory merge</div></div></div>
+<div class="cn" id="cq3"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-ret" onclick="tg('ret')"><div class="stg-st" id="st-ret"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--vecBg);color:var(--vec)">&#128269;</div><div class="stg-nm" style="color:var(--vec)">Retrieve</div></div><div class="stg-ti">Search & Filter</div><div class="stg-items"><div class="stg-it">&#8226; Hybrid: vector + BM25</div><div class="stg-it">&#8226; Access control filter</div><div class="stg-it">&#8226; Metadata filter</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Top-K: 20 candidates</div><div class="dt-it">&#8226; Security trimming by role</div><div class="dt-it">&#8226; Source diversity enforcement</div></div></div>
+<div class="cn" id="cq4"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-rer" onclick="tg('rer')"><div class="stg-st" id="st-rer"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--qryBg);color:var(--qry)">&#9652;&#9662;</div><div class="stg-nm" style="color:var(--qry)">Rerank</div></div><div class="stg-ti">Score & Select</div><div class="stg-items"><div class="stg-it">&#8226; Cross-encoder rerank</div><div class="stg-it">&#8226; Top-5 final chunks</div><div class="stg-it">&#8226; Relevance > 0.70</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Cohere / BGE reranker</div><div class="dt-it">&#8226; Diversity sampling</div><div class="dt-it">&#8226; Recency boost</div></div></div>
+<div class="cn" id="cq5"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-ctx" onclick="tg('ctx')"><div class="stg-st" id="st-ctx"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--qryBg);color:var(--qry)">&#128203;</div><div class="stg-nm" style="color:var(--qry)">Context</div></div><div class="stg-ti">Assemble Prompt</div><div class="stg-items"><div class="stg-it">&#8226; Window management</div><div class="stg-it">&#8226; System + chunks + query</div><div class="stg-it">&#8226; Token budget allocation</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Max context: 128K tokens</div><div class="dt-it">&#8226; System: 500, Chunks: 4K, History: 2K</div><div class="dt-it">&#8226; Citation format injection</div></div></div>
+<div class="cn" id="cq6"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-gen" onclick="tg('gen')"><div class="stg-st" id="st-gen"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--qryBg);color:var(--qry)">&#9889;</div><div class="stg-nm" style="color:var(--qry)">Generate</div></div><div class="stg-ti">LLM Synthesis</div><div class="stg-items"><div class="stg-it">&#8226; Grounded generation</div><div class="stg-it">&#8226; Citation injection</div><div class="stg-it">&#8226; Response formatting</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Temperature: 0.1 (factual)</div><div class="dt-it">&#8226; Format: paragraph / table / steps</div><div class="dt-it">&#8226; Streaming output</div></div></div>
+<div class="cn" id="cq7"><div class="cn-l"><div class="dot"></div></div></div>
+<div class="stg" id="s-grd" onclick="tg('grd')"><div class="stg-st" id="st-grd"></div><div class="stg-hd"><div class="stg-ico" style="background:var(--grdBg);color:var(--grd)">&#128737;</div><div class="stg-nm" style="color:var(--grd)">Guardrails</div></div><div class="stg-ti">Validate & Gate</div><div class="stg-items"><div class="stg-it">&#8226; Groundedness > 0.85</div><div class="stg-it">&#8226; PHI leak detection</div><div class="stg-it">&#8226; Citation verification</div></div><div class="clk">Click to expand</div><div class="stg-dt"><div class="dt-it">&#8226; Content safety check</div><div class="dt-it">&#8226; Factual consistency</div><div class="dt-it">&#8226; Hallucination classifier</div></div></div>
+</div>
+
+<!-- RESPONSE -->
+<div class="rsp" id="rsp"><span class="rsp-code" id="rsp-c">---</span><span class="rsp-msg" id="rsp-m">Select a scenario to simulate the RAG pipeline</span><span class="rsp-cost" id="rsp-$"></span></div>
+
+<!-- FEEDBACK LOOP -->
+<div class="fb" id="fb"><span class="fb-arrow">&#8634;</span> Feedback Loop: user rating + retrieval quality signals loop back to improve index and ranking</div>
+
+<!-- Bottom 2 cross-cutting bars -->
+<div class="xbar ops" style="margin-top:8px"><div class="xdot"></div><span style="color:var(--ops)">Operations</span><div class="xtag">Semantic Cache</div><div class="xtag">Rate Limiting</div><div class="xtag">Circuit Breaker</div><div class="xtag">Fallback Path</div><div class="xtag">Error Handling</div><div class="xtag">Index Versioning</div></div>
+<div class="xbar eco"><div class="xdot"></div><span style="color:var(--eco)">Economics</span><div class="xtag">Token Cost/Stage</div><div class="xtag">Cache Savings</div><div class="xtag">Model Routing Cost</div><div class="xtag">Total Cost/Query</div><div class="xtag">Embedding Cost</div><div class="xtag">Chargeback</div></div>
+</div>
+
+<!-- GAIF-4 METRICS -->
 <div class="mets">
-  <div class="met"><div class="met-l">Retrieval precision</div><div class="met-v" id="m-prec">0.92</div><div class="met-b"><div class="met-f" id="mf-prec" style="width:92%;background:var(--t400)"></div></div><div class="met-n">Relevant chunks / total retrieved</div></div>
-  <div class="met"><div class="met-l">Groundedness</div><div class="met-v" id="m-ground">0.95</div><div class="met-b"><div class="met-f" id="mf-ground" style="width:95%;background:var(--t400)"></div></div><div class="met-n">Answer supported by context</div></div>
-  <div class="met"><div class="met-l">Hallucination rate</div><div class="met-v" id="m-halluc">0.03</div><div class="met-b"><div class="met-f" id="mf-halluc" style="width:3%;background:var(--t400)"></div></div><div class="met-n">Claims not in source documents</div></div>
-  <div class="met"><div class="met-l">Citation accuracy</div><div class="met-v" id="m-cite">0.98</div><div class="met-b"><div class="met-f" id="mf-cite" style="width:98%;background:var(--t400)"></div></div><div class="met-n">Citations match source content</div></div>
+<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:var(--okBg);color:var(--ok)">SAFE</span></div><div class="met-v" id="m-t" style="color:var(--ok)">0.02</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:2%;background:var(--ok)"></div></div><div class="met-n">Contaminated retrievals passing filters</div></div>
+<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:var(--okBg);color:var(--ok)">SAFE</span></div><div class="met-v" id="m-c" style="color:var(--ok)">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:var(--ok)"></div></div><div class="met-n">Compliance violations in responses</div></div>
+<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:var(--okBg);color:var(--ok)">SAFE</span></div><div class="met-v" id="m-e" style="color:var(--ok)">0.01</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:1%;background:var(--ok)"></div></div><div class="met-n">Hallucinated content not in sources</div></div>
+<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:var(--okBg);color:var(--ok)">STABLE</span></div><div class="met-v" id="m-g" style="color:var(--ok)">0.01</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:1%;background:var(--ok)"></div></div><div class="met-n">Retrieval quality degradation rate</div></div>
 </div>
 
-<div class="log"><div class="log-h"><span>RAG pipeline log</span><button class="clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
-
-<div class="info-grid">
-  <div class="info-box"><div class="info-title">When to use this variant</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> Documents contain images, charts, diagrams, medical scans</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> Need to search across text AND visual content</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> Radiology reports + X-rays, blueprints + specs</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--t400)">Use</span> Video compliance review, multimodal evidence</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--r400)">Skip</span> Text-only documents (see standard-rag)</div>
-    <div class="info-row"><span class="info-tag" style="color:var(--r400)">Skip</span> No visual content needed (see standard-rag)</div>
-  </div>
-  <div class="info-box"><div class="info-title">RAG quality metrics</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--ac)"></div>Retrieval: precision, recall, MRR, NDCG</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--llc)"></div>Generation: groundedness, faithfulness, relevance</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--sfc)"></div>Safety: PHI leakage, hallucination rate</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--agc)"></div>Citations: accuracy, completeness, link validity</div>
-    <div class="lg-row"><div class="lg-box" style="background:var(--mlc)"></div>Ops: latency p50/p99, cache hit rate, cost/query</div>
-  </div>
+<!-- RAG QUALITY METRICS -->
+<div class="rmets">
+<div class="rmet"><div class="rmet-l">Retrieval Precision</div><div class="rmet-v" id="rq-p">0.89</div><div class="rmet-n">Relevant chunks in top-5</div></div>
+<div class="rmet"><div class="rmet-l">Groundedness</div><div class="rmet-v" id="rq-g">0.96</div><div class="rmet-n">Claims supported by sources</div></div>
+<div class="rmet"><div class="rmet-l">Answer Relevancy</div><div class="rmet-v" id="rq-r">0.93</div><div class="rmet-n">Response addresses query</div></div>
+<div class="rmet"><div class="rmet-l">Avg Latency</div><div class="rmet-v" id="rq-l">1.8<span style="font-size:10px;color:var(--text3)">s</span></div><div class="rmet-n">End-to-end query time</div></div>
 </div>
+
+<div class="log"><div class="log-h"><div class="log-t">RAG Pipeline Log</div><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
+
+<div class="info">
+<div class="info-box"><div class="info-tl">When to use this variant</div>
+<div class="info-r"><span class="info-tag" style="color:var(--ok)">Use</span> Knowledge includes images, charts, DICOM, diagrams</div>
+<div class="info-r"><span class="info-tag" style="color:var(--ok)">Use</span> Medical imaging + clinical notes together</div>
+<div class="info-r"><span class="info-tag" style="color:var(--ok)">Use</span> "Show me the chart from the Q3 report" type queries</div>
+<div class="info-r"><span class="info-tag" style="color:var(--err)">Skip</span> Text-only knowledge base (see Standard RAG)</div>
+<div class="info-r"><span class="info-tag" style="color:var(--err)">Skip</span> No image/chart content (see Standard RAG)</div></div>
+<div class="info-box"><div class="info-tl">Platform mapping</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--qry)"></div>Azure: AI Search + OpenAI + Content Safety</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--grd)"></div>AWS: OpenSearch + Bedrock + Guardrails</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--ok)"></div>GCP: Vertex Search + Gemini + Model Armor</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--err)"></div>Databricks: Vector Search + DBRX + Mosaic GW</div>
+<div class="plat-r"><div class="plat-d" style="background:var(--vec)"></div>OSS: Qdrant + vLLM + NeMo Guardrails</div></div></div>
 
 <div class="footer">AI Architecture Enterprise Patterns &mdash; <a href="https://github.com/aman210122/ai-architecture-enterprise-patterns">GitHub</a> &mdash; <a href="https://linkedin.com/in/amansharmaarchitect">Aman Sharma</a><br>Governance: <a href="https://github.com/aman210122/gaif-governance-observatory">GAIF Governance Observatory</a></div>
 </div>
 
 <script>
-let busy=false;const $=id=>document.getElementById(id);const W=ms=>new Promise(r=>setTimeout(r,ms));
-const ING=['docs','extract','chunk','vstore','meta'];
-const QRY=['query','retrieve','assemble','generate','post','response'];
-const ALL=[...ING,...QRY];
-function log(tp,msg){const el=$('logB');const now=new Date();const ts=now.toLocaleTimeString('en-US',{hour12:false})+'.'+String(now.getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lt">${ts}</span><span class="lp l-${tp}">${tp.toUpperCase()}</span><span class="lm">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>50)el.removeChild(el.lastChild)}
+const $=id=>document.getElementById(id);const W=ms=>new Promise(r=>setTimeout(r,ms));let busy=false;
+const IS=['src','ext','proc','chunk','emb','comp','qval'];const IC=['ci1','ci2','ci3','ci4','ci5','ci6'];
+const QS=['qin','cls','enh','ret','rer','ctx','gen','grd'];const QC=['cq1','cq2','cq3','cq4','cq5','cq6','cq7'];
+const ALL=[...IS,...QS];
+
+function log(tp,msg){const el=$('logB');const now=new Date();const ts=now.toLocaleTimeString('en-US',{hour12:false})+'.'+String(now.getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lr-t">${ts}</span><span class="lr-p ${tp}">${tp.toUpperCase().padEnd(8)}</span><span class="lr-m">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>80)el.removeChild(el.lastChild)}
 function clearLog(){$('logB').innerHTML=''}
-function ss(id,c){const e=$('s-'+id);if(e)e.className='st '+c}
-function sa(n,l){const e=$('a'+n);if(e)e.className='sta'+(l?' lit':'')}
-function af(id,l){const e=$(id);if(e)e.className='fa'+(l?' lit':'')}
-function resetS(){['docs','extract','chunk','query','retrieve','assemble','generate','post'].forEach(s=>ss(s,''));[1,2,3,4,5,6,7].forEach(n=>sa(n,false));['if1','if2','if3','if4','qf1','qf2','qf3','qf4','qf5'].forEach(id=>af(id,false))}
-function resetSec(){ALL.forEach(id=>{const el=$('sec-'+id);if(el){el.classList.remove('hl','hl-r','dim')};const p=$('st-'+id);if(p)p.className='spip'})}
-function resetResp(){$('rsp').className='rsp';$('rsp-l').textContent='Waiting';$('rsp-d').textContent=''}
-function setB(d){document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=d)}
-function resp(c,l,d){$('rsp').className='rsp '+c;$('rsp-l').textContent=l;$('rsp-d').textContent=d}
-function mets(p,g,h,c){$('m-prec').textContent=p.toFixed(2);$('m-ground').textContent=g.toFixed(2);$('m-halluc').textContent=h.toFixed(2);$('m-cite').textContent=c.toFixed(2);$('mf-prec').style.width=p*100+'%';$('mf-prec').style.background=p>.85?'var(--t400)':p>.7?'var(--am400)':'var(--r400)';$('mf-ground').style.width=g*100+'%';$('mf-ground').style.background=g>.9?'var(--t400)':g>.7?'var(--am400)':'var(--r400)';$('mf-halluc').style.width=Math.min(h*500,100)+'%';$('mf-halluc').style.background=h<.05?'var(--t400)':h<.15?'var(--am400)':'var(--r400)';$('mf-cite').style.width=c*100+'%';$('mf-cite').style.background=c>.95?'var(--t400)':c>.8?'var(--am400)':'var(--r400)'}
-function hl(id){const el=$('sec-'+id);if(el)el.classList.add('hl');const p=$('st-'+id);if(p)p.className='spip on'}
-function tog(id){const el=$('sec-'+id);const was=el.classList.contains('exp');ALL.forEach(s=>{const e=$('sec-'+s);if(e)e.classList.remove('exp')});if(!was)el.classList.add('exp')}
-function resetAll(){if(busy)return;resetS();resetSec();resetResp();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'))}
+function hl(id,c){const e=$('s-'+id);if(e)e.classList.add(c||'hl');const s=$('st-'+id);if(s)s.classList.add('on')}
+function hlE(id){const e=$('s-'+id);if(e)e.classList.add('hl-d');const s=$('st-'+id);if(s){s.classList.remove('on');s.classList.add('er')}}
+function dim(id){const e=$('s-'+id);if(e)e.classList.add('dim')}
+function lc(id,c){const e=$(id);if(e)e.classList.add(c||'li')}
+function rst(){ALL.forEach(id=>{const e=$('s-'+id);if(e)e.className='stg';const s=$('st-'+id);if(s)s.className='stg-st'});IC.forEach(id=>{const e=$(id);if(e)e.className='cn'});QC.forEach(id=>{const e=$(id);if(e)e.className='cn';if(e)e.style.opacity=''});$('s-vs').classList.remove('hl');$('fb').classList.remove('lit');$('rsp').className='rsp';$('rsp-c').textContent='---';$('rsp-m').textContent='';$('rsp-$').textContent=''}
+function tg(id){const e=$('s-'+id);if(!e)return;const w=e.classList.contains('exp');ALL.forEach(s=>{const el=$('s-'+s);if(el)el.classList.remove('exp')});if(!w)e.classList.add('exp')}
+function rsp(c,code,msg,cost){$('rsp').className='rsp '+c;$('rsp-c').textContent=code;$('rsp-m').textContent=msg;$('rsp-$').textContent=cost||''}
+function sM(t,c,e,g,lb){const mk=(id,v,thL,thH,safe,warn)=>{$(id).textContent=v.toFixed(2);const fid=id.replace('m-','mf-');const bid=id.replace('m-','mb-');$(fid).style.width=Math.min(v*500,100)+'%';const ok=v<=thL;const mid=v<=thH;$(fid).style.background=ok?'var(--ok)':mid?'var(--grd)':'var(--err)';$(id).style.color=ok?'var(--ok)':mid?'var(--grd)':'var(--err)';$(bid).textContent=ok?safe:mid?'WARN':'CRITICAL';$(bid).style.background=ok?'var(--okBg)':mid?'var(--grdBg)':'var(--errBg)';$(bid).style.color=ok?'var(--ok)':mid?'var(--grd)':'var(--err)'};mk('m-t',t,0.05,0.15,'SAFE','WARN');mk('m-c',c,0.005,0.01,'SAFE','WARN');mk('m-e',e,0.05,0.15,'SAFE','WARN');mk('m-g',g,0.03,0.05,'STABLE','WARN');if(lb){$('rq-p').textContent=lb[0].toFixed(2);$('rq-g').textContent=lb[1].toFixed(2);$('rq-r').textContent=lb[2].toFixed(2);$('rq-l').innerHTML=lb[3]+'<span style="font-size:10px;color:var(--text3)">s</span>'}}
+function resetAll(){if(busy)return;rst();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));sM(0.02,0.00,0.01,0.01,[0.89,0.96,0.93,'1.8'])}
+async function run(t){if(busy)return;busy=true;document.querySelectorAll('.sc-btn').forEach(b=>{b.classList.remove('active');b.disabled=true});$('btn-'+t).classList.add('active');rst();
+if(t==='clean')await fClean();else if(t==='phi')await fPhi();else if(t==='halluc')await fHalluc();else if(t==='cache')await fCache();else if(t==='fail')await fFail();
+document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
 
-async function run(t){if(busy)return;busy=true;setB(true);document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));$('btn-'+t).classList.add('active');resetS();resetSec();resetResp();
-if(t==='factual')await fFactual();else if(t==='multi')await fMulti();else if(t==='sensitive')await fSensitive();else if(t==='noresult')await fNoResult();else if(t==='cited')await fCited();
-busy=false;setB(false)}
+async function fClean(){
+log('qry','Query: "What is the prior authorization process for specialty medications?"');
+hl('qin','hl');await W(200);lc('cq1');log('qry','Sanitized | No injection | User: clinical_staff | Rate: OK');await W(200);
+hl('cls','hl');await W(200);lc('cq2');log('qry','Classified: FACTUAL | Strategy: standard vector + BM25 hybrid');await W(200);
+hl('enh','hl');await W(200);lc('cq3');log('qry','HyDE: generated hypothetical answer | Multi-query: 3 expansions');await W(200);
+hl('ret','hl-v');$('s-vs').classList.add('hl');await W(200);lc('cq4');log('vec','Hybrid search: 20 candidates | Cosine > 0.78 | BM25 top 10');await W(180);
+log('vec','Access filter: role=clinical_staff | 18/20 accessible | 2 restricted');await W(180);
+hl('rer','hl');await W(200);lc('cq5');log('qry','Reranked: top-5 selected | Relevance: 0.91-0.97 | 3 sources');await W(180);
+hl('ctx','hl');await W(200);lc('cq6');log('qry','Context: system(480t) + chunks(3,847t) + query(42t) = 4,369 tokens');await W(180);
+hl('gen','hl');await W(250);lc('cq7');log('qry','GPT-4o | 847 output tokens | Temperature: 0.1 | Streaming');await W(200);
+log('qry','Citations: [1] Policy Manual 4.2 [2] PA Guidelines [3] Formulary [4] CMS Rules');await W(180);
+hl('grd','hl');await W(250);log('ok','Groundedness: 0.96 (>0.85) PASS');await W(120);log('ok','PHI scan: CLEAR');await W(100);log('ok','Citations: 4/4 verified');await W(100);log('ok','Content safety: PASS');await W(100);
+$('fb').classList.add('lit');log('eco','Cost: embed $0.0002 + retrieve $0.0001 + generate $0.0089 = $0.0092');
+rsp('ok','200 OK','4 citations verified | Groundedness 0.96 | 1.8s','$0.0092');
+sM(0.02,0.00,0.01,0.01,[0.89,0.96,0.93,'1.8'])}
 
-async function fFactual(){
-  ss('docs','on');hl('docs');log('ingest','Query references policy documents (already indexed)');await W(300);ss('docs','ok');sa(1,true);af('if1',true);
-  hl('vstore');log('ingest','Vector store: 12,400 chunks across 847 documents');await W(200);af('if2',true);af('if3',true);af('if4',true);
-  ss('query','on');hl('query');log('query','User: "What is the maximum out-of-pocket for PPO plans?"');await W(350);
-  log('query','Intent: factual lookup | Sensitivity: Level 1 (public)');await W(250);ss('query','ok');sa(4,true);af('qf1',true);
-  ss('retrieve','on');hl('retrieve');log('retrieve','Hybrid search: vector (cosine 0.89) + BM25 (score 14.2)');await W(400);
-  log('retrieve','Retrieved 6 chunks from 2 documents | MMR re-ranked');await W(250);ss('retrieve','ok');sa(5,true);af('qf2',true);
-  ss('assemble','on');hl('assemble');log('retrieve','Context: 4 chunks selected (2,847 tokens) | Relevance > 0.82');await W(300);ss('assemble','ok');sa(6,true);af('qf3',true);
-  ss('generate','on');hl('generate');log('gen','LLM: system prompt + 4 chunks + query assembled');await W(300);
-  log('gen','Inference: 412 tokens generated | Model: GPT-4o');await W(400);ss('generate','ok');sa(7,true);af('qf4',true);
-  ss('post','on');hl('post');log('guard','Groundedness: 0.97 | Hallucination: CLEAR | PHI: CLEAR');await W(350);ss('post','ok');af('qf5',true);
-  hl('response');log('resp','Answer delivered with 2 source citations | Confidence: HIGH');await W(250);
-  resp('rok','200 OK','Factual answer | 4 chunks | Groundedness 0.97 | 2 citations | 1.8s');mets(0.92,0.97,0.01,1.00);
-}
+async function fPhi(){
+log('qry','Query: "Show patient records for diabetes management protocols"');
+hl('qin','hl');await W(200);lc('cq1');log('qry','Sanitized | Classified: clinical query');await W(200);
+hl('cls','hl');await W(200);lc('cq2');log('qry','Type: FACTUAL | Clinical domain detected');await W(200);
+hl('enh','hl');await W(200);lc('cq3');log('qry','Expanded with medical terminology');await W(200);
+hl('ret','hl-v');$('s-vs').classList.add('hl');await W(200);lc('cq4');log('vec','Retrieved: 20 candidates from clinical index');await W(180);
+log('err','PHI DETECTED: 6/20 chunks contain patient identifiers (MRN, DOB, names)');await W(250);
+log('grd','Compliance filter: stripping 6 PHI chunks | Redacting 2 partial-PHI chunks');await W(200);
+log('grd','Remaining: 12 clean chunks | 2 redacted chunks = 14 usable');await W(180);
+hl('rer','hl');await W(200);lc('cq5');log('qry','Reranked: top-5 from de-identified pool');await W(180);
+hl('ctx','hl');await W(200);lc('cq6');log('qry','Context assembled with de-identified chunks only');await W(180);
+hl('gen','hl');await W(250);lc('cq7');log('qry','Generated using de-identified context | No PHI in prompt');await W(200);
+hl('grd','hl-g');await W(250);log('ok','PHI scan on output: CLEAR (no leakage)');await W(120);log('ok','Groundedness: 0.93 PASS');await W(100);
+$('fb').classList.add('lit');log('eco','Cost: $0.0094 (extra PHI scan: +$0.0008)');
+rsp('wn','200 OK','6 PHI chunks filtered | Response uses de-identified data only | HIPAA compliant','$0.0094');
+sM(0.02,0.00,0.01,0.01,[0.82,0.93,0.90,'2.1'])}
 
-async function fMulti(){
-  ss('docs','on');hl('docs');log('ingest','Query spans multiple document types');await W(300);ss('docs','ok');sa(1,true);af('if1',true);af('if2',true);af('if3',true);af('if4',true);
-  ss('query','on');hl('query');log('query','User: "Compare coverage between HMO and PPO for maternity care"');await W(350);
-  log('query','Intent: comparison | Decomposed into 2 sub-queries');await W(300);ss('query','ok');sa(4,true);af('qf1',true);
-  ss('retrieve','on');hl('retrieve');log('retrieve','Sub-query 1 (HMO): 5 chunks from benefits guide');await W(400);
-  log('retrieve','Sub-query 2 (PPO): 4 chunks from plan summary');await W(350);
-  log('retrieve','Total: 9 chunks from 3 documents | Cross-doc dedup applied');await W(250);ss('retrieve','ok');sa(5,true);af('qf2',true);
-  ss('assemble','on');hl('assemble');log('retrieve','Context: 7 chunks selected (4,102 tokens) | Structured as comparison');await W(300);ss('assemble','ok');sa(6,true);af('qf3',true);
-  ss('generate','on');hl('generate');log('gen','Structured comparison prompt assembled');await W(300);
-  log('gen','Inference: 847 tokens | Side-by-side format generated');await W(500);ss('generate','ok');sa(7,true);af('qf4',true);
-  ss('post','on');hl('post');log('guard','Groundedness: 0.94 | All claims traced to source chunks');await W(350);ss('post','ok');af('qf5',true);
-  hl('response');log('resp','Comparison table delivered | 3 source documents cited');await W(250);
-  resp('rok','200 OK','Multi-doc synthesis | 7 chunks | 3 sources | Comparison format | 3.1s');mets(0.88,0.94,0.03,0.96);
-}
+async function fHalluc(){
+log('qry','Query: "What are the dosage limits for metformin in elderly patients?"');
+hl('qin','hl');await W(200);lc('cq1');hl('cls','hl');await W(200);lc('cq2');log('qry','Type: FACTUAL | Clinical pharmacology');await W(200);
+hl('enh','hl');await W(200);lc('cq3');log('qry','Enhanced with clinical context');await W(200);
+hl('ret','hl-v');$('s-vs').classList.add('hl');await W(200);lc('cq4');log('vec','Retrieved: 20 candidates | WARNING: low relevance scores');await W(200);
+log('grd','Top relevance: 0.74 (threshold: 0.70) | Marginal retrieval quality');await W(200);
+hl('rer','hl');await W(200);lc('cq5');log('qry','Reranked: top-5 | Avg relevance: 0.72 (below target 0.80)');await W(200);
+hl('ctx','hl');await W(200);lc('cq6');log('qry','Context: low-confidence chunks assembled with warning flag');await W(180);
+hl('gen','hl');await W(250);lc('cq7');log('qry','Generated: model produced dosage recommendation from weak context');await W(200);
+hl('grd','hl');await W(250);
+log('err','GROUNDEDNESS: 0.41 (threshold: 0.85) FAIL');await W(200);
+log('err','HALLUCINATION: "2500mg daily max for patients >80" NOT in any source chunk');await W(200);
+log('err','BLOCKED: fabricated clinical dosage information');await W(150);
+hlE('grd');hlE('gen');
+log('ops','Fallback: returning "insufficient evidence" response with source links');
+rsp('er','BLOCKED','Hallucination: groundedness 0.41 | Fabricated dosage blocked | Fallback response sent','$0.0078');
+sM(0.02,0.00,0.12,0.01,[0.42,0.41,0.38,'2.4'])}
 
-async function fSensitive(){
-  ss('docs','on');hl('docs');$('sec-docs').classList.add('hl-r');log('ingest','Documents contain PHI (patient records)');await W(300);ss('docs','ok');sa(1,true);af('if1',true);
-  hl('extract');log('guard','Extraction: PHI detected and tagged at ingestion');await W(250);af('if2',true);
-  hl('chunk');log('guard','Chunks carry sensitivity label: LEVEL 4 (PHI)');await W(250);af('if3',true);af('if4',true);
-  ss('query','on');hl('query');$('sec-query').classList.add('hl-r');log('query','User: "What medications was patient in room 412 prescribed?"');await W(350);
-  log('guard','SENSITIVITY: Level 4 detected in query | PHI routing activated');await W(300);ss('query','ok');sa(4,true);af('qf1',true);
-  ss('retrieve','on');hl('retrieve');$('sec-retrieve').classList.add('hl-r');log('retrieve','ACL filter: user authorized for patient records (RN role)');await W(400);
-  log('retrieve','Results filtered by user role + patient consent');await W(300);
-  log('retrieve','4 chunks from patient chart | All Level 4');await W(250);ss('retrieve','ok');sa(5,true);af('qf2',true);
-  ss('assemble','on');hl('assemble');log('guard','Context: PHI minimum necessary applied | Only relevant meds included');await W(350);ss('assemble','ok');sa(6,true);af('qf3',true);
-  ss('generate','on');hl('generate');log('gen','Routed to BAA-compliant provider | PHI in prompt');await W(300);
-  log('gen','Inference: 234 tokens | Medication list formatted');await W(400);ss('generate','ok');sa(7,true);af('qf4',true);
-  ss('post','on');hl('post');$('sec-post').classList.add('hl-r');log('guard','PHI leakage check: CLEAR | Audit: PHI-redacted log stored');await W(400);ss('post','ok');af('qf5',true);
-  hl('response');log('resp','PHI response delivered to authorized user | Full audit trail');await W(250);
-  resp('rok','200 OK (PHI)','Sensitive data | ACL-filtered | BAA provider | PHI redacted in logs');mets(0.95,0.98,0.00,1.00);
-}
+async function fCache(){
+log('qry','Query: "What is our PTO policy?"');
+hl('qin','hl');await W(200);lc('cq1');log('qry','Sanitized | Common query detected');await W(150);
+hl('cls','hl');await W(150);lc('cq2');
+log('ops','CACHE CHECK: semantic similarity 0.98 with cached "PTO policy details"');await W(200);
+log('ops','Cache entry: generated 4h ago | TTL: 24h | Valid');await W(200);
+$('s-vs').classList.add('hl');
+['enh','ret','rer','ctx','gen'].forEach(s=>dim(s));['cq3','cq4','cq5','cq6'].forEach(c=>{const e=$(c);if(e)e.style.opacity='0.12'});
+hl('grd','hl');lc('cq7');await W(200);log('ok','Cached response validation: PASS');await W(150);
+$('fb').classList.add('lit');
+log('eco','Cost: $0.0000 (cache hit: no embedding, no retrieval, no generation)');
+log('ops','Savings: $0.0092 saved vs full pipeline | Latency: 0.12s vs 1.8s');
+rsp('ok','200 OK (Cached)','Cache hit | Semantic similarity 0.98 | 0.12s latency | $0.00 tokens','$0.0000');
+sM(0.02,0.00,0.01,0.01,[0.89,0.96,0.93,'0.12'])}
 
-async function fNoResult(){
-  ss('docs','on');hl('docs');log('ingest','Knowledge base indexed');await W(200);ss('docs','ok');sa(1,true);af('if1',true);af('if2',true);af('if3',true);af('if4',true);
-  ss('query','on');hl('query');log('query','User: "What is the policy on remote work in Antarctica?"');await W(350);
-  log('query','Intent: policy lookup | Topic: unusual');await W(250);ss('query','ok');sa(4,true);af('qf1',true);
-  ss('retrieve','on');hl('retrieve');log('retrieve','Vector search: best match cosine 0.34 (below threshold 0.65)');await W(400);
-  log('warn','LOW RELEVANCE: no chunks above confidence threshold');await W(300);
-  log('retrieve','Fallback: BM25 keyword search | No matches for "Antarctica"');await W(300);ss('retrieve','ok');sa(5,true);af('qf2',true);
-  ss('assemble','on');hl('assemble');log('warn','Context assembly: EMPTY | No relevant chunks found');await W(300);ss('assemble','ok');sa(6,true);af('qf3',true);
-  ss('generate','on');hl('generate');log('gen','ABSTENTION PROMPT: instructed to decline rather than hallucinate');await W(300);
-  log('gen','LLM: "I don\'t have information about that topic in the available documents."');await W(400);ss('generate','ok');sa(7,true);af('qf4',true);
-  ss('post','on');hl('post');log('guard','Abstention verified: no fabricated content | Hallucination: 0.00');await W(300);ss('post','ok');af('qf5',true);
-  hl('response');log('resp','Abstention response delivered | Suggested related topics');await W(250);
-  resp('rwn','200 OK (No Results)','Abstention: no relevant docs found | Hallucination prevented | 0 citations');mets(0.00,1.00,0.00,1.00);
-}
-
-async function fCited(){
-  ss('docs','on');hl('docs');log('ingest','Legal document corpus indexed with section references');await W(300);ss('docs','ok');sa(1,true);af('if1',true);af('if2',true);af('if3',true);af('if4',true);
-  ss('query','on');hl('query');log('query','User: "What are the termination clauses in our vendor agreement?"');await W(350);
-  log('query','Intent: clause extraction | Citation mode: REQUIRED');await W(250);ss('query','ok');sa(4,true);af('qf1',true);
-  ss('retrieve','on');hl('retrieve');log('retrieve','Hybrid search: 8 chunks from vendor agreement v3.2');await W(400);
-  log('retrieve','Section headers preserved for citation: Sec 7.1, 7.2, 7.3, 12.4');await W(300);ss('retrieve','ok');sa(5,true);af('qf2',true);
-  ss('assemble','on');hl('assemble');log('retrieve','Context: 5 chunks | Source metadata: document name, section, page');await W(300);ss('assemble','ok');sa(6,true);af('qf3',true);
-  ss('generate','on');hl('generate');log('gen','Citation-mode prompt: every claim must reference source section');await W(300);
-  log('gen','Inference: 623 tokens | 4 inline citations generated');await W(450);ss('generate','ok');sa(7,true);af('qf4',true);
-  ss('post','on');hl('post');log('guard','Citation verification: 4/4 citations match source chunks');await W(350);
-  log('guard','Groundedness: 0.99 | Every claim has source reference');await W(250);ss('post','ok');af('qf5',true);
-  hl('response');log('resp','Cited response: 4 verifiable citations with section + page numbers');await W(250);
-  resp('rok','200 OK (Cited)','Citation-grounded | 4 verified citations | Sec 7.1, 7.2, 7.3, 12.4 | 2.4s');mets(0.94,0.99,0.01,1.00);
-}
+async function fFail(){
+log('qry','Query: "What is the quantum computing strategy for 2027?"');
+hl('qin','hl');await W(200);lc('cq1');hl('cls','hl');await W(200);lc('cq2');log('qry','Type: ANALYTICAL | No matching domain');await W(200);
+hl('enh','hl');await W(200);lc('cq3');log('qry','Enhanced: multi-query expansion attempted');await W(200);
+hl('ret','hl-v');$('s-vs').classList.add('hl');await W(200);lc('cq4');
+log('err','RETRIEVAL: 0 chunks above relevance threshold (0.70)');await W(250);
+log('err','Best match: 0.34 relevance | Topic not in knowledge base');await W(200);
+hlE('ret');['rer','ctx','gen'].forEach(s=>dim(s));['cq5','cq6'].forEach(c=>{const e=$(c);if(e)e.style.opacity='0.12'});
+log('ops','FALLBACK: 0 results path triggered');await W(200);
+log('ops','Fallback strategy: keyword search attempted | 0 results');await W(200);
+log('ops','Fallback strategy: returning "no information available" with suggested topics');await W(200);
+hl('grd','hl-g');lc('cq7');log('ok','Fallback response: safe, no hallucination risk');await W(150);
+rsp('wn','200 (No Results)','Topic not in knowledge base | 0 relevant chunks | Safe fallback response sent','$0.0003');
+sM(0.02,0.00,0.00,0.01,[0.00,1.00,0.00,'0.9'])}
 </script>
 </body>
 </html>

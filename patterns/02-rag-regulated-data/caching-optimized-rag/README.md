@@ -1,6 +1,10 @@
 # Variant: Caching-Optimized RAG
-**Tiered cache: exact match, semantic similarity, partial match. Cache warming and invalidation.**
+
+**Tiered cache: exact, semantic, partial. Cache warming, TTL, invalidation. For 60%+ query repetition.**
+
 ## Live Demo
 **[Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/caching-optimized-rag/index.html)**
-**Use:** When 60%+ of queries repeat. Tiered caching with semantic similarity matching. Cache-aware chunking. Saves 40-70% on compute for repetitive workloads.
+
+5 interactive scenarios with per-stage latency tracking, token cost breakdown, GAIF-4 metrics, and RAG quality metrics.
+
 *[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
