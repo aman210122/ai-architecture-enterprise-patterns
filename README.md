@@ -3,11 +3,11 @@
 **Production-tested architecture patterns for deploying AI/ML systems in regulated enterprises. Each pattern includes an interactive visualization you can play with in your browser.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Gateway](https://img.shields.io/badge/AI_Gateway-12-blue.svg)](#pattern-01-unified-ai-gateway)
-[![RAG](https://img.shields.io/badge/RAG-10-green.svg)](#pattern-02-rag-for-regulated-data)
-[![Agents](https://img.shields.io/badge/Multi--Agent-10-orange.svg)](#pattern-03-multi-agent-pipeline-with-safety-gates)
-[![Tools](https://img.shields.io/badge/Tool_Gov-5-purple.svg)](#pattern-04-agentic-ai-with-tool-governance)
-[![Interactive](https://img.shields.io/badge/37_visualizations-interactive-purple.svg)](#)
+[![Gateway](https://img.shields.io/badge/AI_Gateway-12-blue.svg)](#pattern-01-unified-ai-gateway-12-variants)
+[![RAG](https://img.shields.io/badge/RAG-10-green.svg)](#pattern-02-rag-for-regulated-data-10-variants)
+[![Agents](https://img.shields.io/badge/Multi--Agent-10-orange.svg)](#pattern-03-multi-agent-pipeline-with-safety-gates-10-variants)
+[![Tools](https://img.shields.io/badge/Tool_Gov-8-purple.svg)](#pattern-04-agentic-ai-with-tool-governance-8-variants)
+[![Interactive](https://img.shields.io/badge/40_visualizations-interactive-purple.svg)](#)
 
 ---
 
@@ -21,7 +21,7 @@ This repository collects architecture patterns designed and validated across 18+
 
 ### GitHub Pages
 
-All 37 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
+All 40 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
 
 ---
 
@@ -40,7 +40,7 @@ Route all LLM and ML traffic through a single governance-aware control plane.
 
 ## Pattern 02: RAG for Regulated Data (10 variants)
 
-Retrieval-augmented generation with compliance boundaries at every stage. [Platform mapping](patterns/02-rag-regulated-data/) for Azure, AWS, GCP, Databricks, and open source.
+Retrieval-augmented generation with compliance boundaries at every stage. [Platform mapping](patterns/02-rag-regulated-data/).
 
 | Category | Variants |
 |----------|---------|
@@ -61,17 +61,15 @@ Chain specialized LLM agents with safety checkpoints. [Platform mapping](pattern
 
 ---
 
-## Pattern 04: Agentic AI with Tool Governance (5 variants)
+## Pattern 04: Agentic AI with Tool Governance (8 variants)
 
 Governance on what agents can DO, not just what they say. [Platform mapping](patterns/04-agentic-tool-governance/).
 
-| Variant | Protocol | Demo |
-|---------|---------|------|
-| [MCP Protocol](patterns/04-agentic-tool-governance/mcp-protocol/) | Model Context Protocol (Anthropic) - typed tool schemas | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/04-agentic-tool-governance/mcp-protocol/index.html) |
-| [A2A Protocol](patterns/04-agentic-tool-governance/a2a-protocol/) | Agent-to-Agent (Google) - peer-to-peer collaboration | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/04-agentic-tool-governance/a2a-protocol/index.html) |
-| [Function Calling](patterns/04-agentic-tool-governance/function-calling/) | Provider-native (OpenAI, Bedrock, Gemini) | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/04-agentic-tool-governance/function-calling/index.html) |
-| [Compound Tools](patterns/04-agentic-tool-governance/compound-tools/) | Tools chaining other tools with inter-tool governance | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/04-agentic-tool-governance/compound-tools/index.html) |
-| [Sandboxed Execution](patterns/04-agentic-tool-governance/sandboxed-execution/) | Agent-generated code in isolated containers | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/04-agentic-tool-governance/sandboxed-execution/index.html) |
+| Category | Variants |
+|----------|---------|
+| Protocols | [MCP](patterns/04-agentic-tool-governance/mcp-protocol/), [A2A](patterns/04-agentic-tool-governance/a2a-protocol/), [Function Calling](patterns/04-agentic-tool-governance/function-calling/) |
+| Advanced execution | [Compound Tools](patterns/04-agentic-tool-governance/compound-tools/), [Sandboxed Execution](patterns/04-agentic-tool-governance/sandboxed-execution/) |
+| Enterprise governance | [Tool Escalation](patterns/04-agentic-tool-governance/tool-escalation/), [Multi-Tenant Isolation](patterns/04-agentic-tool-governance/multi-tenant-isolation/), [Tool Discovery](patterns/04-agentic-tool-governance/tool-discovery/) |
 
 ---
 
