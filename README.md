@@ -7,8 +7,8 @@
 [![RAG](https://img.shields.io/badge/RAG-10-green.svg)](#pattern-02-rag-for-regulated-data-10-variants)
 [![Agents](https://img.shields.io/badge/Multi--Agent-10-orange.svg)](#pattern-03-multi-agent-pipeline-with-safety-gates-10-variants)
 [![Tools](https://img.shields.io/badge/Tool_Gov-8-purple.svg)](#pattern-04-agentic-ai-with-tool-governance-8-variants)
-[![LLMOps](https://img.shields.io/badge/LLMOps-6-red.svg)](#pattern-05-llmops-pipeline-6-variants)
-[![Interactive](https://img.shields.io/badge/46_visualizations-interactive-purple.svg)](#)
+[![LLMOps](https://img.shields.io/badge/LLMOps-10-red.svg)](#pattern-05-llmops-pipeline-10-variants)
+[![Interactive](https://img.shields.io/badge/50_visualizations-interactive-purple.svg)](#)
 
 ---
 
@@ -22,7 +22,7 @@ This repository collects architecture patterns designed and validated across 18+
 
 ### GitHub Pages
 
-All 46 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
+All 50 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
 
 ---
 
@@ -66,18 +66,15 @@ Governance on what agents can DO. [Platform mapping](patterns/04-agentic-tool-go
 | Execution | [Compound Tools](patterns/04-agentic-tool-governance/compound-tools/), [Sandboxed](patterns/04-agentic-tool-governance/sandboxed-execution/) |
 | Enterprise | [Escalation](patterns/04-agentic-tool-governance/tool-escalation/), [Multi-Tenant](patterns/04-agentic-tool-governance/multi-tenant-isolation/), [Discovery](patterns/04-agentic-tool-governance/tool-discovery/) |
 
-## Pattern 05: LLMOps Pipeline (6 variants)
+## Pattern 05: LLMOps Pipeline (10 variants)
 
-End-to-end LLM lifecycle: experiment, evaluate, deploy, monitor. Cloud-specific because each cloud has different MLOps tooling.
+End-to-end LLM lifecycle: experiment, evaluate, deploy, monitor.
 
-| Variant | Stack | Demo |
-|---------|-------|------|
-| [Azure LLMOps](patterns/05-llmops-pipeline/azure-llmops/) | Azure ML + Azure DevOps + AI Foundry | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/azure-llmops/index.html) |
-| [AWS LLMOps](patterns/05-llmops-pipeline/aws-llmops/) | SageMaker + CodePipeline + Bedrock | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/aws-llmops/index.html) |
-| [GCP LLMOps](patterns/05-llmops-pipeline/gcp-llmops/) | Vertex AI + Cloud Build + Model Garden | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/gcp-llmops/index.html) |
-| [Databricks LLMOps](patterns/05-llmops-pipeline/databricks-llmops/) | MLflow + Asset Bundles + Unity Catalog | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/databricks-llmops/index.html) |
-| [Open Source LLMOps](patterns/05-llmops-pipeline/open-source-llmops/) | MLflow + GitHub Actions + RAGAS + ArgoCD | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/open-source-llmops/index.html) |
-| [Hybrid LLMOps](patterns/05-llmops-pipeline/hybrid-llmops/) | Multi-cloud unified pipeline + Tekton | [Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/05-llmops-pipeline/hybrid-llmops/index.html) |
+| Category | Variants |
+|----------|---------|
+| Cloud-specific | [Azure](patterns/05-llmops-pipeline/azure-llmops/), [AWS](patterns/05-llmops-pipeline/aws-llmops/), [GCP](patterns/05-llmops-pipeline/gcp-llmops/), [Databricks](patterns/05-llmops-pipeline/databricks-llmops/) |
+| Self-hosted | [Open Source](patterns/05-llmops-pipeline/open-source-llmops/), [Hybrid](patterns/05-llmops-pipeline/hybrid-llmops/) |
+| Specialized | [Prompt Engineering](patterns/05-llmops-pipeline/prompt-engineering/), [A/B Testing](patterns/05-llmops-pipeline/model-ab-testing/), [Compliance-Gated](patterns/05-llmops-pipeline/compliance-gated/), [Data Pipeline](patterns/05-llmops-pipeline/data-pipeline/) |
 
 ---
 
