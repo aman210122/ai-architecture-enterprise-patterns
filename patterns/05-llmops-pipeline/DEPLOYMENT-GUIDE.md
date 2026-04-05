@@ -1,28 +1,21 @@
 # Deployment Guide: LLMOps Pipeline
-
-## Prerequisites
-Git repo, CI/CD platform (Azure DevOps / GitHub Actions / Cloud Build), Pattern 01 gateway
-
-## Deployment Steps
--e 1. Set up experiment tracking (MLflow / Azure ML / SageMaker)
-2. Define evaluation suite and quality thresholds
-3. Create CI/CD pipeline: build -> test -> evaluate -> deploy
-4. Configure approval gates (auto for staging, manual for production)
-5. Set up canary deployment strategy
-6. Wire monitoring (drift detection, quality regression)
-7. Create rollback runbook
-8. Test full pipeline: commit to production in one flow
-9. Configure GAIF-4 GDR: track deployment quality over time
-
-## Validation Checklist
-- [ ] All variants selected for your use case
-- [ ] Platform mapping confirmed (Azure / AWS / GCP / Databricks / OSS)
-- [ ] GAIF-4 metric thresholds defined
-- [ ] Monitoring and alerting configured
-- [ ] Rollback procedure documented and tested
-- [ ] Compliance review completed (if applicable)
-
-## GAIF-4 Integration
-Every deployment should include GAIF-4 metric collection. See [Embedded Governance](../06-governance-as-architecture/embedded-governance/) for implementation details.
-
-*[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
+## Prerequisites: Pattern 01 (Gateway), CI/CD pipeline, model serving infra
+## Steps
+1. Set up prompt engineering workspace with version control (git-tracked prompts)
+2. Configure model selection benchmarks (quality, cost, latency per task)
+3. Build evaluation harness: golden datasets, regression tests, safety tests, bias tests
+4. Set up red team testing: adversarial inputs, jailbreak attempts, prompt injection
+5. Configure human evaluation workflow: SME review, preference ranking
+6. Deploy prompt registry: versioned prompts with approval gates and ownership
+7. Deploy model registry: versioned models with lineage and deployment targets
+8. Configure artifact packaging: bundle prompt + model + config + guardrails
+9. Set up canary deployment: 5% traffic routing, metric comparison, auto-promote
+10. Configure A/B testing: statistical significance thresholds, minimum sample size
+11. Implement rollback: quality threshold triggers, auto-revert, notification
+12. Deploy quality monitoring: groundedness, relevance, safety on production traffic
+13. Configure drift detection: prompt drift, data drift, topic drift baselines
+14. Set up cost monitoring: token tracking, budget alerts, per-team breakdown
+15. Implement feedback loop: user ratings, implicit signals, integration into eval
+16. Create incident playbooks: hallucination spike, PHI leak, cost runaway, model outage
+17. GAIF-4: T1PR on outputs, CFR on policy, EMR on drift, GDR weekly trending
+*[Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pattern 06 / Policy-as-Code: Standard RAG | AI Architecture Enterprise Patterns</title>
+<title>Pattern 05 / Rollback Strategy: Standard RAG | AI Architecture Enterprise Patterns</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 :root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.12);--border2:rgba(139,149,168,0.2);
@@ -69,7 +69,7 @@ svg text{font-family:'DM Sans',sans-serif}
 <body>
 <div class="wm">Designed by Aman Sharma</div>
 <div class="pg">
-<div class="hdr"><div class="hdr-badge">Pattern 06 / Policy-as-Code</div><div><h1>Governance-as-Architecture</h1><p>Click any component for full details. Run scenarios to watch data flow through the architecture.</p></div></div>
+<div class="hdr"><div class="hdr-badge">Pattern 05 / Rollback Strategy</div><div><h1>LLMOps Pipeline</h1><p>Click any component for full details. Run scenarios to watch data flow through the architecture.</p></div></div>
 
 <div class="sc-bar">
 <button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--ok)"></div>Clean query</button>
@@ -87,60 +87,60 @@ svg text{font-family:'DM Sans',sans-serif}
 <text class="gbar-t" x="22" y="50" fill="#34d399">OBSERVABILITY</text><text class="gbar-t" x="120" y="50" fill="#8b949e">Per-Stage Tracing | Latency | Retrieval Precision | Recall | MRR | NDCG | Groundedness</text>
 
 <text x="550" y="78" text-anchor="middle" fill="#8b949e" style="font-size:9px;font-style:italic;font-family:DM Sans,sans-serif">Click any component box for full architecture details</text>
-<text class="lbl" x="20" y="78" fill="#34d399">&#9679; DEFINE + ASSESS + ENFORCE</text><text class="lbl" x="880" y="78" fill="#8b949e" style="font-weight:400">Policy engine, risk classification, regulatory mapping, enforcement</text>
+<text class="lbl" x="20" y="78" fill="#34d399">&#9679; DEVELOP + TEST + BUILD</text><text class="lbl" x="880" y="78" fill="#8b949e" style="font-weight:400">Prompt engineering, model selection, evaluation, packaging</text>
 
-<rect class="box" id="b-src" x="20" y="86" width="118" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('src')"/><text class="bx-t" x="79" y="107" fill="#34d399">Policy Engine</text><text class="bx-s" x="79" y="119">OPA/Rego rules</text><circle class="sdot" id="d-src" cx="130" cy="94" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-src" x="20" y="86" width="118" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('src')"/><text class="bx-t" x="79" y="107" fill="#34d399">Prompt Eng</text><text class="bx-s" x="79" y="119">Version, template</text><circle class="sdot" id="d-src" cx="130" cy="94" fill="#8b949e" opacity="0.2"/>
 <text x="130" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans;cursor:pointer" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ext" x="162" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('ext')"/><text class="bx-t" x="211" y="107" fill="#34d399">Risk Classify</text><text class="bx-s" x="211" y="119">T1-T4 tiers</text><circle class="sdot" id="d-ext" cx="252" cy="94" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-ext" x="162" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('ext')"/><text class="bx-t" x="211" y="107" fill="#34d399">Model Select</text><text class="bx-s" x="211" y="119">Benchmark, cost</text><circle class="sdot" id="d-ext" cx="252" cy="94" fill="#8b949e" opacity="0.2"/>
 <text x="252" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-proc" x="284" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('proc')"/><text class="bx-t" x="333" y="107" fill="#34d399">Reg Mapping</text><text class="bx-s" x="333" y="119">HIPAA,GDPR,NIST</text><circle class="sdot" id="d-proc" cx="374" cy="94" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-proc" x="284" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('proc')"/><text class="bx-t" x="333" y="107" fill="#34d399">Fine-Tune</text><text class="bx-s" x="333" y="119">Data, train, val</text><circle class="sdot" id="d-proc" cx="374" cy="94" fill="#8b949e" opacity="0.2"/>
 <text x="374" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-chunk" x="406" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('chunk')"/><text class="bx-t" x="455" y="107" fill="#34d399">Risk Assess</text><text class="bx-s" x="455" y="119">25Q, 7 domains</text><circle class="sdot" id="d-chunk" cx="496" cy="94" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-chunk" x="406" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('chunk')"/><text class="bx-t" x="455" y="107" fill="#34d399">Eval Harness</text><text class="bx-s" x="455" y="119">Auto test suite</text><circle class="sdot" id="d-chunk" cx="496" cy="94" fill="#8b949e" opacity="0.2"/>
 <text x="496" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-emb" x="528" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('emb')"/><text class="bx-t" x="577" y="107" fill="#34d399">Model Cards</text><text class="bx-s" x="577" y="119">Standardized doc</text><circle class="sdot" id="d-emb" cx="618" cy="94" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-emb" x="528" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('emb')"/><text class="bx-t" x="577" y="107" fill="#34d399">Red Team</text><text class="bx-s" x="577" y="119">Adversarial test</text><circle class="sdot" id="d-emb" cx="618" cy="94" fill="#8b949e" opacity="0.2"/>
 <text x="618" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-comp" x="650" y="86" width="108" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('comp')"/><text class="bx-t" x="704" y="107" fill="#fbbf24">Impact Assess</text><text class="bx-s" x="704" y="119">DPIA, fairness</text><circle class="sdot" id="d-comp" cx="750" cy="94" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-comp" x="650" y="86" width="108" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('comp')"/><text class="bx-t" x="704" y="107" fill="#fbbf24">Human Eval</text><text class="bx-s" x="704" y="119">SME review</text><circle class="sdot" id="d-comp" cx="750" cy="94" fill="#8b949e" opacity="0.2"/>
 <text x="750" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-qual" x="782" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('qual')"/><text class="bx-t" x="831" y="107" fill="#34d399">Change Mgmt</text><text class="bx-s" x="831" y="119">Runtime enforce</text><circle class="sdot" id="d-qual" cx="872" cy="94" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-qual" x="782" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('qual')"/><text class="bx-t" x="831" y="107" fill="#34d399">Package</text><text class="bx-s" x="831" y="119">Prompt+model+cfg</text><circle class="sdot" id="d-qual" cx="872" cy="94" fill="#8b949e" opacity="0.2"/>
 <text x="872" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
 
 <line class="arr" id="ai1" x1="138" y1="111" x2="162" y2="111"/><line class="arr" id="ai2" x1="260" y1="111" x2="284" y2="111"/><line class="arr" id="ai3" x1="382" y1="111" x2="406" y2="111"/><line class="arr" id="ai4" x1="504" y1="111" x2="528" y2="111"/><line class="arr" id="ai5" x1="626" y1="111" x2="650" y2="111"/><line class="arr" id="ai6" x1="758" y1="111" x2="782" y2="111"/>
 <path class="arr" id="ai7" d="M831 136 L831 165 L550 165 L550 190"/>
 
 <rect class="box" id="b-vs" x="410" y="190" width="280" height="68" fill="#1c2333" stroke="#c084fc" stroke-width="2" rx="10" ry="10" onclick="detail('vs')"/>
-<text class="bx-t" x="550" y="214" fill="#c084fc" style="font-size:11px">GAIF-4 Measurement Hub</text>
-<text class="bx-s" x="550" y="228">T1PR + CFR + EMR + GDR measured across all AI systems</text>
-<text class="bx-s" x="550" y="242" fill="#8b949e">Continuous measurement + threshold alerting + trend analysis</text>
+<text class="bx-t" x="550" y="214" fill="#c084fc" style="font-size:11px">Model + Prompt Registry</text>
+<text class="bx-s" x="550" y="228">Versioned prompts + models + configs + guardrails</text>
+<text class="bx-s" x="550" y="242" fill="#8b949e">Approval gates + lineage + deployment targets</text>
 <text x="682" y="252" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
 
 <path class="arr" id="aq-vs" d="M550 258 L550 282 L435 282 L435 312"/>
 
-<text class="lbl" x="20" y="305" fill="#60a5fa">&#9679; MONITOR + REPORT + RESPOND</text><text class="lbl" x="880" y="305" fill="#8b949e" style="font-weight:400">Bias monitoring, audit trail, incident governance, continuous assurance</text>
+<text class="lbl" x="20" y="305" fill="#60a5fa">&#9679; DEPLOY + MONITOR + OPERATE</text><text class="lbl" x="880" y="305" fill="#8b949e" style="font-weight:400">Canary rollout, quality monitoring, drift, feedback, incident</text>
 
-<rect class="box" id="b-qin" x="20" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('qin')"/><text class="bx-t" x="68" y="333" fill="#60a5fa">Bias Monitor</text><text class="bx-s" x="68" y="345">Fairness metrics</text><circle class="sdot" id="d-qin" cx="108" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-qin" x="20" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('qin')"/><text class="bx-t" x="68" y="333" fill="#60a5fa">Canary</text><text class="bx-s" x="68" y="345">5% traffic test</text><circle class="sdot" id="d-qin" cx="108" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="108" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-cls" x="138" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('cls')"/><text class="bx-t" x="181" y="333" fill="#60a5fa">Explainability</text><text class="bx-s" x="181" y="345">Feature attrib</text><circle class="sdot" id="d-cls" cx="216" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-cls" x="138" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('cls')"/><text class="bx-t" x="181" y="333" fill="#60a5fa">A/B Test</text><text class="bx-s" x="181" y="345">Compare versions</text><circle class="sdot" id="d-cls" cx="216" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="216" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-enh" x="246" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('enh')"/><text class="bx-t" x="289" y="333" fill="#60a5fa">Consent Mgmt</text><text class="bx-s" x="289" y="345">Opt-in/out, DSR</text><circle class="sdot" id="d-enh" cx="324" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-enh" x="246" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('enh')"/><text class="bx-t" x="289" y="333" fill="#60a5fa">Blue/Green</text><text class="bx-s" x="289" y="345">Instant cutover</text><circle class="sdot" id="d-enh" cx="324" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="324" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ret" x="354" y="312" width="106" height="50" fill="#1c2333" stroke="#c084fc" onclick="detail('ret')"/><text class="bx-t" x="407" y="333" fill="#c084fc">Dashboard</text><text class="bx-s" x="407" y="345">Real-time view</text><circle class="sdot" id="d-ret" cx="452" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-ret" x="354" y="312" width="106" height="50" fill="#1c2333" stroke="#c084fc" onclick="detail('ret')"/><text class="bx-t" x="407" y="333" fill="#c084fc">Rollback</text><text class="bx-s" x="407" y="345">Auto revert</text><circle class="sdot" id="d-ret" cx="452" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="452" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-rer" x="482" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('rer')"/><text class="bx-t" x="525" y="333" fill="#60a5fa">Audit Trail</text><text class="bx-s" x="525" y="345">Immutable log</text><circle class="sdot" id="d-rer" cx="560" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-rer" x="482" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('rer')"/><text class="bx-t" x="525" y="333" fill="#60a5fa">Quality Mon</text><text class="bx-s" x="525" y="345">Ground, safety</text><circle class="sdot" id="d-rer" cx="560" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="560" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ctx" x="590" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('ctx')"/><text class="bx-t" x="638" y="333" fill="#60a5fa">Reports</text><text class="bx-s" x="638" y="345">Board, regulator</text><circle class="sdot" id="d-ctx" cx="678" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-ctx" x="590" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('ctx')"/><text class="bx-t" x="638" y="333" fill="#60a5fa">Drift Detect</text><text class="bx-s" x="638" y="345">Prompt+data drift</text><circle class="sdot" id="d-ctx" cx="678" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="678" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-gen" x="708" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('gen')"/><text class="bx-t" x="756" y="333" fill="#60a5fa">Incident Gov</text><text class="bx-s" x="756" y="345">Bias, PHI, fail</text><circle class="sdot" id="d-gen" cx="796" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-gen" x="708" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('gen')"/><text class="bx-t" x="756" y="333" fill="#60a5fa">Cost Monitor</text><text class="bx-s" x="756" y="345">Token, budget</text><circle class="sdot" id="d-gen" cx="796" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="796" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-grd" x="826" y="312" width="106" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('grd')"/><text class="bx-t" x="879" y="333" fill="#fbbf24">Change Mgmt</text><text class="bx-s" x="879" y="345">Approval flow</text><circle class="sdot" id="d-grd" cx="924" cy="320" fill="#8b949e" opacity="0.2"/>
+<rect class="box" id="b-grd" x="826" y="312" width="106" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('grd')"/><text class="bx-t" x="879" y="333" fill="#fbbf24">Latency Mon</text><text class="bx-s" x="879" y="345">P50/P95/P99</text><circle class="sdot" id="d-grd" cx="924" cy="320" fill="#8b949e" opacity="0.2"/>
 <text x="924" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-rsp" x="954" y="312" width="86" height="50" fill="#1c2333" stroke="#34d399" stroke-dasharray="4,2"/><text class="bx-t" x="997" y="333" fill="#34d399">Response</text><text class="bx-s" x="997" y="345">Assurance</text>
+<rect class="box" id="b-rsp" x="954" y="312" width="86" height="50" fill="#1c2333" stroke="#34d399" stroke-dasharray="4,2"/><text class="bx-t" x="997" y="333" fill="#34d399">Response</text><text class="bx-s" x="997" y="345">Operate</text>
 
 <line class="arr" id="aq1" x1="116" y1="337" x2="138" y2="337"/><line class="arr" id="aq2" x1="224" y1="337" x2="246" y2="337"/><line class="arr" id="aq3" x1="332" y1="337" x2="354" y2="337"/><line class="arr" id="aq4" x1="460" y1="337" x2="482" y2="337"/><line class="arr" id="aq5" x1="568" y1="337" x2="590" y2="337"/><line class="arr" id="aq6" x1="686" y1="337" x2="708" y2="337"/><line class="arr" id="aq7" x1="804" y1="337" x2="826" y2="337"/><line class="arr" id="aq8" x1="932" y1="337" x2="954" y2="337"/>
 
 <path class="arr" id="a-cache" d="M181 362 Q181 392 550 392 Q879 392 879 362" stroke-dasharray="4,3" opacity="0.08"/>
-<text x="530" y="405" class="bx-s" fill="#c084fc" opacity="0.25" text-anchor="middle" id="cache-lbl">Continuous assurance (ongoing verification)</text>
+<text x="530" y="405" class="bx-s" fill="#c084fc" opacity="0.25" text-anchor="middle" id="cache-lbl">Incident response + model deprecation lifecycle (user signals improve prompts)</text>
 <path class="arr" id="a-fb" d="M997 362 Q997 415 550 425 Q68 435 68 370" stroke-dasharray="4,3" opacity="0.08"/>
-<text x="530" y="442" class="bx-s" fill="#34d399" opacity="0.2" text-anchor="middle" id="fb-lbl">Governance maturity improvement cycle</text>
+<text x="530" y="442" class="bx-s" fill="#34d399" opacity="0.2" text-anchor="middle" id="fb-lbl">Incident response + model deprecation lifecycle</text>
 
 <rect class="gbar" x="10" y="458" width="1080" height="20" fill="rgba(56,189,248,0.07)" stroke="rgba(56,189,248,0.15)"/>
 <text class="gbar-t" x="22" y="472" fill="#38bdf8">OPERATIONS</text><text class="gbar-t" x="115" y="472" fill="#8b949e">Cache | Rate Limit | Circuit Breaker | Fallback | Error Handling | Index Versioning</text>
@@ -160,12 +160,12 @@ svg text{font-family:'DM Sans',sans-serif}
 
 <div class="brow">
 <div class="mets">
-<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-t" style="color:#34d399">0.02</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:2%;background:#34d399"></div></div><div class="met-n">Policy violations detected</div></div>
-<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-c" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:#34d399"></div></div><div class="met-n">Governance framework breaches</div></div>
-<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-e" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:1%;background:#34d399"></div></div><div class="met-n">Undetected bias or harm</div></div>
-<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:rgba(52,211,153,0.12);color:#34d399">OK</span></div><div class="met-v" id="m-g" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:1%;background:#34d399"></div></div><div class="met-n">Governance decay rate (GDR)</div></div>
+<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-t" style="color:#34d399">0.02</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:2%;background:#34d399"></div></div><div class="met-n">Output quality degradation</div></div>
+<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-c" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:#34d399"></div></div><div class="met-n">Policy violations in outputs</div></div>
+<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-e" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:1%;background:#34d399"></div></div><div class="met-n">Drift from baseline behavior</div></div>
+<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:rgba(52,211,153,0.12);color:#34d399">OK</span></div><div class="met-v" id="m-g" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:1%;background:#34d399"></div></div><div class="met-n">Governance decay over time</div></div>
 </div>
-<div class="log"><div class="log-h"><span>Governance Event Log</span><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
+<div class="log"><div class="log-h"><span>LLMOps Pipeline Log</span><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
 </div>
 <div class="footer"><a href="https://github.com/aman210122/ai-architecture-enterprise-patterns">GitHub</a> | <a href="https://linkedin.com/in/amansharmaarchitect">Aman Sharma</a> | <a href="https://github.com/aman210122/gaif-governance-observatory">GAIF Observatory</a></div>
 </div>
@@ -179,7 +179,7 @@ src:{title:'Data Sources',tag:'INGESTION',tagColor:'#34d399',sections:[
 {title:'Configuration',items:[{t:'Connector: SharePoint, S3, GCS, FHIR, Confluence, databases',c:'ok'},{t:'Sync: incremental (CDC via Debezium) + full rebuild',c:'ok'},{t:'Schedule: cron (hourly) or event-driven (webhook)',c:'ok'},{t:'Auth: service principal, managed identity, API key (rotated)',c:'ok'},{t:'Freshness SLA: < 2h for clinical, < 24h for policies',c:'warn'}]},
 {title:'Platform Mapping',items:[{t:'Azure: Data Factory, Blob Storage connectors',c:'plat'},{t:'AWS: Glue, S3, Lambda triggers',c:'plat'},{t:'GCP: Dataflow, Cloud Storage, Pub/Sub triggers',c:'plat'},{t:'Databricks: Auto Loader, Unity Catalog volumes',c:'plat'},{t:'OSS: Airbyte, custom Python connectors',c:'plat'}]}]},
 ext:{title:'Document Extraction',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Parses T1-T4 tiers, PPTX, Markdown, plain text',c:'info'},{t:'Preserves document structure: headings, lists, tables',c:'info'},{t:'Extracts metadata: author, date, title, classification',c:'info'},{t:'Handles encoding normalization and language detection',c:'info'}]},
+{title:'What It Does',items:[{t:'Parses Benchmark, cost, PPTX, Markdown, plain text',c:'info'},{t:'Preserves document structure: headings, lists, tables',c:'info'},{t:'Extracts metadata: author, date, title, classification',c:'info'},{t:'Handles encoding normalization and language detection',c:'info'}]},
 {title:'Configuration',items:[{t:'PDF: PyMuPDF / pdfplumber (text-based), Azure DI (scanned)',c:'ok'},{t:'DOCX: python-docx with style mapping',c:'ok'},{t:'HTML: Beautiful Soup with boilerplate removal',c:'ok'},{t:'Tables: preserve as markdown tables with headers',c:'ok'},{t:'Max file size: 50MB | Timeout: 60s per document',c:'warn'}]},
 {title:'Anti-Patterns',items:[{t:'Stripping all formatting (loses document structure)',c:'warn'},{t:'Ignoring table data (tables contain critical info)',c:'warn'},{t:'No language detection (mixing languages in one index)',c:'warn'},{t:'No metadata preservation (lose audit trail)',c:'warn'}]}]},
 proc:{title:'Document Processing',tag:'INGESTION',tagColor:'#34d399',sections:[
@@ -202,7 +202,7 @@ qual:{title:'Quality Validation',tag:'INGESTION',tagColor:'#34d399',sections:[
 {title:'What It Does',items:[{t:'Scores each chunk for quality before index insertion',c:'info'},{t:'Detects and removes duplicate/near-duplicate chunks',c:'info'},{t:'Analyzes coverage: are all source sections represented?',c:'info'},{t:'Rejects malformed chunks (too short, encoding errors, empty)',c:'info'}]},
 {title:'Configuration',items:[{t:'Min quality score: 0.70 (reject below)',c:'ok'},{t:'Dedup: MinHash LSH (similarity > 0.95 = duplicate)',c:'ok'},{t:'Min chunk length: 50 tokens (skip fragments)',c:'ok'},{t:'Max chunk length: 2048 tokens (split if exceeded)',c:'ok'},{t:'Coverage report: flag missing sections per source document',c:'ok'}]},
 {title:'GAIF-4 Relevance',items:[{t:'T1PR: bad chunks in = contaminated retrievals out',c:'warn'},{t:'GDR: quality should be measured per ingestion batch over time',c:'warn'}]}]},
-vs:{title:'GAIF-4 Measurement Hub',tag:'VECTOR STORE',tagColor:'#c084fc',sections:[
+vs:{title:'Model + Prompt Registry',tag:'VECTOR STORE',tagColor:'#c084fc',sections:[
 {title:'What It Does',items:[{t:'Stores vector embeddings with compliance metadata',c:'info'},{t:'Enforces access control on every query (security trimming)',c:'info'},{t:'Supports hybrid search: dense vectors + sparse BM25',c:'info'},{t:'Versioned index: rollback to previous version on issues',c:'info'},{t:'Monitors data freshness: alert if stale > SLA threshold',c:'info'}]},
 {title:'Configuration',items:[{t:'Documents: 24.3K | Chunks: 186K | Dimensions: 3072',c:'ok'},{t:'Distance metric: cosine similarity',c:'ok'},{t:'Index version: v3.2 | Previous: v3.1 (rollback ready)',c:'ok'},{t:'Freshness SLA: < 2h | Current: 1.8h',c:'ok'},{t:'Access control model: attribute-based (role + department + clearance)',c:'ok'},{t:'Backup: daily snapshot + cross-region replication',c:'ok'}]},
 {title:'Platform Mapping',items:[{t:'Azure: Azure AI Search (hybrid) + RBAC filters',c:'plat'},{t:'AWS: OpenSearch Serverless + fine-grained access',c:'plat'},{t:'GCP: Vertex AI Search + IAM conditions',c:'plat'},{t:'Databricks: Vector Search + Unity Catalog ACLs',c:'plat'},{t:'OSS: Qdrant + custom ACL middleware / Weaviate + RBAC',c:'plat'}]}]},

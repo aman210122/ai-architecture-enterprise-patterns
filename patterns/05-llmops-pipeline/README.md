@@ -1,31 +1,27 @@
 # Pattern 05: LLMOps Pipeline
+**Full LLM lifecycle: develop, test, build, deploy, monitor, operate. 12 variants. SVG architecture diagram with click-to-detail panels.**
 
-**End-to-end LLM lifecycle. 12 variants for every cloud, platform, and specialized pipeline.**
-
-## Which Variant Should You Use?
-
-| Your situation | Variant |
+| Lifecycle Area | Variant |
 |---------------|---------|
-| Azure ecosystem | [Azure LLMOps](azure-llmops/) |
-| AWS ecosystem | [AWS LLMOps](aws-llmops/) |
-| Google Cloud | [GCP LLMOps](gcp-llmops/) |
-| Databricks | [Databricks LLMOps](databricks-llmops/) |
-| Self-hosted, no vendor | [Open Source](open-source-llmops/) |
-| Multiple clouds | [Hybrid LLMOps](hybrid-llmops/) |
-| Prompt-only iteration | [Prompt Engineering](prompt-engineering/) |
-| Compare models with real traffic | [Model A/B Testing](model-ab-testing/) |
-| Regulatory approval required | [Compliance-Gated](compliance-gated/) |
-| Training data lifecycle | [Data Pipeline](data-pipeline/) |
-| Zero-risk production validation | [Shadow Deployment](shadow-deployment/) |
-| AI failure runbooks | [Incident Response](incident-response/) |
+| Prompt versioning | [Prompt Lifecycle](prompt-lifecycle/) |
+| Versioned models | [Model Registry](model-registry/) |
+| Automated testing | [Evaluation Harness](evaluation-harness/) |
+| Version comparison | [A/B Testing](ab-testing/) |
+| Gradual rollout | [Canary Deployment](canary-deployment/) |
+| Auto revert | [Rollback Strategy](rollback-strategy/) |
+| Behavior change | [Drift Detection](drift-detection/) |
+| User signals | [Feedback Integration](feedback-integration/) |
+| Token budgets | [Cost Optimization](cost-optimization/) |
+| Scaling rules | [Capacity Planning](capacity-planning/) |
+| LLM-specific playbooks | [Incident Response](incident-response/) |
+| Audit evidence | [Compliance Audit](compliance-audit/) |
 
-## GAIF-4 Metrics for LLMOps
+## GAIF-4 for LLMOps
+| Metric | Measured At | Safe | Critical |
+|--------|-----------|------|----------|
+| T1PR | Output quality monitoring | < 0.05 | > 0.15 |
+| CFR | Policy compliance checks | 0.00 | > 0.01 |
+| EMR | Drift from baseline | < 0.05 | > 0.15 |
+| GDR | All metrics trending | < 0.03 | > 0.05 |
 
-| Metric | LLMOps Application |
-|--------|-------------------|
-| T1PR | Contaminated models passing deployment gates |
-| CFR | Deployments violating compliance policies |
-| EMR | Quality issues only visible in production |
-| GDR | Deployment quality gates weakening over time |
-
-*Governance: [GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
+*[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

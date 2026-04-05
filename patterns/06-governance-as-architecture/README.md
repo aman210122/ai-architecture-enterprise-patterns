@@ -1,34 +1,33 @@
 # Pattern 06: Governance-as-Architecture
+**Governance embedded in architecture, not in PDFs. 15 variants. Define, assess, enforce, measure, monitor, report, respond. SVG diagram with click-to-detail panels.**
 
-**Governance built into architecture, not bolted on. 15 variants. The largest pattern, directly integrates GAIF-4.**
+| Governance Area | Variant |
+|----------------|---------|
+| Executable policies | [Policy-as-Code](policy-as-code/) |
+| 4-tier risk system | [Risk Classification](risk-classification/) |
+| Standardized docs | [Model Cards](model-cards/) |
+| Source-to-output tracking | [Data Lineage](data-lineage/) |
+| Fairness measurement | [Bias Monitoring](bias-monitoring/) |
+| Decision explanations | [Explainability](explainability/) |
+| User opt-in/out | [Consent Management](consent-management/) |
+| Multi-regulation mapping | [Regulatory Mapping](regulatory-mapping/) |
+| Evidence collection | [Audit Automation](audit-automation/) |
+| Real-time compliance view | [Governance Dashboard](governance-dashboard/) |
+| Maturity level 1-5 | [Maturity Assessment](maturity-assessment/) |
+| Board/regulator reports | [Stakeholder Reporting](stakeholder-reporting/) |
+| Governance incidents | [Incident Governance](incident-governance/) |
+| Governed change process | [Change Management](change-management/) |
+| Ongoing verification | [Continuous Assurance](continuous-assurance/) |
 
-## Which Variant Should You Use?
+## GAIF-4 for Governance
+| Metric | Application | Safe | Critical |
+|--------|-----------|------|----------|
+| T1PR | Policy violations detected | < 0.05 | > 0.15 |
+| CFR | Framework breaches | 0.00 | > 0.01 |
+| EMR | Undetected bias or harm | < 0.05 | > 0.15 |
+| GDR | Governance decay rate | < 0.03 | > 0.05 |
 
-| Your situation | Variant |
-|---------------|---------|
-| Quantitative metrics in every stage | [Embedded Governance](embedded-governance/) |
-| Real-time monitoring UI | [Governance Dashboard](governance-dashboard/) |
-| Detect controls weakening | [Decay Detection](decay-detection/) |
-| Governance rules as testable code | [Policy-as-Code](policy-as-code/) |
-| Continuous, not quarterly audits | [Continuous Compliance](continuous-compliance/) |
-| Immutable audit trail | [Audit Trail](audit-trail/) |
-| Different controls per risk tier | [Risk-Tiered](risk-tiered/) |
-| Central standards, BU autonomy | [Governance Federation](governance-federation/) |
-| Assess maturity, plan roadmap | [Governance Maturity Model](governance-maturity/) |
-| Catch issues during development | [Shift-Left Governance](shift-left-governance/) |
-| Model docs as deployment gate | [Model Cards](model-cards/) |
-| Serve explanations with outputs | [XAI Explainability](xai-explainability/) |
-| Ongoing bias measurement | [Bias & Fairness](bias-fairness/) |
-| GDPR consent and data rights | [Consent & Data Rights](consent-data-rights/) |
-| Test governance rules themselves | [Governance Testing](governance-testing/) |
+## Regulatory Coverage
+HIPAA | GDPR | EU AI Act | NIST AI RMF | WHO AI Ethics | CHAI Blueprint | BSC 7-Phase Lifecycle
 
-## GAIF-4 Metrics
-
-| Metric | Safe | Critical | What It Measures |
-|--------|------|----------|-----------------|
-| T1PR | < 0.05 | > 0.15 | Contaminated outputs passing filters |
-| CFR | 0.00 | > 0.01 | Policy violations in completed requests |
-| EMR | 0.00 | > 0.05 | Dangerous content at pipeline level |
-| GDR | < 0.03 | > 0.05 | Governance effectiveness degrading |
-
-*Governance: [GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
+*[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
