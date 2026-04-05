@@ -5,10 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Gateway](https://img.shields.io/badge/AI_Gateway-12-blue.svg)](#pattern-01-unified-ai-gateway-12-variants)
 [![RAG](https://img.shields.io/badge/RAG-10-green.svg)](#pattern-02-rag-for-regulated-data-10-variants)
-[![Agents](https://img.shields.io/badge/Multi--Agent-10-orange.svg)](#pattern-03-multi-agent-pipeline-with-safety-gates-10-variants)
-[![Tools](https://img.shields.io/badge/Tool_Gov-8-purple.svg)](#pattern-04-agentic-ai-with-tool-governance-8-variants)
+[![Agents](https://img.shields.io/badge/Multi--Agent-10-orange.svg)](#pattern-03-multi-agent-safety-gates-10-variants)
+[![Tools](https://img.shields.io/badge/Tool_Gov-8-purple.svg)](#pattern-04-tool-governance-8-variants)
 [![LLMOps](https://img.shields.io/badge/LLMOps-10-red.svg)](#pattern-05-llmops-pipeline-10-variants)
-[![Interactive](https://img.shields.io/badge/50_visualizations-interactive-purple.svg)](#)
+[![Governance](https://img.shields.io/badge/Governance-14-teal.svg)](#pattern-06-governance-as-architecture-14-variants)
+[![Interactive](https://img.shields.io/badge/64_visualizations-interactive-purple.svg)](#)
 
 ---
 
@@ -20,15 +21,11 @@ This repository collects architecture patterns designed and validated across 18+
 
 **Industries:** Healthcare (HIPAA), Financial Services (SOX, PCI-DSS), Insurance, Government (FedRAMP), Legal, and any organization handling sensitive data.
 
-### GitHub Pages
-
-All 50 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
+### GitHub Pages: All 64 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
 
 ---
 
 ## Pattern 01: Unified AI Gateway (12 variants)
-
-Route all LLM and ML traffic through a single governance-aware control plane.
 
 | Category | Variants |
 |----------|---------|
@@ -39,16 +36,12 @@ Route all LLM and ML traffic through a single governance-aware control plane.
 
 ## Pattern 02: RAG for Regulated Data (10 variants)
 
-Retrieval-augmented generation with compliance boundaries. [Platform mapping](patterns/02-rag-regulated-data/).
-
 | Category | Variants |
 |----------|---------|
 | Core | [Standard](patterns/02-rag-regulated-data/standard-rag/), [GraphRAG](patterns/02-rag-regulated-data/graph-rag/), [Agentic](patterns/02-rag-regulated-data/agentic-rag/), [Sensitive](patterns/02-rag-regulated-data/sensitive-data-rag/) |
 | Specialized | [Conversational](patterns/02-rag-regulated-data/conversational-rag/), [SQL+Vector](patterns/02-rag-regulated-data/hybrid-sql-vector-rag/), [Multimodal](patterns/02-rag-regulated-data/multimodal-rag/), [Multi-Source](patterns/02-rag-regulated-data/multi-source-rag/), [Real-Time](patterns/02-rag-regulated-data/realtime-rag/), [Evaluation](patterns/02-rag-regulated-data/evaluation-rag/) |
 
-## Pattern 03: Multi-Agent Pipeline with Safety Gates (10 variants)
-
-Chain specialized LLM agents with safety checkpoints. [Platform mapping](patterns/03-multi-agent-safety-gates/).
+## Pattern 03: Multi-Agent Safety Gates (10 variants)
 
 | Category | Variants |
 |----------|---------|
@@ -56,9 +49,7 @@ Chain specialized LLM agents with safety checkpoints. [Platform mapping](pattern
 | Decision | [Consensus](patterns/03-multi-agent-safety-gates/consensus/), [Adversarial](patterns/03-multi-agent-safety-gates/adversarial-red-blue/), [Debate](patterns/03-multi-agent-safety-gates/debate/) |
 | Advanced | [Reflection](patterns/03-multi-agent-safety-gates/reflection-loop/), [Swarm](patterns/03-multi-agent-safety-gates/swarm/), [Monitor](patterns/03-multi-agent-safety-gates/parallel-monitor/) |
 
-## Pattern 04: Agentic AI with Tool Governance (8 variants)
-
-Governance on what agents can DO. [Platform mapping](patterns/04-agentic-tool-governance/).
+## Pattern 04: Tool Governance (8 variants)
 
 | Category | Variants |
 |----------|---------|
@@ -68,13 +59,24 @@ Governance on what agents can DO. [Platform mapping](patterns/04-agentic-tool-go
 
 ## Pattern 05: LLMOps Pipeline (10 variants)
 
-End-to-end LLM lifecycle: experiment, evaluate, deploy, monitor.
-
 | Category | Variants |
 |----------|---------|
 | Cloud-specific | [Azure](patterns/05-llmops-pipeline/azure-llmops/), [AWS](patterns/05-llmops-pipeline/aws-llmops/), [GCP](patterns/05-llmops-pipeline/gcp-llmops/), [Databricks](patterns/05-llmops-pipeline/databricks-llmops/) |
 | Self-hosted | [Open Source](patterns/05-llmops-pipeline/open-source-llmops/), [Hybrid](patterns/05-llmops-pipeline/hybrid-llmops/) |
 | Specialized | [Prompt Engineering](patterns/05-llmops-pipeline/prompt-engineering/), [A/B Testing](patterns/05-llmops-pipeline/model-ab-testing/), [Compliance-Gated](patterns/05-llmops-pipeline/compliance-gated/), [Data Pipeline](patterns/05-llmops-pipeline/data-pipeline/) |
+
+## Pattern 06: Governance-as-Architecture (14 variants)
+
+Governance built into the architecture, not bolted on. Integrates [GAIF-4](https://github.com/aman210122/gaif-governance-observatory) metrics.
+
+| Category | Variants |
+|----------|---------|
+| Measurement | [Embedded](patterns/06-governance-as-architecture/embedded-governance/), [Dashboard](patterns/06-governance-as-architecture/governance-dashboard/), [Decay Detection](patterns/06-governance-as-architecture/decay-detection/) |
+| Automation | [Policy-as-Code](patterns/06-governance-as-architecture/policy-as-code/), [Continuous Compliance](patterns/06-governance-as-architecture/continuous-compliance/) |
+| Enterprise | [Audit Trail](patterns/06-governance-as-architecture/audit-trail/), [Risk-Tiered](patterns/06-governance-as-architecture/risk-tiered/), [Federation](patterns/06-governance-as-architecture/governance-federation/) |
+| Development | [Shift-Left](patterns/06-governance-as-architecture/shift-left-governance/), [Model Cards](patterns/06-governance-as-architecture/model-cards/) |
+| Responsible AI | [XAI Explainability](patterns/06-governance-as-architecture/xai-explainability/), [Bias & Fairness](patterns/06-governance-as-architecture/bias-fairness/), [Consent & Data Rights](patterns/06-governance-as-architecture/consent-data-rights/) |
+| Meta-governance | [Governance Testing](patterns/06-governance-as-architecture/governance-testing/) |
 
 ---
 
@@ -82,8 +84,7 @@ End-to-end LLM lifecycle: experiment, evaluate, deploy, monitor.
 
 | # | Pattern | Variants | Status |
 |---|---------|----------|--------|
-| 06 | Governance-as-Architecture | Embedded, Dashboard, Policy-as-Code, Decay | Planned |
-| 07 | Contamination-Resistant Pipeline | Isolation, Validation, Canary, Rollback | Planned |
+| 07 | Contamination-Resistant Pipeline | Isolation, Validation, Canary, Rollback, Percolation, Redundant, Sanitization, Immune System | Planned |
 | 08 | Compliance-Aware Data Routing | Azure, AWS, GCP, Multi-Cloud, On-Prem | Planned |
 | 09 | AI Evaluation & Red Teaming | Automated, RAGAS, LLM-as-Judge, Human, Safety | Planned |
 | 10 | FinOps for AI | Azure, AWS, GCP, Multi-Cloud, Token-Level | Planned |
