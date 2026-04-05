@@ -9,8 +9,8 @@
 [![Tools](https://img.shields.io/badge/Tool_Gov-8-purple.svg)](#pattern-04-tool-governance-8-variants)
 [![LLMOps](https://img.shields.io/badge/LLMOps-10-red.svg)](#pattern-05-llmops-pipeline-10-variants)
 [![Governance](https://img.shields.io/badge/Governance-14-teal.svg)](#pattern-06-governance-as-architecture-14-variants)
-[![Contamination](https://img.shields.io/badge/Contamination-8-orange.svg)](#pattern-07-contamination-resistant-pipeline-8-variants)
-[![Interactive](https://img.shields.io/badge/72_visualizations-interactive-purple.svg)](#)
+[![Contamination](https://img.shields.io/badge/Contamination-12-orange.svg)](#pattern-07-contamination-resistant-pipeline-12-variants)
+[![Interactive](https://img.shields.io/badge/76_visualizations-interactive-purple.svg)](#)
 
 ---
 
@@ -20,7 +20,7 @@ Most AI architecture guides show you how to build a chatbot. They skip the hard 
 
 **Industries:** Healthcare (HIPAA), Financial Services (SOX, PCI-DSS), Insurance, Government (FedRAMP), Legal, and any organization handling sensitive data.
 
-### GitHub Pages: All 72 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
+### GitHub Pages: All 76 interactive demos live at `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
 
 ---
 
@@ -73,17 +73,18 @@ Most AI architecture guides show you how to build a chatbot. They skip the hard 
 | Enterprise | [Audit Trail](patterns/06-governance-as-architecture/audit-trail/), [Risk-Tiered](patterns/06-governance-as-architecture/risk-tiered/), [Federation](patterns/06-governance-as-architecture/governance-federation/) |
 | Development | [Shift-Left](patterns/06-governance-as-architecture/shift-left-governance/), [Model Cards](patterns/06-governance-as-architecture/model-cards/) |
 | Responsible AI | [XAI](patterns/06-governance-as-architecture/xai-explainability/), [Bias & Fairness](patterns/06-governance-as-architecture/bias-fairness/), [Consent](patterns/06-governance-as-architecture/consent-data-rights/) |
-| Meta-governance | [Governance Testing](patterns/06-governance-as-architecture/governance-testing/) |
+| Meta | [Governance Testing](patterns/06-governance-as-architecture/governance-testing/) |
 
-## Pattern 07: Contamination-Resistant Pipeline (8 variants)
+## Pattern 07: Contamination-Resistant Pipeline (12 variants)
 
-Prevent, detect, and recover from error propagation. Research-validated from [EMG](https://doi.org/10.5281/zenodo.19411743) and ContamPerc papers.
+Research-validated from [EMG](https://doi.org/10.5281/zenodo.19411743) and ContamPerc papers.
 
 | Category | Variants |
 |----------|---------|
 | Prevention | [Isolation Barriers](patterns/07-contamination-resistant-pipeline/isolation-barriers/), [Input Sanitization](patterns/07-contamination-resistant-pipeline/input-sanitization/) |
-| Detection | [Validation Checkpoints](patterns/07-contamination-resistant-pipeline/validation-checkpoints/), [Canary Pipeline](patterns/07-contamination-resistant-pipeline/canary-pipeline/), [Contamination Percolation](patterns/07-contamination-resistant-pipeline/contamination-percolation/), [Redundant Generation](patterns/07-contamination-resistant-pipeline/redundant-generation/) |
-| Recovery | [Rollback-Capable](patterns/07-contamination-resistant-pipeline/rollback-capable/), [Adaptive Immune System](patterns/07-contamination-resistant-pipeline/immune-system/) |
+| Detection | [Validation](patterns/07-contamination-resistant-pipeline/validation-checkpoints/), [Canary](patterns/07-contamination-resistant-pipeline/canary-pipeline/), [Percolation](patterns/07-contamination-resistant-pipeline/contamination-percolation/), [Redundant](patterns/07-contamination-resistant-pipeline/redundant-generation/) |
+| Response | [Quarantine](patterns/07-contamination-resistant-pipeline/output-quarantine/), [Graceful Degradation](patterns/07-contamination-resistant-pipeline/graceful-degradation/) |
+| Recovery | [Rollback](patterns/07-contamination-resistant-pipeline/rollback-capable/), [Lineage](patterns/07-contamination-resistant-pipeline/contamination-lineage/), [Cross-Pipeline](patterns/07-contamination-resistant-pipeline/cross-pipeline/), [Immune System](patterns/07-contamination-resistant-pipeline/immune-system/) |
 
 ---
 
@@ -91,9 +92,9 @@ Prevent, detect, and recover from error propagation. Research-validated from [EM
 
 | # | Pattern | Variants | Status |
 |---|---------|----------|--------|
-| 08 | Compliance-Aware Data Routing | Azure, AWS, GCP, Multi-Cloud, On-Prem | Planned |
-| 09 | AI Evaluation & Red Teaming | Automated, RAGAS, LLM-as-Judge, Human, Safety | Planned |
-| 10 | FinOps for AI | Azure, AWS, GCP, Multi-Cloud, Token-Level | Planned |
+| 08 | Compliance-Aware Data Routing | Azure, AWS, GCP, Multi-Cloud, On-Prem + more | Planned |
+| 09 | AI Evaluation & Red Teaming | Automated, RAGAS, LLM-as-Judge, Human, Safety + more | Planned |
+| 10 | FinOps for AI | Azure, AWS, GCP, Multi-Cloud, Token-Level + more | Planned |
 
 ---
 
