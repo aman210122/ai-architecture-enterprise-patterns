@@ -1,6 +1,5 @@
 # Variant: Caching-Optimized RAG
-**Tiered cache: exact, semantic, partial. For 60%+ query repetition.**
-## Live Demo
-**[Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/caching-optimized-rag/index.html)**
-5 scenarios with per-stage latency, token cost, GAIF-4 metrics, and RAG quality metrics.
-*[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
+**Tiered cache for 60%+ query repetition.**
+## [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/caching-optimized-rag/index.html)
+SVG architecture diagram. Click any component for details. 5 interactive scenarios with cost tracking and GAIF-4 metrics.
+*[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

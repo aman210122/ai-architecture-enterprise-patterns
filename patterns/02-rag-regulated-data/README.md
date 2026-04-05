@@ -1,40 +1,43 @@
 # Pattern 02: RAG for Regulated Data
 
-**End-to-end retrieval-augmented generation with compliance boundaries. 12 variants. 7-stage ingestion, 8-stage query, governed vector store, 4 cross-cutting bars.**
+**True SVG architecture diagram with click-to-detail panels. 12 variants. 7-stage ingestion, 8-stage query, governed vector store, 4 cross-cutting layers.**
 
-## Which Variant Should You Use?
+Click any component in the diagram for full details: configuration, platform mapping, anti-patterns, and GAIF-4 relevance.
+
+## Variants
 
 | Your situation | Variant |
 |---------------|---------|
-| Standard vector search + generation | [Standard RAG](standard-rag/) |
-| Entity relationships, multi-hop reasoning | [GraphRAG](graph-rag/) |
-| Self-correcting retrieval (CRAG/Self-RAG) | [Agentic RAG](agentic-rag/) |
-| PHI/PII zero-trust, field-level redaction | [Sensitive Data RAG](sensitive-data-rag/) |
-| Multi-turn chat with follow-up detection | [Conversational RAG](conversational-rag/) |
-| Databases + documents combined | [Hybrid SQL+Vector](hybrid-sql-vector-rag/) |
-| Images, charts, DICOM + text | [Multimodal RAG](multimodal-rag/) |
-| Search across multiple platforms | [Multi-Source RAG](multi-source-rag/) |
-| Seconds-to-searchable streaming | [Real-Time RAG](realtime-rag/) |
-| Automated quality testing + regression | [Evaluation RAG](evaluation-rag/) |
-| Data stays local, federated search | [Privacy-Preserving RAG](privacy-preserving-rag/) |
-| 60%+ repeated queries, tiered cache | [Caching-Optimized RAG](caching-optimized-rag/) |
+| Standard vector + generation | [Standard RAG](standard-rag/) |
+| Knowledge graph, multi-hop | [GraphRAG](graph-rag/) |
+| Self-correcting (CRAG) | [Agentic RAG](agentic-rag/) |
+| PHI/PII zero-trust | [Sensitive Data](sensitive-data-rag/) |
+| Multi-turn chat | [Conversational](conversational-rag/) |
+| SQL + vector combined | [SQL+Vector](hybrid-sql-vector-rag/) |
+| Images, DICOM, charts | [Multimodal](multimodal-rag/) |
+| Cross-platform search | [Multi-Source](multi-source-rag/) |
+| Seconds-to-searchable | [Real-Time](realtime-rag/) |
+| Quality testing | [Evaluation](evaluation-rag/) |
+| Data stays local | [Privacy-Preserving](privacy-preserving-rag/) |
+| 60%+ query repetition | [Caching-Optimized](caching-optimized-rag/) |
 
-## GAIF-4 Metrics for RAG
+## GAIF-4 Metrics
 
-| Metric | RAG Application | Safe | Critical |
-|--------|----------------|------|----------|
-| T1PR | Contaminated retrievals passing filters | < 0.05 | > 0.15 |
-| CFR | Compliance violations in responses | 0.00 | > 0.01 |
-| EMR | Hallucinated content not in sources | < 0.05 | > 0.15 |
-| GDR | Retrieval quality degrading over time | < 0.03 | > 0.05 |
+| Metric | Measured At | Safe | Critical |
+|--------|-----------|------|----------|
+| T1PR | Retrieve stage | < 0.05 | > 0.15 |
+| CFR | Guardrails stage | 0.00 | > 0.01 |
+| EMR | Guardrails stage | < 0.05 | > 0.15 |
+| GDR | Weekly trending | < 0.03 | > 0.05 |
 
 ## Platform Mapping
 
-| Component | Azure | AWS | GCP | Databricks | Open Source |
-|-----------|-------|-----|-----|------------|-------------|
-| Vector Store | AI Search | OpenSearch | Vertex Search | Vector Search | Qdrant / Weaviate |
+| Component | Azure | AWS | GCP | Databricks | OSS |
+|-----------|-------|-----|-----|------------|-----|
+| Vector Store | AI Search | OpenSearch | Vertex Search | Vector Search | Qdrant |
 | Embedding | Azure OpenAI | Titan | Vertex Embed | DBRX | sentence-transformers |
-| Generation | Azure OpenAI | Bedrock | Gemini | DBRX / External | vLLM / Ollama |
-| Guardrails | Content Safety | Guardrails | Model Armor | Mosaic GW | NeMo Guardrails |
+| LLM | Azure OpenAI | Bedrock | Gemini | DBRX | vLLM |
+| Guardrails | Content Safety | Guardrails | Model Armor | Mosaic GW | NeMo |
+| DLP | Purview | Macie | Cloud DLP | Presidio | Presidio |
 
-*Governance: [GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
+*[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
