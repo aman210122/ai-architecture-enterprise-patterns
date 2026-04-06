@@ -1,30 +1,31 @@
 # Pattern 06: Governance-as-Architecture
-**Governance wraps AROUND the AI system. 15 variants. Define, Assess, Enforce, Measure, Report. Not a PDF, embedded in architecture.**
 
-Unique layout: U-shape governance wrapper with dashed boundary. Left column (pre-request: Define + Assess), center (AI System under governance), right column (runtime: Enforce + Measure), bottom (Report spanning full width). BSC 7-phase lifecycle bar.
+Governance wraps AROUND the AI system. Define, Assess, Enforce, Measure, Report. BSC 7-phase lifecycle.
 
-| Governance Phase | Variant | When to Use |
-|-----------------|---------|-------------|
-| 4-tier risk system | [Risk Classification](risk-classification/) | Default. Classify every AI system by risk tier. |
-| OPA/Rego rules | [Policy-as-Code](policy-as-code/) | Express policies as executable code, not documents. |
-| GDPR/CCPA consent | [Consent Management](consent-management/) | Track user opt-in/out for AI processing. |
-| Fairness testing | [Bias Testing](bias-testing/) | Demographic parity, equalized odds testing. |
-| Attribution maps | [Explainability](explainability/) | Why did the AI say this? Audit trail. |
-| Approval gates | [Human Oversight](human-oversight/) | Configurable human review per risk tier. |
-| Model documentation | [Model Cards](model-cards/) | Standardized model capability/limitation docs. |
-| Committee review | [Responsible AI Review](responsible-ai-review/) | Cross-functional committee for high-risk systems. |
-| Training data audit | [Data Governance](data-governance/) | Data lineage, quality, consent for AI training. |
-| EU AI Act, NIST, HIPAA | [Regulatory Mapping](regulatory-mapping/) | Map systems to applicable regulations. |
-| CISO/CTO view | [Governance Dashboard](governance-dashboard/) | Real-time GAIF-4 across all systems. |
-| Hallucination spike | [Incident Response](incident-response/) | AI-specific incident playbooks. |
-| Unauthorized AI | [Shadow AI Detection](shadow-ai-detection/) | Detect unregistered AI API calls. |
-| Third-party AI | [Vendor Governance](vendor-governance/) | Vendor risk assessment, BAA verification. |
-| Automated checks | [Continuous Compliance](continuous-compliance/) | Policies validated continuously, not just at deploy. |
+**Unique Layout:** U-shape governance wrapper. Left (Define+Assess), Center (AI System), Right (Enforce+Measure), Bottom (Report).
 
-## Research Connection
-- GAIF v1.0 (Zenodo DOI: 10.5281/zenodo.19341015): T1PR, CFR, EMR, GDR metrics
-- BSC 7-phase governance lifecycle: Intake, Assess, Design, Build, Deploy, Monitor, Retire
-- NIST AI RMF: MAP, MEASURE, MANAGE, GOVERN functions mapped to phases
-- GDR paper submitted to IEEE Software: continuous governance decay measurement
+---
+
+## Variants
+
+| Variant | Focus | Demo |
+|---------|-------|------|
+| Risk Classification | 4-tier system, 25-question assessment | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/risk-classification/index.html) |
+| Policy-as-Code | OPA/Rego rules at gateway | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/policy-as-code/index.html) |
+| Consent Management | GDPR/CCPA consent flows | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/consent-management/index.html) |
+| Bias Testing | Demographic parity testing | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/bias-testing/index.html) |
+| Explainability | Attribution maps, audit trail | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/explainability/index.html) |
+| Human Oversight | Approval gates per risk tier | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/human-oversight/index.html) |
+| Model Cards | Standardized model documentation | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/model-cards/index.html) |
+| Responsible AI Review | Cross-functional committee | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/responsible-ai-review/index.html) |
+| Data Governance | Training data lineage, quality | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/data-governance/index.html) |
+| Regulatory Mapping | EU AI Act, HIPAA, NIST mapping | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/regulatory-mapping/index.html) |
+| Governance Dashboard | Real-time GAIF-4 for CISO/CTO | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/governance-dashboard/index.html) |
+| Incident Response | AI-specific playbooks | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/incident-response/index.html) |
+| Shadow AI Detection | Unauthorized AI API detection | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/shadow-ai-detection/index.html) |
+| Vendor Governance | Third-party AI risk assessment | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/vendor-governance/index.html) |
+| Continuous Compliance | Automated compliance checking | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/06-governance-as-architecture/continuous-compliance/index.html) |
+
+*[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
 
 *[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

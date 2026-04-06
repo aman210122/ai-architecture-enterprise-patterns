@@ -1,43 +1,26 @@
 # Pattern 02: RAG for Regulated Data
 
-**True SVG architecture diagram with click-to-detail panels. 12 variants. 7-stage ingestion, 8-stage query, governed vector store, 4 cross-cutting layers.**
+Retrieval-augmented generation with compliance controls. 7-stage ingestion, central vector store hub, 8-stage query pipeline. PHI-aware, HIPAA-compliant.
 
-Click any component in the diagram for full details: configuration, platform mapping, anti-patterns, and GAIF-4 relevance.
+**Unique Layout:** Horizontal pipeline with central vector store hub. Click any stage for configuration, platform mapping, anti-patterns.
+
+---
 
 ## Variants
 
-| Your situation | Variant |
-|---------------|---------|
-| Standard vector + generation | [Standard RAG](standard-rag/) |
-| Knowledge graph, multi-hop | [GraphRAG](graph-rag/) |
-| Self-correcting (CRAG) | [Agentic RAG](agentic-rag/) |
-| PHI/PII zero-trust | [Sensitive Data](sensitive-data-rag/) |
-| Multi-turn chat | [Conversational](conversational-rag/) |
-| SQL + vector combined | [SQL+Vector](hybrid-sql-vector-rag/) |
-| Images, DICOM, charts | [Multimodal](multimodal-rag/) |
-| Cross-platform search | [Multi-Source](multi-source-rag/) |
-| Seconds-to-searchable | [Real-Time](realtime-rag/) |
-| Quality testing | [Evaluation](evaluation-rag/) |
-| Data stays local | [Privacy-Preserving](privacy-preserving-rag/) |
-| 60%+ query repetition | [Caching-Optimized](caching-optimized-rag/) |
-
-## GAIF-4 Metrics
-
-| Metric | Measured At | Safe | Critical |
-|--------|-----------|------|----------|
-| T1PR | Retrieve stage | < 0.05 | > 0.15 |
-| CFR | Guardrails stage | 0.00 | > 0.01 |
-| EMR | Guardrails stage | < 0.05 | > 0.15 |
-| GDR | Weekly trending | < 0.03 | > 0.05 |
-
-## Platform Mapping
-
-| Component | Azure | AWS | GCP | Databricks | OSS |
-|-----------|-------|-----|-----|------------|-----|
-| Vector Store | AI Search | OpenSearch | Vertex Search | Vector Search | Qdrant |
-| Embedding | Azure OpenAI | Titan | Vertex Embed | DBRX | sentence-transformers |
-| LLM | Azure OpenAI | Bedrock | Gemini | DBRX | vLLM |
-| Guardrails | Content Safety | Guardrails | Model Armor | Mosaic GW | NeMo |
-| DLP | Purview | Macie | Cloud DLP | Presidio | Presidio |
+| Variant | Focus | Demo |
+|---------|-------|------|
+| Standard RAG | Default ingestion + query pipeline | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/standard-rag/index.html) |
+| Multimodal RAG | Text + image + audio retrieval | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/multimodal-rag/index.html) |
+| Agentic RAG | Agent-driven retrieval with tool calls | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/agentic-rag/index.html) |
+| Graph RAG | Knowledge graph + vector hybrid retrieval | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/graph-rag/index.html) |
+| Corrective RAG | Self-correcting retrieval with quality checks | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/corrective-rag/index.html) |
+| Self-RAG | Model decides when to retrieve | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/self-rag/index.html) |
+| Hybrid Search | Dense + sparse retrieval combined | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/hybrid-search/index.html) |
+| Contextual Compression | Compress retrieved chunks before prompting | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/contextual-compression/index.html) |
+| Parent-Child Chunking | Hierarchical chunk strategy | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/parent-child-chunking/index.html) |
+| Multi-Index | Search across multiple vector indexes | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/multi-index/index.html) |
+| Semantic Caching | Cache by query similarity, not exact match | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/semantic-caching/index.html) |
+| Streaming RAG | Progressive retrieval with streaming response | [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/02-rag-regulated-data/streaming-rag/index.html) |
 
 *[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
