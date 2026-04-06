@@ -1,335 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pattern 18 / Graceful Degradation Hierarchy: Standard RAG | AI Architecture Enterprise Patterns</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pattern 18: Observability for AI</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap');
-:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.12);--border2:rgba(139,149,168,0.2);
---ing:#34d399;--qry:#60a5fa;--vec:#c084fc;--grd:#fbbf24;--ok:#34d399;--err:#f87171;--warn:#fbbf24;--ops:#38bdf8;--eco:#fb923c;
---f:'DM Sans',sans-serif;--m:'JetBrains Mono',monospace}
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.12);--qual:#10b981;--lat:#3b82f6;--cost:#f97316;--drift:#8b5cf6;--ok:#34d399;--err:#f87171;--warn:#fbbf24;--ops:#38bdf8;--f:'Nunito Sans',sans-serif;--m:'JetBrains Mono',monospace}
 *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:var(--f)}
 .pg{max-width:1440px;margin:0 auto;padding:1.2rem}
 .hdr{margin-bottom:0.8rem;display:flex;align-items:center;gap:12px;padding-bottom:0.6rem;border-bottom:1px solid var(--border)}
-.hdr-badge{background:linear-gradient(135deg,var(--ing),var(--qry));padding:5px 10px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#000;white-space:nowrap}
-.hdr h1{font-size:20px;font-weight:700;letter-spacing:-0.3px}.hdr p{font-size:11px;color:var(--text2)}
+.hdr-badge{background:linear-gradient(135deg,var(--qual),var(--lat));padding:5px 10px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#fff}
+.hdr h1{font-size:20px;font-weight:800}.hdr p{font-size:11px;color:var(--text2)}
 .sc-bar{display:flex;gap:5px;margin-bottom:0.6rem;flex-wrap:wrap;align-items:center}
 .sc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 11px;cursor:pointer;font-family:var(--f);font-size:10px;color:var(--text2);transition:all 0.2s;display:flex;align-items:center;gap:4px}
-.sc-btn:hover{border-color:var(--qry);color:var(--text)}.sc-btn.active{border-color:var(--qry);color:var(--qry);background:rgba(96,165,250,0.08);font-weight:600}.sc-btn:disabled{opacity:0.3;cursor:not-allowed}
+.sc-btn:hover{border-color:var(--qual)}.sc-btn.active{border-color:var(--qual);color:var(--qual);background:rgba(16,185,129,0.08);font-weight:600}.sc-btn:disabled{opacity:0.3}
 .sc-dot{width:6px;height:6px;border-radius:50%}.sc-reset{margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-family:var(--f);font-size:9px;color:var(--text3)}
-
 .dw{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:8px;margin-bottom:0.6rem;overflow-x:auto}
-.dw svg{width:100%;min-width:1000px;height:auto;display:block}
-svg text{font-family:'DM Sans',sans-serif}
-.box{rx:6;ry:6;stroke-width:1.5;cursor:pointer;transition:all 0.3s}.box:hover{filter:brightness(1.15)}.box.hl{stroke-width:2.5;filter:drop-shadow(0 0 6px currentColor)}.box.dim{opacity:0.08}
-.arr{fill:none;stroke:#8b949e;stroke-width:1.2;opacity:0.25}.arr.li{opacity:1;stroke-width:2}.arr.li-i{opacity:1;stroke:var(--ing);stroke-width:2}.arr.li-q{opacity:1;stroke:var(--qry);stroke-width:2}.arr.li-v{opacity:1;stroke:var(--vec);stroke-width:2}.arr.li-d{opacity:1;stroke:var(--err);stroke-width:2}
-.bx-t{font-size:9px;font-weight:700;text-anchor:middle}.bx-s{font-size:7px;fill:#b8c0cc;text-anchor:middle}
-.lbl{font-size:8.5px;fill:#8b949e;font-weight:600;letter-spacing:0.8px}
-.gbar{rx:5;ry:5}.gbar-t{font-size:8px;font-weight:600;letter-spacing:0.5px}
-.sdot{r:3;transition:all 0.3s}
-
-/* Detail panel */
-.dp{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:0.6rem;overflow:hidden;transition:all 0.3s}
-.dp.closed{max-height:0;border:none;margin:0}.dp.open{max-height:600px}
-.dp-h{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.dp-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}.dp-tag{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:600;font-family:var(--m)}
-.dp-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;font-family:var(--f)}
+.dw svg{width:100%;min-width:1050px;height:auto;display:block}
+svg text{font-family:'Nunito Sans',sans-serif}
+.box{rx:8;ry:8;stroke-width:1.5;cursor:pointer;transition:all 0.3s}.box:hover{filter:brightness(1.15)}.box.hl{stroke-width:2.5;filter:drop-shadow(0 0 6px currentColor)}
+.gauge{transition:all 0.5s}
+.dp{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:0.6rem;overflow:hidden;transition:all 0.3s}.dp.closed{max-height:0;border:none;margin:0}.dp.open{max-height:600px}
+.dp-h{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}.dp-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}.dp-tag{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:600;font-family:var(--m)}.dp-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px}
 .dp-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-@media(max-width:900px){.dp-body{grid-template-columns:1fr}}
-.dp-sec{}.dp-sec-t{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.dp-sec-t{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--border)}
 .dp-it{font-size:10px;color:var(--text2);margin-bottom:3px;line-height:1.5;display:flex;align-items:baseline;gap:5px}.dp-it::before{content:'';width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.dp-it.ok::before{background:var(--ok)}.dp-it.warn::before{background:var(--warn)}.dp-it.info::before{background:var(--qry)}.dp-it.plat::before{background:var(--vec)}
-.dp-kv{display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-bottom:2px;font-family:var(--m)}.dp-kv span:last-child{color:var(--text)}
-
-/* Response */
+.dp-it.ok::before{background:var(--ok)}.dp-it.warn::before{background:var(--warn)}.dp-it.info::before{background:var(--ops)}.dp-it.plat::before{background:var(--qual)}
 .rsp{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;transition:all 0.3s;margin-bottom:0.6rem;flex-wrap:wrap}
 .rsp.ok{border-color:var(--ok);background:rgba(52,211,153,0.06)}.rsp.er{border-color:var(--err);background:rgba(248,113,113,0.06)}.rsp.wn{border-color:var(--warn);background:rgba(251,191,36,0.06)}
-.rsp-c{font-family:var(--m);font-size:12px;font-weight:700}.rsp-m{font-size:10px;color:var(--text2);flex:1}.rsp-${font-family:var(--m);font-size:10px;color:var(--eco)}
-
-/* Bottom row */
-.brow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.6rem}@media(max-width:900px){.brow{grid-template-columns:1fr}}
-.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}@media(max-width:768px){.mets{grid-template-columns:repeat(2,1fr)}}
+.rsp-c{font-family:var(--m);font-size:12px;font-weight:700}.rsp-m{font-size:10px;color:var(--text2);flex:1}
+.brow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.6rem}
+.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
 .met{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px}
-.met-l{font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:3px}
-.met-b{font-size:6px;padding:1px 4px;border-radius:2px;font-weight:600}.met-v{font-size:18px;font-weight:700;font-family:var(--m)}.met-bar{height:2px;border-radius:1px;background:var(--bg4);margin-top:3px;overflow:hidden}.met-f{height:100%;border-radius:1px;transition:width 0.5s}.met-n{font-size:7px;color:var(--text3);margin-top:2px}
-
+.met-l{font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3)}.met-b{font-size:6px;padding:1px 4px;border-radius:2px;font-weight:600}
+.met-v{font-size:18px;font-weight:700;font-family:var(--m)}.met-bar{height:2px;border-radius:1px;background:var(--bg4);margin-top:3px;overflow:hidden}.met-f{height:100%;border-radius:1px;transition:width 0.5s}.met-n{font-size:7px;color:var(--text3);margin-top:2px}
 .log{background:var(--bg3);border:1px solid var(--border);border-radius:6px;overflow:hidden}
-.log-h{padding:5px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:8px;font-weight:700;color:var(--text3)}
+.log-h{padding:5px 10px;border-bottom:1px solid var(--border);font-size:8px;font-weight:700;color:var(--text3);display:flex;justify-content:space-between}
 .log-clr{background:none;border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:7px;color:var(--text3);cursor:pointer;font-family:var(--f)}
-.log-b{max-height:140px;overflow-y:auto;padding:2px 0;font-family:var(--m);font-size:8px}.log-b::-webkit-scrollbar{width:2px}.log-b::-webkit-scrollbar-thumb{background:var(--bg4)}
+.log-b{max-height:140px;overflow-y:auto;padding:2px 0;font-family:var(--m);font-size:8px}
 .lr{padding:1px 10px;display:flex;gap:6px;animation:fi 0.15s ease}@keyframes fi{from{opacity:0}to{opacity:1}}
-.lr-t{color:var(--text3);min-width:60px}.lr-p{min-width:45px;font-weight:600}.lr-m{color:var(--text2);flex:1}
-.lr-p.i{color:var(--ing)}.lr-p.q{color:var(--qry)}.lr-p.v{color:var(--vec)}.lr-p.g{color:var(--grd)}.lr-p.ok{color:var(--ok)}.lr-p.er{color:var(--err)}.lr-p.w{color:var(--warn)}.lr-p.ec{color:var(--eco)}
-
-.footer{text-align:center;padding:0.6rem 0;font-size:8px;color:var(--text3)}.footer a{color:var(--qry);text-decoration:none}
-.wm{position:fixed;bottom:6px;right:10px;font-size:7px;color:var(--text3);opacity:0.15;font-family:var(--m);pointer-events:none;z-index:99}
-</style>
-</head>
-<body>
-<div class="wm">Designed by Aman Sharma</div>
+.lr-t{color:var(--text3);min-width:60px}.lr-p{min-width:50px;font-weight:600}.lr-m{color:var(--text2);flex:1}
+.lr-p.ql{color:var(--qual)}.lr-p.lt{color:var(--lat)}.lr-p.ct{color:var(--cost)}.lr-p.dr{color:var(--drift)}.lr-p.ok{color:var(--ok)}.lr-p.er{color:var(--err)}.lr-p.wn{color:var(--warn)}
+.footer{text-align:center;padding:0.6rem 0;font-size:8px;color:var(--text3)}.footer a{color:var(--qual);text-decoration:none}
+</style></head><body>
 <div class="pg">
-<div class="hdr"><div class="hdr-badge">Pattern 18 / Graceful Degradation Hierarchy</div><div><h1>AI Resilience Engineering</h1><p>Click any component for full details. Run scenarios to watch data flow through the architecture.</p></div></div>
-
+<div class="hdr"><div class="hdr-badge">Pattern 18</div><div><h1>AI Resilience Engineering</h1><p>Circuit breakers, context overflow, deadlock, semantic retry. State machine.</p></div></div>
 <div class="sc-bar">
-<button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--ok)"></div>Clean query</button>
-<button class="sc-btn" onclick="run('phi')" id="btn-phi"><div class="sc-dot" style="background:var(--err)"></div>PHI in retrieval</button>
-<button class="sc-btn" onclick="run('halluc')" id="btn-halluc"><div class="sc-dot" style="background:var(--warn)"></div>Hallucination</button>
-<button class="sc-btn" onclick="run('cache')" id="btn-cache"><div class="sc-dot" style="background:var(--vec)"></div>Cache hit</button>
-<button class="sc-btn" onclick="run('fail')" id="btn-fail"><div class="sc-dot" style="background:var(--text3)"></div>0 results</button>
+<button class="sc-btn" onclick="run('healthy')" id="btn-healthy"><div class="sc-dot" style="background:var(--ok)"></div>Clean recovery</button>
+<button class="sc-btn" onclick="run('drift')" id="btn-drift"><div class="sc-dot" style="background:var(--drift)"></div>Circuit break</button>
+<button class="sc-btn" onclick="run('spike')" id="btn-spike"><div class="sc-dot" style="background:var(--err)"></div>Context overflow</button>
+<button class="sc-btn" onclick="run('cost')" id="btn-cost"><div class="sc-dot" style="background:var(--cost)"></div>Failover chain</button>
+<button class="sc-btn" onclick="run('halluc')" id="btn-halluc"><div class="sc-dot" style="background:var(--warn)"></div>Deadlock break</button>
 <button class="sc-reset" onclick="resetAll()">&#8634; Reset</button></div>
 
 <div class="dw">
-<svg viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg">
-<rect class="gbar" x="10" y="8" width="1080" height="24" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.2)"/>
-<text class="gbar-t" x="22" y="24" fill="#60a5fa">GOVERNANCE</text><text class="gbar-t" x="120" y="24" fill="#8b949e">GAIF-4 (T1PR/CFR/EMR/GDR) | Compliance Tagging | Access Control | PHI Detection | Data Lineage | Audit Trail</text>
-<rect class="gbar" x="10" y="36" width="1080" height="20" fill="rgba(52,211,153,0.08)" stroke="rgba(52,211,153,0.15)"/>
-<text class="gbar-t" x="22" y="50" fill="#34d399">OBSERVABILITY</text><text class="gbar-t" x="120" y="50" fill="#8b949e">Per-Stage Tracing | Latency | Retrieval Precision | Recall | MRR | NDCG | Groundedness</text>
+<svg viewBox="0 0 1050 420" xmlns="http://www.w3.org/2000/svg">
+<text x="525" y="16" text-anchor="middle" fill="#8b949e" style="font-size:9px;font-style:italic">Click any dashboard panel for drill-down details. AI observability beyond traditional APM.</text>
 
-<text x="550" y="78" text-anchor="middle" fill="#8b949e" style="font-size:9px;font-style:italic;font-family:DM Sans,sans-serif">Click any component box for full architecture details</text>
-<text class="lbl" x="20" y="78" fill="#34d399">&#9679; DETECT FAILURES</text><text class="lbl" x="880" y="78" fill="#8b949e" style="font-weight:400">Identify failure type: timeout, overflow, stale, deadlock, exhaustion, poison</text>
+<!-- 4 METRIC DASHBOARD PANELS (2x2 grid, unique to this pattern) -->
+<!-- Panel 1: Quality (top-left) -->
+<rect class="box" id="p-qual" x="15" y="30" width="250" height="160" fill="#1c2333" stroke="#10b981" rx="12" onclick="detail('qual')"/>
+<text x="140" y="52" text-anchor="middle" fill="#10b981" style="font-size:10px;font-weight:700">CLOSED</text>
+<text x="140" y="100" text-anchor="middle" fill="#34d399" style="font-size:36px;font-weight:800;font-family:'JetBrains Mono'" id="q-val">0.91</text>
+<text x="140" y="120" text-anchor="middle" fill="#8b949e" style="font-size:8px" id="q-sub">All requests pass through</text>
+<rect x="40" y="130" width="200" height="6" rx="3" fill="#252d3f"/><rect class="gauge" id="q-bar" x="40" y="130" width="182" height="6" rx="3" fill="#34d399"/>
+<text x="40" y="155" fill="#8b949e" style="font-size:7px">7-day: 0.91 0.90 0.91 0.90 0.89 0.91 0.91</text>
+<text x="40" y="170" fill="#8b949e" style="font-size:7px" id="q-trend">Trend: stable (no drift)</text>
+<text x="140" y="185" text-anchor="middle" fill="#60a5fa" style="font-size:5.5px;opacity:0.5">click for details</text>
 
-<rect class="box" id="b-src" x="20" y="86" width="118" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('src')"/><text class="bx-t" x="79" y="107" fill="#34d399">Health Check</text><text class="bx-s" x="79" y="119">Model alive?</text><circle class="sdot" id="d-src" cx="130" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="130" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans;cursor:pointer" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ext" x="162" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('ext')"/><text class="bx-t" x="211" y="107" fill="#34d399">Timeout Det</text><text class="bx-s" x="211" y="119">Response SLA</text><circle class="sdot" id="d-ext" cx="252" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="252" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-proc" x="284" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('proc')"/><text class="bx-t" x="333" y="107" fill="#34d399">Rate Limit</text><text class="bx-s" x="333" y="119">429 detection</text><circle class="sdot" id="d-proc" cx="374" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="374" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-chunk" x="406" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('chunk')"/><text class="bx-t" x="455" y="107" fill="#34d399">Context Over</text><text class="bx-s" x="455" y="119">Window full</text><circle class="sdot" id="d-chunk" cx="496" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="496" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-emb" x="528" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('emb')"/><text class="bx-t" x="577" y="107" fill="#34d399">Stale Detect</text><text class="bx-s" x="577" y="119">Index age check</text><circle class="sdot" id="d-emb" cx="618" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="618" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-comp" x="650" y="86" width="108" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('comp')"/><text class="bx-t" x="704" y="107" fill="#fbbf24">Deadlock Det</text><text class="bx-s" x="704" y="119">Agent circular</text><circle class="sdot" id="d-comp" cx="750" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="750" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-qual" x="782" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('qual')"/><text class="bx-t" x="831" y="107" fill="#34d399">Poison Det</text><text class="bx-s" x="831" y="119">Bad context in</text><circle class="sdot" id="d-qual" cx="872" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="872" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
+<!-- Panel 2: Latency (top-right) -->
+<rect class="box" id="p-lat" x="280" y="30" width="250" height="160" fill="#1c2333" stroke="#3b82f6" rx="12" onclick="detail('lat')"/>
+<text x="405" y="52" text-anchor="middle" fill="#3b82f6" style="font-size:10px;font-weight:700">HALF-OPEN</text>
+<text x="405" y="100" text-anchor="middle" fill="#60a5fa" style="font-size:36px;font-weight:800;font-family:'JetBrains Mono'" id="l-val">2.1s</text>
+<text x="405" y="120" text-anchor="middle" fill="#8b949e" style="font-size:8px" id="l-sub">One test request allowed</text>
+<rect x="305" y="130" width="200" height="6" rx="3" fill="#252d3f"/><rect class="gauge" id="l-bar" x="305" y="130" width="105" height="6" rx="3" fill="#60a5fa"/>
+<text x="305" y="155" fill="#8b949e" style="font-size:7px">P50: 1.2s | P95: 2.1s | P99: 3.8s</text>
+<text x="305" y="170" fill="#8b949e" style="font-size:7px" id="l-trend">SLA: < 4.0s (within target)</text>
 
-<line class="arr" id="ai1" x1="138" y1="111" x2="162" y2="111"/><line class="arr" id="ai2" x1="260" y1="111" x2="284" y2="111"/><line class="arr" id="ai3" x1="382" y1="111" x2="406" y2="111"/><line class="arr" id="ai4" x1="504" y1="111" x2="528" y2="111"/><line class="arr" id="ai5" x1="626" y1="111" x2="650" y2="111"/><line class="arr" id="ai6" x1="758" y1="111" x2="782" y2="111"/>
-<path class="arr" id="ai7" d="M831 136 L831 165 L550 165 L550 190"/>
+<!-- Panel 3: Cost (bottom-left) -->
+<rect class="box" id="p-cost" x="15" y="200" width="250" height="160" fill="#1c2333" stroke="#f97316" rx="12" onclick="detail('costpanel')"/>
+<text x="140" y="222" text-anchor="middle" fill="#f97316" style="font-size:10px;font-weight:700">OPEN</text>
+<text x="140" y="270" text-anchor="middle" fill="#fb923c" style="font-size:36px;font-weight:800;font-family:'JetBrains Mono'" id="c-val">$412</text>
+<text x="140" y="290" text-anchor="middle" fill="#8b949e" style="font-size:8px" id="c-sub">Daily spend (budget: $500)</text>
+<rect x="40" y="300" width="200" height="6" rx="3" fill="#252d3f"/><rect class="gauge" id="c-bar" x="40" y="300" width="164" height="6" rx="3" fill="#fb923c"/>
+<text x="40" y="325" fill="#8b949e" style="font-size:7px" id="c-detail">82% of budget | $2,610 cache savings/mo</text>
+<text x="40" y="340" fill="#8b949e" style="font-size:7px" id="c-trend">Trend: +2%/week (normal growth)</text>
 
-<rect class="box" id="b-vs" x="410" y="190" width="280" height="68" fill="#1c2333" stroke="#c084fc" stroke-width="2" rx="10" ry="10" onclick="detail('vs')"/>
-<text class="bx-t" x="550" y="214" fill="#c084fc" style="font-size:11px">Resilience Decision Engine</text>
-<text class="bx-s" x="550" y="228">Classify failure type + select recovery strategy + track RTO</text>
-<text class="bx-s" x="550" y="242" fill="#8b949e">Full model -> cached -> static -> safe default -> error page</text>
-<text x="682" y="252" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
+<!-- Panel 4: Drift / Safety (bottom-right) -->
+<rect class="box" id="p-drift" x="280" y="200" width="250" height="160" fill="#1c2333" stroke="#8b5cf6" rx="12" onclick="detail('driftpanel')"/>
+<text x="405" y="222" text-anchor="middle" fill="#8b5cf6" style="font-size:10px;font-weight:700">FALLBACK</text>
+<text x="405" y="270" text-anchor="middle" fill="#a78bfa" style="font-size:36px;font-weight:800;font-family:'JetBrains Mono'" id="d-val">0.02</text>
+<text x="405" y="290" text-anchor="middle" fill="#8b949e" style="font-size:8px" id="d-sub">Cache -> static -> safe default</text>
+<rect x="305" y="300" width="200" height="6" rx="3" fill="#252d3f"/><rect class="gauge" id="d-bar" x="305" y="300" width="20" height="6" rx="3" fill="#a78bfa"/>
+<text x="305" y="325" fill="#8b949e" style="font-size:7px" id="d-detail">Deadlock break: 2.1% | Safety: 0 incidents</text>
+<text x="305" y="340" fill="#8b949e" style="font-size:7px" id="d-trend">Topic drift: none detected</text>
 
-<path class="arr" id="aq-vs" d="M550 258 L550 282 L435 282 L435 312"/>
+<!-- RIGHT: ALERT FEED (unique to observability - live alert stream) -->
+<rect class="box" id="p-alerts" x="550" y="30" width="480" height="155" fill="#1c2333" stroke="rgba(139,149,168,0.2)" rx="10" onclick="detail('alerts')"/>
+<text x="790" y="52" text-anchor="middle" fill="#c9d1d9" style="font-size:10px;font-weight:700">RESILIENCE EVENTS</text>
+<text x="570" y="74" fill="#34d399" style="font-size:7px;font-family:'JetBrains Mono'" id="al1">14:23 OK    Quality 0.91 (stable, no drift)</text>
+<text x="570" y="90" fill="#34d399" style="font-size:7px;font-family:'JetBrains Mono'" id="al2">14:18 OK    Latency P95 2.1s (within SLA)</text>
+<text x="570" y="106" fill="#34d399" style="font-size:7px;font-family:'JetBrains Mono'" id="al3">14:15 OK    Cost $412 (82% of budget)</text>
+<text x="570" y="122" fill="#34d399" style="font-size:7px;font-family:'JetBrains Mono'" id="al4">14:10 OK    GDR 0.02 (governance stable)</text>
+<text x="570" y="138" fill="#34d399" style="font-size:7px;font-family:'JetBrains Mono'" id="al5">14:05 OK    Deadlock break 2.1% (normal)</text>
+<text x="570" y="154" fill="#8b949e" style="font-size:7px;font-family:'JetBrains Mono'" id="al6">14:00 INFO  Daily report generated</text>
+<text x="570" y="170" fill="#8b949e" style="font-size:7px;font-family:'JetBrains Mono'" id="al7">13:55 INFO  Cache hit rate: 38%</text>
 
-<text class="lbl" x="20" y="305" fill="#60a5fa">&#9679; RECOVER + DEGRADE + RESUME</text><text class="lbl" x="880" y="305" fill="#8b949e" style="font-weight:400">Circuit break, failover, degrade, retry, resume, recover</text>
+<!-- INTEGRATION BAR (OTel, SIEM, APM connections) -->
+<rect class="box" id="p-integrations" x="550" y="200" width="480" height="60" fill="#1c2333" stroke="rgba(56,189,248,0.25)" rx="8" onclick="detail('integrations')"/>
+<text x="790" y="222" text-anchor="middle" fill="#38bdf8" style="font-size:9px;font-weight:700">INTEGRATIONS</text>
+<text x="620" y="240" text-anchor="middle" fill="#8b949e" style="font-size:8px">OpenTelemetry</text>
+<text x="730" y="240" text-anchor="middle" fill="#8b949e" style="font-size:8px">Splunk/Sentinel</text>
+<text x="840" y="240" text-anchor="middle" fill="#8b949e" style="font-size:8px">Datadog</text>
+<text x="950" y="240" text-anchor="middle" fill="#8b949e" style="font-size:8px">App Insights</text>
+<text x="790" y="254" text-anchor="middle" fill="#8b949e" style="font-size:6.5px">AI metrics exported to existing enterprise monitoring via standard protocols</text>
 
-<rect class="box" id="b-qin" x="20" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('qin')"/><text class="bx-t" x="68" y="333" fill="#60a5fa">Circuit Break</text><text class="bx-s" x="68" y="345">Open/half/close</text><circle class="sdot" id="d-qin" cx="108" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="108" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-cls" x="138" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('cls')"/><text class="bx-t" x="181" y="333" fill="#60a5fa">Failover</text><text class="bx-s" x="181" y="345">Next provider</text><circle class="sdot" id="d-cls" cx="216" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="216" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-enh" x="246" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('enh')"/><text class="bx-t" x="289" y="333" fill="#60a5fa">Degrade</text><text class="bx-s" x="289" y="345">Cached response</text><circle class="sdot" id="d-enh" cx="324" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="324" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ret" x="354" y="312" width="106" height="50" fill="#1c2333" stroke="#c084fc" onclick="detail('ret')"/><text class="bx-t" x="407" y="333" fill="#c084fc">Sem Retry</text><text class="bx-s" x="407" y="345">Rewrite + retry</text><circle class="sdot" id="d-ret" cx="452" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="452" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-rer" x="482" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('rer')"/><text class="bx-t" x="525" y="333" fill="#60a5fa">Token Recov</text><text class="bx-s" x="525" y="345">Budget reset</text><circle class="sdot" id="d-rer" cx="560" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="560" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ctx" x="590" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('ctx')"/><text class="bx-t" x="638" y="333" fill="#60a5fa">Conv Recov</text><text class="bx-s" x="638" y="345">Restore session</text><circle class="sdot" id="d-ctx" cx="678" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="678" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-gen" x="708" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('gen')"/><text class="bx-t" x="756" y="333" fill="#60a5fa">Resume</text><text class="bx-s" x="756" y="345">From checkpoint</text><circle class="sdot" id="d-gen" cx="796" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="796" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-grd" x="826" y="312" width="106" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('grd')"/><text class="bx-t" x="879" y="333" fill="#fbbf24">RTO Track</text><text class="bx-s" x="879" y="345">Time to recover</text><circle class="sdot" id="d-grd" cx="924" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="924" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-rsp" x="954" y="312" width="86" height="50" fill="#1c2333" stroke="#34d399" stroke-dasharray="4,2"/><text class="bx-t" x="997" y="333" fill="#34d399">Response</text><text class="bx-s" x="997" y="345">Recovered</text>
+<!-- MODEL COMPARISON (unique mini-table) -->
+<rect class="box" id="p-models" x="550" y="275" width="480" height="85" fill="#1c2333" stroke="rgba(139,149,168,0.2)" rx="8" onclick="detail('models')"/>
+<text x="790" y="296" text-anchor="middle" fill="#c9d1d9" style="font-size:9px;font-weight:700">MODEL PERFORMANCE COMPARISON</text>
+<text x="620" y="316" fill="#8b949e" style="font-size:7px;font-weight:600">Model</text>
+<text x="720" y="316" fill="#10b981" style="font-size:7px;font-weight:600">Quality</text>
+<text x="800" y="316" fill="#3b82f6" style="font-size:7px;font-weight:600">Latency</text>
+<text x="880" y="316" fill="#f97316" style="font-size:7px;font-weight:600">Cost/call</text>
+<text x="960" y="316" fill="#8b949e" style="font-size:7px;font-weight:600">Calls/day</text>
+<text x="620" y="332" fill="#b8c0cc" style="font-size:7px">gpt-4o</text><text x="720" y="332" fill="#34d399" style="font-size:7px">0.93</text><text x="800" y="332" fill="#60a5fa" style="font-size:7px">2.1s</text><text x="880" y="332" fill="#fb923c" style="font-size:7px">$0.018</text><text x="960" y="332" fill="#8b949e" style="font-size:7px">11,000</text>
+<text x="620" y="348" fill="#b8c0cc" style="font-size:7px">claude-sonnet</text><text x="720" y="348" fill="#34d399" style="font-size:7px">0.95</text><text x="800" y="348" fill="#60a5fa" style="font-size:7px">1.6s</text><text x="880" y="348" fill="#fb923c" style="font-size:7px">$0.008</text><text x="960" y="348" fill="#8b949e" style="font-size:7px">9,000</text>
+<text x="620" y="364" fill="#b8c0cc" style="font-size:7px">claude-haiku</text><text x="720" y="364" fill="#fbbf24" style="font-size:7px">0.87</text><text x="800" y="364" fill="#34d399" style="font-size:7px">0.4s</text><text x="880" y="364" fill="#34d399" style="font-size:7px">$0.001</text><text x="960" y="364" fill="#8b949e" style="font-size:7px">34,000</text>
 
-<line class="arr" id="aq1" x1="116" y1="337" x2="138" y2="337"/><line class="arr" id="aq2" x1="224" y1="337" x2="246" y2="337"/><line class="arr" id="aq3" x1="332" y1="337" x2="354" y2="337"/><line class="arr" id="aq4" x1="460" y1="337" x2="482" y2="337"/><line class="arr" id="aq5" x1="568" y1="337" x2="590" y2="337"/><line class="arr" id="aq6" x1="686" y1="337" x2="708" y2="337"/><line class="arr" id="aq7" x1="804" y1="337" x2="826" y2="337"/><line class="arr" id="aq8" x1="932" y1="337" x2="954" y2="337"/>
-
-<path class="arr" id="a-cache" d="M181 362 Q181 392 550 392 Q879 392 879 362" stroke-dasharray="4,3" opacity="0.08"/>
-<text x="530" y="405" class="bx-s" fill="#c084fc" opacity="0.25" text-anchor="middle" id="cache-lbl">Bulkhead isolation (failure in one pipeline does not cascade)</text>
-<path class="arr" id="a-fb" d="M997 362 Q997 415 550 425 Q68 435 68 370" stroke-dasharray="4,3" opacity="0.08"/>
-<text x="530" y="442" class="bx-s" fill="#34d399" opacity="0.2" text-anchor="middle" id="fb-lbl">Failure patterns improve circuit breaker thresholds and retry strategies</text>
-
-<rect class="gbar" x="10" y="458" width="1080" height="20" fill="rgba(56,189,248,0.07)" stroke="rgba(56,189,248,0.15)"/>
-<text class="gbar-t" x="22" y="472" fill="#38bdf8">OPERATIONS</text><text class="gbar-t" x="115" y="472" fill="#8b949e">Cache | Rate Limit | Circuit Breaker | Fallback | Error Handling | Index Versioning</text>
-<rect class="gbar" x="10" y="482" width="1080" height="20" fill="rgba(251,146,60,0.07)" stroke="rgba(251,146,60,0.15)"/>
-<text class="gbar-t" x="22" y="496" fill="#fb923c">ECONOMICS</text><text class="gbar-t" x="115" y="496" fill="#8b949e">Token Cost/Stage | Cache Savings | Model Routing | Total Cost/Query | Chargeback</text>
-<defs><filter id="gl"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<!-- Bottom bars -->
+<rect x="10" y="380" width="1030" height="20" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.12)" rx="5"/>
+<text x="22" y="394" fill="#38bdf8" style="font-size:8px;font-weight:600">OPERATIONS</text><text x="115" y="394" fill="#8b949e" style="font-size:8px">Alert Rules | Dashboard Config | Retention Policy | Sampling Rate | OTel Export | SIEM Rules</text>
 </svg>
 </div>
 
-<!-- DETAIL PANEL (click any component) -->
-<div class="dp closed" id="dp">
-<div class="dp-h"><div class="dp-title" id="dp-title">Component</div><button class="dp-close" onclick="closeDetail()">&#10005;</button></div>
-<div class="dp-body" id="dp-body"></div>
-</div>
-
-<div class="rsp" id="rsp"><span class="rsp-c" id="rsp-c">---</span><span class="rsp-m" id="rsp-m">Click any component for details, or run a scenario</span><span class="rsp-$" id="rsp-$"></span></div>
-
+<div class="dp closed" id="dp"><div class="dp-h"><div class="dp-title" id="dp-title">Component</div><button class="dp-close" onclick="closeDetail()">&#10005;</button></div><div class="dp-body" id="dp-body"></div></div>
+<div class="rsp" id="rsp"><span class="rsp-c" id="rsp-c">---</span><span class="rsp-m" id="rsp-m">Click any dashboard panel, or run a scenario</span></div>
 <div class="brow">
 <div class="mets">
-<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-t" style="color:#34d399">0.02</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:2%;background:#34d399"></div></div><div class="met-n">Mean time to recover (MTTR)</div></div>
-<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-c" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:#34d399"></div></div><div class="met-n">Cascading failure rate</div></div>
-<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-e" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:1%;background:#34d399"></div></div><div class="met-n">Silent degradation (user unaware)</div></div>
-<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:rgba(52,211,153,0.12);color:#34d399">OK</span></div><div class="met-v" id="m-g" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:1%;background:#34d399"></div></div><div class="met-n">Resilience coverage gaps</div></div>
+<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-t" style="color:#34d399">0.02</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:2%;background:#34d399"></div></div><div class="met-n">Undetected issues</div></div>
+<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-c" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:#34d399"></div></div><div class="met-n">SLA violations</div></div>
+<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-e" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:1%;background:#34d399"></div></div><div class="met-n">Unobserved anomalies</div></div>
+<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:rgba(52,211,153,0.12);color:#34d399">OK</span></div><div class="met-v" id="m-g" style="color:#34d399">0.02</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:2%;background:#34d399"></div></div><div class="met-n">Observability gaps</div></div>
 </div>
-<div class="log"><div class="log-h"><span>Resilience Event Log</span><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
+<div class="log"><div class="log-h"><span>Resilience Log</span><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
 </div>
 <div class="footer"><a href="https://github.com/aman210122/ai-architecture-enterprise-patterns">GitHub</a> | <a href="https://linkedin.com/in/amansharmaarchitect">Aman Sharma</a> | <a href="https://github.com/aman210122/gaif-governance-observatory">GAIF Observatory</a></div>
 </div>
-
 <script>
 const $=id=>document.getElementById(id);const W=ms=>new Promise(r=>setTimeout(r,ms));let busy=false;
-
 const DETAILS={
-src:{title:'Data Sources',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Connects to document repositories, databases, APIs, and clinical systems',c:'info'},{t:'Supports incremental sync (CDC) and full sync modes',c:'info'},{t:'Schedules ingestion (cron, event-triggered, webhook)',c:'info'},{t:'Audits every source access for compliance trail',c:'info'}]},
-{title:'Configuration',items:[{t:'Connector: SharePoint, S3, GCS, FHIR, Confluence, databases',c:'ok'},{t:'Sync: incremental (CDC via Debezium) + full rebuild',c:'ok'},{t:'Schedule: cron (hourly) or event-driven (webhook)',c:'ok'},{t:'Auth: service principal, managed identity, API key (rotated)',c:'ok'},{t:'Freshness SLA: < 2h for clinical, < 24h for policies',c:'warn'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Data Factory, Blob Storage connectors',c:'plat'},{t:'AWS: Glue, S3, Lambda triggers',c:'plat'},{t:'GCP: Dataflow, Cloud Storage, Pub/Sub triggers',c:'plat'},{t:'Databricks: Auto Loader, Unity Catalog volumes',c:'plat'},{t:'OSS: Airbyte, custom Python connectors',c:'plat'}]}]},
-ext:{title:'Document Extraction',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Parses Response SLA, PPTX, Markdown, plain text',c:'info'},{t:'Preserves document structure: headings, lists, tables',c:'info'},{t:'Extracts metadata: author, date, title, classification',c:'info'},{t:'Handles encoding normalization and language detection',c:'info'}]},
-{title:'Configuration',items:[{t:'PDF: PyMuPDF / pdfplumber (text-based), Azure DI (scanned)',c:'ok'},{t:'DOCX: python-docx with style mapping',c:'ok'},{t:'HTML: Beautiful Soup with boilerplate removal',c:'ok'},{t:'Tables: preserve as markdown tables with headers',c:'ok'},{t:'Max file size: 50MB | Timeout: 60s per document',c:'warn'}]},
-{title:'Anti-Patterns',items:[{t:'Stripping all formatting (loses document structure)',c:'warn'},{t:'Ignoring table data (tables contain critical info)',c:'warn'},{t:'No language detection (mixing languages in one index)',c:'warn'},{t:'No metadata preservation (lose audit trail)',c:'warn'}]}]},
-proc:{title:'Document Processing',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'OCR for scanned documents and handwritten notes',c:'info'},{t:'Table structure extraction to markdown/JSON',c:'info'},{t:'Image captioning for diagrams and charts',c:'info'},{t:'DICOM medical image to clinical findings text',c:'info'},{t:'Chart data extraction (bar, line, pie to tabular data)',c:'info'}]},
-{title:'Configuration',items:[{t:'OCR: Tesseract (OSS) / Azure Document Intelligence / Textract',c:'ok'},{t:'Table: Camelot / Azure DI table extraction',c:'ok'},{t:'Images: GPT-4V captioning for complex diagrams',c:'ok'},{t:'DICOM: MONAI / custom radiology NLP',c:'ok'},{t:'Charts: ChartOCR / DePlot for data extraction',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'T1PR: OCR errors propagate as contamination downstream',c:'warn'},{t:'EMR: Bad OCR can cause hallucinated content',c:'warn'},{t:'GDR: OCR quality should be monitored over time',c:'warn'}]}]},
-chunk:{title:'Chunking Strategy',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Splits documents into retrieval-optimized segments',c:'info'},{t:'Preserves semantic boundaries (paragraphs, sections)',c:'info'},{t:'Adds overlap for context continuity across chunks',c:'info'},{t:'Attaches metadata per chunk (source, page, section)',c:'info'},{t:'Creates parent-child relationships for hierarchical retrieval',c:'info'}]},
-{title:'Configuration',items:[{t:'Strategy: semantic (paragraph-based) preferred over fixed-size',c:'ok'},{t:'Size: 512-1024 tokens (balance retrieval vs context)',c:'ok'},{t:'Overlap: 10-20% (ensures no context lost at boundaries)',c:'ok'},{t:'Metadata per chunk: source_id, page, section, doc_type',c:'ok'},{t:'Parent-child: summary chunk -> detail chunks',c:'ok'},{t:'Token counter: tiktoken for accurate token budgeting',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'Fixed 500-char splits (breaks mid-sentence)',c:'warn'},{t:'No overlap (loses context at chunk boundaries)',c:'warn'},{t:'Too large chunks (>2000t reduce retrieval precision)',c:'warn'},{t:'No metadata (cannot filter or trace back to source)',c:'warn'}]}]},
-emb:{title:'Embedding',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Converts text chunks into dense vector representations',c:'info'},{t:'Enables semantic similarity search across documents',c:'info'},{t:'Batch processing for ingestion, single-query for search',c:'info'}]},
-{title:'Configuration',items:[{t:'Model: text-embedding-3-large (OpenAI) / 3072 dimensions',c:'ok'},{t:'Alt: text-embedding-ada-002 (1536d, cheaper)',c:'ok'},{t:'Batch size: 100 chunks per API call',c:'ok'},{t:'Rate limit handling: exponential backoff',c:'ok'},{t:'Embedding cache: hash-based dedup (skip unchanged chunks)',c:'ok'},{t:'Cost: ~$0.00013 per 1K tokens',c:'ok'},{t:'Dimension reduction: Matryoshka (3072 -> 1024) for cost savings',c:'ok'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Azure OpenAI text-embedding-3-large',c:'plat'},{t:'AWS: Titan Embeddings V2 / Cohere Embed',c:'plat'},{t:'GCP: Vertex textembedding-gecko@003',c:'plat'},{t:'Databricks: DBRX Instruct embedding / BGE',c:'plat'},{t:'OSS: sentence-transformers all-MiniLM / BGE-large',c:'plat'}]}]},
-comp:{title:'Compliance Tagging',tag:'COMPLIANCE',tagColor:'#fbbf24',sections:[
-{title:'What It Does',items:[{t:'Detects PHI/PII across 18 HIPAA identifier types',c:'info'},{t:'Assigns sensitivity levels: Public, Internal, Confidential, Restricted',c:'info'},{t:'Applies access control labels per chunk for security trimming',c:'info'},{t:'Records compliance metadata for audit trail',c:'info'}]},
-{title:'PHI Detection (18 types)',items:[{t:'Names, dates, phone, fax, email, SSN, MRN',c:'warn'},{t:'Account numbers, license, VIN, device IDs',c:'warn'},{t:'URLs, IPs, biometric, photo, any unique identifier',c:'warn'},{t:'Redaction rules: mask, hash, or remove per sensitivity level',c:'warn'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Purview DLP + Presidio + Content Safety',c:'plat'},{t:'AWS: Macie + Comprehend Medical',c:'plat'},{t:'GCP: Cloud DLP API + Healthcare NLP',c:'plat'},{t:'Databricks: Presidio on Spark + Unity Catalog tags',c:'plat'},{t:'OSS: Presidio + spaCy NER + custom rules',c:'plat'}]}]},
-qual:{title:'Quality Validation',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Scores each chunk for quality before index insertion',c:'info'},{t:'Detects and removes duplicate/near-duplicate chunks',c:'info'},{t:'Analyzes coverage: are all source sections represented?',c:'info'},{t:'Rejects malformed chunks (too short, encoding errors, empty)',c:'info'}]},
-{title:'Configuration',items:[{t:'Min quality score: 0.70 (reject below)',c:'ok'},{t:'Dedup: MinHash LSH (similarity > 0.95 = duplicate)',c:'ok'},{t:'Min chunk length: 50 tokens (skip fragments)',c:'ok'},{t:'Max chunk length: 2048 tokens (split if exceeded)',c:'ok'},{t:'Coverage report: flag missing sections per source document',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'T1PR: bad chunks in = contaminated retrievals out',c:'warn'},{t:'GDR: quality should be measured per ingestion batch over time',c:'warn'}]}]},
-vs:{title:'Resilience Decision Engine',tag:'VECTOR STORE',tagColor:'#c084fc',sections:[
-{title:'What It Does',items:[{t:'Stores vector embeddings with compliance metadata',c:'info'},{t:'Enforces access control on every query (security trimming)',c:'info'},{t:'Supports hybrid search: dense vectors + sparse BM25',c:'info'},{t:'Versioned index: rollback to previous version on issues',c:'info'},{t:'Monitors data freshness: alert if stale > SLA threshold',c:'info'}]},
-{title:'Configuration',items:[{t:'Documents: 24.3K | Chunks: 186K | Dimensions: 3072',c:'ok'},{t:'Distance metric: cosine similarity',c:'ok'},{t:'Index version: v3.2 | Previous: v3.1 (rollback ready)',c:'ok'},{t:'Freshness SLA: < 2h | Current: 1.8h',c:'ok'},{t:'Access control model: attribute-based (role + department + clearance)',c:'ok'},{t:'Backup: daily snapshot + cross-region replication',c:'ok'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Azure AI Search (hybrid) + RBAC filters',c:'plat'},{t:'AWS: OpenSearch Serverless + fine-grained access',c:'plat'},{t:'GCP: Vertex AI Search + IAM conditions',c:'plat'},{t:'Databricks: Vector Search + Unity Catalog ACLs',c:'plat'},{t:'OSS: Qdrant + custom ACL middleware / Weaviate + RBAC',c:'plat'}]}]},
-qin:{title:'Query Input',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Sanitizes user input against prompt injection attacks',c:'info'},{t:'Authenticates user identity and extracts role/permissions',c:'info'},{t:'Checks rate limits (per-user, per-team, per-model)',c:'info'},{t:'Loads session context for multi-turn conversations',c:'info'}]},
-{title:'Configuration',items:[{t:'Injection detection: classifier model + regex patterns',c:'ok'},{t:'Auth: JWT token validation + role extraction',c:'ok'},{t:'Rate limit: 60/min per user, 600/min per team',c:'ok'},{t:'Max query length: 4096 tokens',c:'ok'},{t:'Session: load last 5 turns from session store',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'No injection detection (prompt injection is real and common)',c:'warn'},{t:'No rate limiting (one user can consume all capacity)',c:'warn'},{t:'Trusting user-provided role claims without verification',c:'warn'}]}]},
-cls:{title:'Query Classification',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Classifies query type to route retrieval strategy',c:'info'},{t:'Types: factual, analytical, comparison, how-to, conversational',c:'info'},{t:'Sets reranking weights and generation prompt per type',c:'info'}]},
-{title:'Routing Rules',items:[{t:'Factual: standard hybrid search, high precision',c:'ok'},{t:'Analytical: broader search, more chunks, synthesis prompt',c:'ok'},{t:'Comparison: multi-query expansion, diversity reranking',c:'ok'},{t:'How-to: step-by-step prompt template, ordered retrieval',c:'ok'},{t:'Conversational: history-aware rewrite, session context',c:'ok'},{t:'Cache check: exact + semantic similarity before retrieval',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'Wrong classification leads to wrong strategy leads to bad answers',c:'warn'},{t:'EMR: analytical query classified as factual may hallucinate',c:'warn'}]}]},
-enh:{title:'Query Enhancement',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Rewrites query for better retrieval (not better generation)',c:'info'},{t:'HyDE: generates hypothetical answer, embeds that instead of query',c:'info'},{t:'Multi-query: generates 3 alternative phrasings, retrieves for all',c:'info'},{t:'History-aware: resolves pronouns from conversation history',c:'info'}]},
-{title:'Techniques',items:[{t:'HyDE (Hypothetical Document Embeddings): best for factual',c:'ok'},{t:'Step-back prompting: generalize query, then search broader',c:'ok'},{t:'Multi-query expansion: 3 rephrased queries, union results',c:'ok'},{t:'Synonym expansion: medical terminology variants',c:'ok'},{t:'Pronoun resolution: "it" -> actual entity from history',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'Enhancing without classification (wrong technique for query type)',c:'warn'},{t:'Too many expansions (increases cost without improving quality)',c:'warn'},{t:'No history awareness (follow-up queries fail)',c:'warn'}]}]},
-ret:{title:'Retrieval',tag:'RETRIEVAL',tagColor:'#c084fc',sections:[
-{title:'What It Does',items:[{t:'Searches vector store using hybrid: dense vector + sparse BM25',c:'info'},{t:'Applies access control filter (security trimming by user role)',c:'info'},{t:'Applies metadata filters (date range, document type, department)',c:'info'},{t:'Enforces source diversity (not all chunks from one document)',c:'info'}]},
-{title:'Configuration',items:[{t:'Top-K: 20 candidates (reduced to 5 after reranking)',c:'ok'},{t:'Hybrid: 0.7 * vector_score + 0.3 * BM25_score',c:'ok'},{t:'Security trim: filter by user.role, user.department, chunk.sensitivity',c:'ok'},{t:'Source diversity: max 3 chunks per source document',c:'ok'},{t:'Min similarity: 0.50 (below = discard)',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'T1PR: contaminated chunks retrieved = contamination passes filter',c:'warn'},{t:'This is where T1PR is measured: how many bad chunks get through?',c:'warn'},{t:'Security trimming failure = CFR violation (wrong data to wrong user)',c:'warn'}]}]},
-rer:{title:'Reranking',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Cross-encoder reranks 20 candidates to pick top 5',c:'info'},{t:'More accurate than embedding similarity (but slower)',c:'info'},{t:'Applies diversity sampling and recency boost',c:'info'}]},
-{title:'Configuration',items:[{t:'Model: Cohere Rerank v3 / BGE-reranker-large',c:'ok'},{t:'Relevance threshold: 0.70 (below = discard)',c:'ok'},{t:'Diversity: max 2 chunks from same source in top 5',c:'ok'},{t:'Recency boost: +0.05 for documents < 30 days old',c:'ok'},{t:'Latency: ~100ms for 20 candidates',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'No reranking (embedding similarity is not enough for quality)',c:'warn'},{t:'No diversity (all 5 chunks from same document = narrow answer)',c:'warn'},{t:'Threshold too low (irrelevant chunks reach generation)',c:'warn'}]}]},
-ctx:{title:'Context Assembly',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Constructs the complete prompt: system + chunks + query',c:'info'},{t:'Manages token budget across all prompt components',c:'info'},{t:'Injects citation format instructions',c:'info'},{t:'Adds conversation history for multi-turn',c:'info'}]},
-{title:'Token Budget',items:[{t:'Max context window: 128K tokens (GPT-4o)',c:'ok'},{t:'System prompt: 500 tokens (instructions + format)',c:'ok'},{t:'Retrieved chunks: 4,000 tokens (5 chunks avg)',c:'ok'},{t:'Conversation history: 2,000 tokens (last 5 turns)',c:'ok'},{t:'User query: 100 tokens (typical)',c:'ok'},{t:'Reserved for output: 4,000 tokens',c:'ok'},{t:'Total budget used: ~10,600 of 128K available',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'No token budgeting (context overflow truncates chunks silently)',c:'warn'},{t:'Chunks before system prompt (model ignores late instructions)',c:'warn'},{t:'No citation format in prompt (model invents citation styles)',c:'warn'}]}]},
-gen:{title:'LLM Generation',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Generates grounded answer using retrieved chunks as context',c:'info'},{t:'Injects citations [1][2][3] referencing source chunks',c:'info'},{t:'Formats response per query type (paragraph, table, steps)',c:'info'},{t:'Streams output for low perceived latency',c:'info'}]},
-{title:'Configuration',items:[{t:'Model: GPT-4o (default) / Claude Sonnet (fallback)',c:'ok'},{t:'Temperature: 0.1 (factual) | 0.3 (analytical)',c:'ok'},{t:'Max output tokens: 4,096',c:'ok'},{t:'Streaming: enabled (first token < 200ms)',c:'ok'},{t:'System prompt version: v4.2 (versioned in git)',c:'ok'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Azure OpenAI GPT-4o (PTU or paygo)',c:'plat'},{t:'AWS: Bedrock Claude / Bedrock Llama',c:'plat'},{t:'GCP: Gemini 1.5 Pro via Vertex AI',c:'plat'},{t:'Databricks: DBRX / external via Mosaic AI Gateway',c:'plat'},{t:'OSS: vLLM serving Llama / Mistral',c:'plat'}]}]},
-grd:{title:'Guardrails',tag:'COMPLIANCE',tagColor:'#fbbf24',sections:[
-{title:'What It Does',items:[{t:'Groundedness check: every claim must trace to a source chunk',c:'info'},{t:'PHI leak detection: scan output for patient identifiers',c:'info'},{t:'Citation verification: all [N] references must map to real chunks',c:'info'},{t:'Content safety: toxicity, harmful advice, off-topic detection',c:'info'},{t:'Hallucination classifier: flag claims not supported by context',c:'info'}]},
-{title:'Thresholds',items:[{t:'Groundedness: > 0.85 required (block below)',c:'ok'},{t:'PHI scan: zero tolerance (any PHI = block)',c:'ok'},{t:'Citations: 100% must map to actual source chunks',c:'ok'},{t:'Content safety: block harmful medical/legal/financial advice',c:'ok'},{t:'Hallucination: flag if confidence < 0.70 on any claim',c:'ok'}]},
-{title:'GAIF-4 (this is where EMR is measured)',items:[{t:'EMR: hallucinated content that was NOT in any source chunk',c:'warn'},{t:'CFR: PHI leaked in output = compliance failure',c:'warn'},{t:'This gate is the last line of defense before the user sees output',c:'warn'}]}]}
+qual:{title:'Quality Panel',tag:'METRIC',tagColor:'#10b981',sections:[{title:'What It Tracks',items:[{t:'All requests pass through response',c:'ok'},{t:'5-point rubric: groundedness, relevance, safety',c:'ok'},{t:'Baseline: 0.91 (established from last 30 days)',c:'ok'}]},{title:'Thresholds',items:[{t:'Green: > 0.85 (current: 0.91)',c:'ok'},{t:'Yellow: 0.80 - 0.85 (investigation needed)',c:'warn'},{t:'Red: < 0.80 (auto-rollback triggered)',c:'warn'}]}]},
+lat:{title:'Latency Panel',tag:'METRIC',tagColor:'#3b82f6',sections:[{title:'What It Tracks',items:[{t:'P50, P95, P99 response time per model per endpoint',c:'info'},{t:'Broken down: classification + retrieval + generation + guardrails',c:'info'},{t:'SLA: P95 < 4.0s for production endpoints',c:'info'}]},{title:'Current Values',items:[{t:'P50: 1.2s (typical user experience)',c:'ok'},{t:'P95: 2.1s (95th percentile, within SLA)',c:'ok'},{t:'P99: 3.8s (tail latency, acceptable)',c:'ok'}]},{title:'Per-Stage Breakdown',items:[{t:'Classification: 50ms | Retrieval: 200ms',c:'ok'},{t:'Generation: 1.5s | Guardrails: 150ms',c:'ok'},{t:'Overhead: 200ms (gateway, auth, logging)',c:'ok'}]}]},
+costpanel:{title:'Cost Panel',tag:'METRIC',tagColor:'#f97316',sections:[{title:'What It Tracks',items:[{t:'Daily AI spend across all models and infrastructure',c:'info'},{t:'Budget utilization with alert thresholds',c:'info'},{t:'Per-team allocation and chargeback',c:'info'}]},{title:'Current',items:[{t:'Daily: $412 (82% of $500 budget)',c:'ok'},{t:'Monthly projected: $12,360 (82% of $15K)',c:'ok'},{t:'Cache savings: $87/day ($2,610/month)',c:'ok'}]},{title:'Alerts',items:[{t:'80%: informational | 90%: warning | 100%: hard cap',c:'warn'}]}]},
+driftpanel:{title:'Drift + Safety Panel',tag:'METRIC',tagColor:'#8b5cf6',sections:[{title:'What It Tracks',items:[{t:'Cache -> static -> safe default(weekly trend)',c:'info'},{t:'Deadlock break: ungrounded claims per 1K queries',c:'info'},{t:'Topic drift: queries shifting to untrained domains',c:'info'},{t:'Safety incidents: zero-tolerance tracking',c:'info'}]},{title:'Current',items:[{t:'GDR: 0.02 (stable, threshold 0.05)',c:'ok'},{t:'Hallucination: 2.1% (baseline 2.0%, normal variance)',c:'ok'},{t:'Topic drift: none detected',c:'ok'},{t:'Safety incidents: 0 this month',c:'ok'}]},{title:'Detection',items:[{t:'Circuit break: 7-day rolling average comparison',c:'ok'},{t:'Topic drift: embed queries, cluster, detect shift',c:'ok'},{t:'Model drift: provider silent update detection',c:'ok'}]}]},
+alerts:{title:'Live Alert Feed',tag:'ALERTS',tagColor:'#c9d1d9',sections:[{title:'Alert Sources',items:[{t:'Quality: sampled every 5 minutes on production traffic',c:'info'},{t:'Latency: real-time P95 monitoring per endpoint',c:'info'},{t:'Cost: daily spend tracking with hourly projections',c:'info'},{t:'Drift: weekly rolling average with daily checks',c:'info'}]},{title:'Alert Routing',items:[{t:'INFO: logged, no notification',c:'ok'},{t:'WARNING: Slack alert to team lead',c:'warn'},{t:'CRITICAL: PagerDuty to on-call + auto-mitigate',c:'warn'}]},{title:'Auto-Mitigation',items:[{t:'Quality < 0.80: auto-rollback to previous version',c:'warn'},{t:'Latency > 8s: auto-scale compute',c:'warn'},{t:'Cost > 100%: throttle non-critical queries',c:'warn'}]}]},
+integrations:{title:'Monitoring Integrations',tag:'INTEGRATIONS',tagColor:'#38bdf8',sections:[{title:'Standard Protocols',items:[{t:'OpenTelemetry: AI-specific spans + metrics exported',c:'ok'},{t:'Custom OTel attributes: tokens, model, prompt_version, quality',c:'ok'},{t:'Standard OTLP export to any OTel-compatible backend',c:'ok'}]},{title:'Enterprise SIEM',items:[{t:'Splunk: AI security events + custom dashboards',c:'plat'},{t:'Sentinel: Azure native, AI analytics rules',c:'plat'},{t:'Chronicle: GCP native, threat detection',c:'plat'}]},{title:'APM Integration',items:[{t:'Datadog: custom metrics + AI-specific dashboards',c:'plat'},{t:'New Relic: AI observability plugin',c:'plat'},{t:'App Insights: Azure native, deep integration',c:'plat'}]}]},
+models:{title:'Model Performance Comparison',tag:'COMPARISON',tagColor:'#c9d1d9',sections:[{title:'Live Comparison',items:[{t:'gpt-4o: quality 0.93, P95 2.1s, $0.018/call, 11K calls/day',c:'info'},{t:'claude-sonnet: quality 0.95, P95 1.6s, $0.008/call, 9K calls/day',c:'info'},{t:'claude-haiku: quality 0.87, P95 0.4s, $0.001/call, 34K calls/day',c:'info'}]},{title:'Insights',items:[{t:'claude-sonnet: best quality + best cost (recommended for reasoning)',c:'ok'},{t:'claude-haiku: best for simple tasks (80% of queries)',c:'ok'},{t:'gpt-4o: good but more expensive than claude-sonnet',c:'warn'}]},{title:'Action',items:[{t:'Consider swapping gpt-4o reasoning to claude-sonnet',c:'warn'},{t:'Potential savings: $120/day ($43.8K/year)',c:'warn'}]}]}
 };
-
-function detail(id){const d=DETAILS[id];if(!d)return;const dp=$('dp');$('dp-title').innerHTML=`${d.title} <span class="dp-tag" style="background:${d.tagColor}22;color:${d.tagColor}">${d.tag}</span>`;
-let html='';d.sections.forEach(s=>{html+=`<div class="dp-sec"><div class="dp-sec-t">${s.title}</div>`;s.items.forEach(i=>{html+=`<div class="dp-it ${i.c}">${i.t}</div>`});html+='</div>'});
-$('dp-body').innerHTML=html;dp.className='dp open'}
+function detail(id){const d=DETAILS[id];if(!d)return;$('dp-title').innerHTML=`${d.title} <span class="dp-tag" style="background:${d.tagColor}22;color:${d.tagColor}">${d.tag}</span>`;let h='';d.sections.forEach(s=>{h+=`<div><div class="dp-sec-t">${s.title}</div>`;s.items.forEach(i=>{h+=`<div class="dp-it ${i.c}">${i.t}</div>`});h+='</div>'});$('dp-body').innerHTML=h;$('dp').className='dp open'}
 function closeDetail(){$('dp').className='dp closed'}
-
-// Diagram interaction
-const IB=['b-src','b-ext','b-proc','b-chunk','b-emb','b-comp','b-qual'];
-const QB=['b-qin','b-cls','b-enh','b-ret','b-rer','b-ctx','b-gen','b-grd','b-rsp'];
-const DB=['d-src','d-ext','d-proc','d-chunk','d-emb','d-comp','d-qual','d-qin','d-cls','d-enh','d-ret','d-rer','d-ctx','d-gen','d-grd'];
-const IA=['ai1','ai2','ai3','ai4','ai5','ai6','ai7'];
-const QA=['aq1','aq2','aq3','aq4','aq5','aq6','aq7','aq8','aq-vs'];
-
-function log(tp,msg){const el=$('logB');const now=new Date();const ts=now.toLocaleTimeString('en-US',{hour12:false})+'.'+String(now.getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lr-t">${ts}</span><span class="lr-p ${tp}">${tp}</span><span class="lr-m">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>50)el.removeChild(el.lastChild)}
+function log(tp,msg){const el=$('logB');const ts=new Date().toLocaleTimeString('en-US',{hour12:false});const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lr-t">${ts}</span><span class="lr-p ${tp}">${tp.toUpperCase()}</span><span class="lr-m">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>40)el.removeChild(el.lastChild)}
 function clearLog(){$('logB').innerHTML=''}
 function hlB(id){$(id)?.classList.add('hl')}
-function dimB(id){$(id)?.classList.add('dim')}
-function hlD(id){const e=$(id);if(e){e.setAttribute('fill','#34d399');e.setAttribute('opacity','1')}}
-function erD(id){const e=$(id);if(e){e.setAttribute('fill','#f87171');e.setAttribute('opacity','1')}}
-function litA(id,c){$(id)?.classList.add(c||'li-i')}
-function rst(){[...IB,...QB,'b-vs'].forEach(id=>{const e=$(id);if(e){e.classList.remove('hl','dim');e.style.stroke=''}});DB.forEach(id=>{const e=$(id);if(e){e.setAttribute('fill','#8b949e');e.setAttribute('opacity','0.2')}});[...IA,...QA,'a-cache','a-fb'].forEach(id=>{const e=$(id);if(e)e.className='arr'});$('a-cache').style.opacity='0.08';$('cache-lbl').style.opacity='0.25';$('a-fb').style.opacity='0.08';$('fb-lbl').style.opacity='0.2';$('rsp').className='rsp';$('rsp-c').textContent='---';$('rsp-m').textContent='';$('rsp-$').textContent=''}
-function resp(c,code,msg,cost){$('rsp').className='rsp '+c;$('rsp-c').textContent=code;$('rsp-m').textContent=msg;$('rsp-$').textContent=cost||''}
+function rst(){['p-qual','p-lat','p-cost','p-drift','p-alerts','p-integrations','p-models'].forEach(id=>{$(id)?.classList.remove('hl')});$('q-val').textContent='0.91';$('q-val').style.fill='#34d399';$('l-val').textContent='2.1s';$('l-val').style.fill='#60a5fa';$('c-val').textContent='$412';$('c-val').style.fill='#fb923c';$('d-val').textContent='0.02';$('d-val').style.fill='#a78bfa';$('q-trend').textContent='Trend: stable (no drift)';$('l-trend').textContent='SLA: < 4.0s (within target)';$('c-trend').textContent='Trend: +2%/week (normal growth)';$('d-trend').textContent='Topic drift: none detected';$('rsp').className='rsp';$('rsp-c').textContent='---';$('rsp-m').textContent=''}
+function resp(c,code,msg){$('rsp').className='rsp '+c;$('rsp-c').textContent=code;$('rsp-m').textContent=msg}
 function sM(t,c,e,g){const mk=(id,v,thL,thH,safe)=>{$(id).textContent=v.toFixed(2);const f=id.replace('m-','mf-'),b=id.replace('m-','mb-');const ok=v<=thL,mid=v<=thH;$(f).style.width=Math.min(v*500,100)+'%';$(f).style.background=ok?'#34d399':mid?'#fbbf24':'#f87171';$(id).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171';$(b).textContent=ok?safe:mid?'WARN':'CRIT';$(b).style.background=ok?'rgba(52,211,153,0.12)':mid?'rgba(251,191,36,0.12)':'rgba(248,113,113,0.12)';$(b).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171'};mk('m-t',t,0.05,0.15,'SAFE');mk('m-c',c,0.005,0.01,'SAFE');mk('m-e',e,0.05,0.15,'SAFE');mk('m-g',g,0.03,0.05,'OK')}
-function resetAll(){if(busy)return;rst();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));sM(0.02,0.00,0.01,0.01)}
-
+function resetAll(){if(busy)return;rst();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));sM(0.02,0.00,0.01,0.02)}
 async function run(t){if(busy)return;busy=true;document.querySelectorAll('.sc-btn').forEach(b=>{b.classList.remove('active');b.disabled=true});$('btn-'+t).classList.add('active');rst();closeDetail();
-if(t==='clean')await fClean();else if(t==='phi')await fPhi();else if(t==='halluc')await fHalluc();else if(t==='cache')await fCache();else if(t==='fail')await fFail();
+if(t==='healthy')await fHealthy();else if(t==='drift')await fDrift();else if(t==='spike')await fSpike();else if(t==='cost')await fCost();else if(t==='halluc')await fHalluc();
 document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
-
-async function fClean(){
-log('q','Query: "What is the prior authorization process for specialty medications?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');
-hlB('b-cls');hlD('d-cls');log('q','Type: FACTUAL | Strategy: hybrid');await W(180);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');log('q','HyDE + 3 multi-query expansions');await W(180);litA('aq3','li-q');
-litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');hlD('d-ret');log('v','20 candidates | cosine>0.78 | 18/20 accessible');await W(200);litA('aq4','li-q');
-hlB('b-rer');hlD('d-rer');log('q','Top-5 | relevance 0.91-0.97');await W(180);litA('aq5','li-q');
-hlB('b-ctx');hlD('d-ctx');log('q','sys(480t)+chunks(3847t)+query(42t)=4369t');await W(160);litA('aq6','li-q');
-hlB('b-gen');hlD('d-gen');log('q','GPT-4o | 847t | temp 0.1 | 4 citations');await W(200);litA('aq7','li-q');
-hlB('b-grd');hlD('d-grd');log('ok','Ground:0.96 | PHI:clear | Cite:4/4');await W(180);litA('aq8','li-q');
-hlB('b-rsp');$('a-fb').style.opacity='0.4';$('fb-lbl').style.opacity='0.5';
-log('ec','embed $0.0002 + retrieve $0.0001 + generate $0.0089 = $0.0092');
-resp('ok','200 OK','4 citations | groundedness 0.96 | 1.8s','$0.0092');sM(0.02,0.00,0.01,0.01)}
-
-async function fPhi(){
-log('q','Query: "Show patient records for diabetes management"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');hlB('b-cls');hlD('d-cls');await W(160);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');await W(160);litA('aq3','li-q');litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');hlD('d-ret');log('v','20 candidates');await W(180);
-log('er','PHI: 6/20 chunks contain patient identifiers');await W(180);
-log('g','Filtering 6 PHI chunks | redacting 2 partial');await W(160);
-$('b-ret').style.stroke='#fbbf24';litA('aq4','li-q');
-hlB('b-rer');hlD('d-rer');log('q','Top-5 from de-identified pool');await W(180);litA('aq5','li-q');
-hlB('b-ctx');hlD('d-ctx');await W(160);litA('aq6','li-q');
-hlB('b-gen');hlD('d-gen');await W(200);litA('aq7','li-q');
-hlB('b-grd');hlD('d-grd');log('ok','PHI output: CLEAR | Ground: 0.93');await W(180);litA('aq8','li-q');hlB('b-rsp');
-resp('wn','200 OK','6 PHI chunks filtered | de-identified only | HIPAA compliant','$0.0094');sM(0.02,0.00,0.01,0.01)}
-
-async function fHalluc(){
-log('q','Query: "Dosage limits for metformin in elderly?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');hlB('b-cls');hlD('d-cls');await W(160);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');await W(160);litA('aq3','li-q');litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');hlD('d-ret');log('w','LOW: top score 0.74');await W(200);litA('aq4','li-q');
-hlB('b-rer');hlD('d-rer');log('w','Avg relevance 0.72 (target 0.80)');await W(180);litA('aq5','li-q');
-hlB('b-ctx');hlD('d-ctx');await W(160);litA('aq6','li-q');
-hlB('b-gen');hlD('d-gen');log('q','Model produced dosage from weak context');await W(200);litA('aq7','li-q');
-hlB('b-grd');log('er','GROUND: 0.41 (need 0.85) FAIL');await W(180);
-log('er','HALLUC: "2500mg max for >80" NOT in sources');
-erD('d-grd');$('b-grd').style.stroke='#f87171';$('b-gen').style.stroke='#f87171';erD('d-gen');dimB('b-rsp');
-resp('er','BLOCKED','Hallucination: groundedness 0.41 | fabricated dosage','$0.0078');sM(0.02,0.00,0.12,0.01)}
-
-async function fCache(){
-log('q','Query: "What is our PTO policy?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');
-hlB('b-cls');hlD('d-cls');log('q','CACHE HIT: similarity 0.98');await W(200);
-$('a-cache').style.opacity='0.7';$('a-cache').style.stroke='#c084fc';$('a-cache').classList.add('li-v');$('cache-lbl').style.opacity='0.9';
-['b-enh','b-ret','b-rer','b-ctx','b-gen'].forEach(dimB);
-hlB('b-vs');hlB('b-grd');hlD('d-grd');litA('aq8','li-q');hlB('b-rsp');
-log('ec','Cost: $0.0000 | 0.12s vs 1.8s');
-resp('ok','200 (Cached)','Cache hit | 0.12s | $0.00','$0.0000');sM(0.02,0.00,0.01,0.01)}
-
-async function fFail(){
-log('q','Query: "Quantum computing strategy for 2027?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');hlB('b-cls');hlD('d-cls');await W(160);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');await W(160);litA('aq3','li-q');litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');log('er','0 chunks above 0.70 | best: 0.34');await W(200);
-erD('d-ret');$('b-ret').style.stroke='#f87171';['b-rer','b-ctx','b-gen'].forEach(dimB);
-log('w','FALLBACK: keyword search | 0 results');await W(180);
-log('w','Returning "no information available"');
-hlB('b-grd');hlD('d-grd');litA('aq8','li-q');hlB('b-rsp');
-resp('wn','200 (No Results)','0 relevant chunks | safe fallback','$0.0003');sM(0.02,0.00,0.00,0.01)}
-</script>
-</body>
-</html>
+async function fHealthy(){log('ql','Dashboard refresh: all metrics healthy');hlB('p-qual');await W(200);hlB('p-lat');await W(200);hlB('p-cost');await W(200);hlB('p-drift');await W(200);hlB('p-alerts');log('ok','Quality 0.91, Latency P95 2.1s, Cost $412 (82%), GDR 0.02');resp('ok','ALL GREEN','4 panels healthy | 0 alerts | all SLAs met')}
+async function fDrift(){log('dr','Circuit break detection triggered');hlB('p-qual');await W(300);$('q-val').textContent='0.84';$('q-val').style.fill='#f87171';$('q-trend').textContent='DRIFT: -0.01/day for 7 days';$('p-qual').style.stroke='#f87171';await W(300);hlB('p-drift');$('d-val').textContent='0.06';$('d-val').style.fill='#f87171';$('d-trend').textContent='GDR ALERT: governance decay detected';$('p-drift').style.stroke='#f87171';await W(200);log('er','Root cause: model provider silent update degraded quality');hlB('p-alerts');$('al1').textContent='NOW  CRIT  Quality dropped 0.91 -> 0.84 (drift)';$('al1').style.fill='#f87171';resp('er','CLOSED DRIFT','0.91 -> 0.84 over 7 days | model provider update | triggering re-eval');sM(0.02,0.00,0.04,0.06)}
+async function fSpike(){log('lt','Latency anomaly detected');hlB('p-lat');await W(300);$('l-val').textContent='7.8s';$('l-val').style.fill='#f87171';$('l-trend').textContent='SLA BREACH: P95 7.8s > 4.0s target';$('p-lat').style.stroke='#f87171';await W(300);log('er','P95 latency spiked: 2.1s -> 7.8s (model provider throttling)');hlB('p-alerts');$('al1').textContent='NOW  CRIT  Latency P95 7.8s (SLA: 4.0s)';$('al1').style.fill='#f87171';await W(200);log('lt','Auto-scale: provisioning additional inference endpoints');resp('er','HALF-OPEN SPIKE','P95: 2.1s -> 7.8s | SLA breach | auto-scaling triggered');sM(0.02,0.01,0.01,0.02)}
+async function fCost(){log('ct','Failover chain detected');hlB('p-cost');await W(300);$('c-val').textContent='$847';$('c-val').style.fill='#f87171';$('c-trend').textContent='ANOMALY: 169% of budget (runaway loop)';$('p-cost').style.stroke='#f87171';await W(300);log('er','Cost spike: $412 -> $847 (claims agent retry loop)');hlB('p-alerts');$('al1').textContent='NOW  CRIT  Cost $847 (169% of budget)';$('al1').style.fill='#f87171';resp('er','OPEN ANOMALY','$412 -> $847 | runaway agent loop | circuit breaker triggered');sM(0.02,0.01,0.03,0.02)}
+async function fHalluc(){log('ql','Deadlock break increase detected');hlB('p-qual');hlB('p-drift');await W(300);$('d-detail').textContent='Deadlock break: 8.3% (baseline 2.1%)';$('d-val').textContent='0.08';$('d-val').style.fill='#fbbf24';$('p-drift').style.stroke='#fbbf24';await W(300);log('wn','Deadlock break: 2.1% -> 8.3% (4x increase)');log('wn','Correlates with vector index staleness (last refresh: 72h ago)');hlB('p-alerts');$('al1').textContent='NOW  WARN  Deadlock break 8.3% (4x baseline)';$('al1').style.fill='#fbbf24';resp('wn','HALLUCINATION','Rate: 2.1% -> 8.3% | vector index stale (72h) | triggering refresh');sM(0.02,0.00,0.08,0.03)}
+</script></body></html>
