@@ -1,5 +1,5 @@
 # A2A Protocol
-**Agent-to-agent via agent cards.**
+**Google Agent-to-Agent delegation through agent cards with capability discovery.**
 ## [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/04-agentic-tool-governance/a2a-protocol/index.html)
-SVG diagram. Click components for details. 5 scenarios with per-tool cost, GAIF-4 metrics.
+Unique SVG: tool registry grid with health dots, shield authorization gate, 8-stage invocation chain. 5 scenarios: authorized call, permission denied, side effect flagged, tool chain, timeout.
 *[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

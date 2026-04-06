@@ -60,7 +60,7 @@ svg text{font-family:'Plus Jakarta Sans',sans-serif}
 </head>
 <body>
 <div class="pg">
-<div class="hdr"><div class="hdr-badge">Pattern 03</div><div><h1>Reflection Loop Pipeline</h1><p>Agent reviews its own output iteratively. Generate, evaluate, revise until quality threshold met.</p></div></div>
+<div class="hdr"><div class="hdr-badge">Pattern 03</div><div><h1>Memory Governance Pipeline</h1><p>Govern what agents remember. Access control on memories, GDPR deletion rights, retention policies, memory isolation.</p></div></div>
 
 <div class="sc-bar">
 <button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--ok)"></div>Clean pipeline</button>
@@ -112,9 +112,9 @@ svg text{font-family:'Plus Jakarta Sans',sans-serif}
 
 <!-- AGENT 1 (warm orange, larger) -->
 <rect class="box" id="b-a1" x="120" y="180" width="140" height="94" fill="#1c2333" stroke="#e8943a" onclick="detail('a1')"/>
-<text class="bx-t" x="190" y="200" fill="#e8943a">Generator</text>
+<text class="bx-t" x="190" y="200" fill="#e8943a">Memory Writer</text>
 <text class="model-tag" x="190" y="212" id="m-a1">claude-haiku</text>
-<text class="bx-s" x="190" y="226">Initial draft</text><text class="bx-s" x="190" y="238">Best-effort v1</text>
+<text class="bx-s" x="190" y="226">Store new memory</text><text class="bx-s" x="190" y="238">Scoped write</text>
 <text class="cost-tag" x="190" y="255" id="c-a1">--</text>
 <text class="hint" x="253" y="268">&#9432; details</text>
 
@@ -122,7 +122,7 @@ svg text{font-family:'Plus Jakarta Sans',sans-serif}
 
 <!-- GATE 1 (hexagonal shape - visually distinct from agents) -->
 <polygon class="gate-hex" id="g1" points="315,182 345,195 345,258 315,272 285,258 285,195" fill="#161b22" stroke="#22b8cf" onclick="detail('g1')"/>
-<text class="gt-t" x="315" y="222" fill="#22b8cf">Qual 1</text>
+<text class="gt-t" x="315" y="222" fill="#22b8cf">Access</text>
 <text class="gt-s" x="315" y="236" fill="#67e8f9" id="gv1">T1PR</text>
 <text class="gt-s" x="315" y="248" fill="#8b949e" id="gs1">--</text>
 
@@ -133,9 +133,9 @@ svg text{font-family:'Plus Jakarta Sans',sans-serif}
 
 <!-- AGENT 2 -->
 <rect class="box" id="b-a2" x="370" y="180" width="140" height="94" fill="#1c2333" stroke="#e8943a" onclick="detail('a2')"/>
-<text class="bx-t" x="440" y="200" fill="#e8943a">Self-Evaluator</text>
+<text class="bx-t" x="440" y="200" fill="#e8943a">Memory Auditor</text>
 <text class="model-tag" x="440" y="212" id="m-a2">gpt-4o</text>
-<text class="bx-s" x="440" y="226">Score own output</text><text class="bx-s" x="440" y="238">Quality rubric</text>
+<text class="bx-s" x="440" y="226">Check compliance</text><text class="bx-s" x="440" y="238">Retention rules</text>
 <text class="cost-tag" x="440" y="255" id="c-a2">--</text>
 <text class="hint" x="503" y="268">&#9432; details</text>
 
@@ -143,7 +143,7 @@ svg text{font-family:'Plus Jakarta Sans',sans-serif}
 
 <!-- GATE 2 -->
 <polygon class="gate-hex" id="g2" points="565,182 595,195 595,258 565,272 535,258 535,195" fill="#161b22" stroke="#22b8cf" onclick="detail('g2')"/>
-<text class="gt-t" x="565" y="222" fill="#22b8cf">Qual 2</text>
+<text class="gt-t" x="565" y="222" fill="#22b8cf">Retain</text>
 <text class="gt-s" x="565" y="236" fill="#67e8f9" id="gv2">T1PR</text>
 <text class="gt-s" x="565" y="248" fill="#8b949e" id="gs2">--</text>
 <text x="565" y="288" text-anchor="middle" fill="#8b949e" style="font-size:6px;opacity:0" id="gp2"></text>
@@ -152,9 +152,9 @@ svg text{font-family:'Plus Jakarta Sans',sans-serif}
 
 <!-- AGENT 3 -->
 <rect class="box" id="b-a3" x="620" y="180" width="140" height="94" fill="#1c2333" stroke="#e8943a" onclick="detail('a3')"/>
-<text class="bx-t" x="690" y="200" fill="#e8943a">Reviser</text>
+<text class="bx-t" x="690" y="200" fill="#e8943a">Memory Enforcer</text>
 <text class="model-tag" x="690" y="212" id="m-a3">gpt-4o</text>
-<text class="bx-s" x="690" y="226">Apply fixes</text><text class="bx-s" x="690" y="238">Improved version</text>
+<text class="bx-s" x="690" y="226">Apply policies</text><text class="bx-s" x="690" y="238">GDPR enforce</text>
 <text class="cost-tag" x="690" y="255" id="c-a3">--</text>
 <text class="hint" x="753" y="268">&#9432; details</text>
 
@@ -224,11 +224,11 @@ state:{title:'State Management',tag:'ORCHESTRATOR',tagColor:'#818cf8',sections:[
 mem:{title:'Agent Memory',tag:'ORCHESTRATOR',tagColor:'#818cf8',sections:[{title:'What It Does',items:[{t:'Short-term: context within this pipeline execution',c:'info'},{t:'Long-term: persistent across invocations',c:'info'},{t:'Shared vs isolated: configurable per agent pair',c:'info'}]},{title:'Configuration',items:[{t:'Short-term: in-memory, cleared after pipeline completes',c:'ok'},{t:'Long-term: vector store with agent-scoped namespace',c:'ok'},{t:'Isolation: Agent 1 cannot read Agent 2 memory (default)',c:'ok'},{t:'Shared: explicitly configured for approved pairs only',c:'warn'}]},{title:'GAIF-4 (EMG finding)',items:[{t:'Shared memory is a contamination vector',c:'warn'},{t:'EMG research: collective delusion spreads through shared context',c:'warn'},{t:'Isolation prevents cross-agent contamination percolation',c:'warn'}]}]},
 cfg:{title:'Agent Configuration',tag:'ORCHESTRATOR',tagColor:'#818cf8',sections:[{title:'What It Does',items:[{t:'Defines agent roles, system prompts, model selection per agent',c:'info'},{t:'Versioned prompts tracked in git, rollback capable',c:'info'},{t:'Per-agent token limits, temperature, tool permissions',c:'info'}]},{title:'Current Configuration',items:[{t:'Agent 1: claude-haiku | extractor | 2048t | temp 0.1 | $0.001/call',c:'ok'},{t:'Agent 2: gpt-4o | analyzer | 4096t | temp 0.2 | $0.018/call',c:'ok'},{t:'Agent 3: gpt-4o | synthesizer | 4096t | temp 0.1 | $0.012/call',c:'ok'},{t:'Each agent has a backup model for failover',c:'ok'}]},{title:'Anti-Patterns',items:[{t:'Same model for all agents (no cost optimization)',c:'warn'},{t:'No prompt versioning (cannot rollback bad prompts)',c:'warn'},{t:'No failover model configured (single point of failure)',c:'warn'}]}]},
 req:{title:'Request Input',tag:'EXECUTION',tagColor:'#c9d1d9',sections:[{title:'What It Does',items:[{t:'Receives user request with task description and context',c:'info'},{t:'Validates user authorization for this pipeline',c:'info'},{t:'Classifies priority: P1 (real-time) to P4 (batch)',c:'info'}]},{title:'Configuration',items:[{t:'Auth: JWT token + role extraction',c:'ok'},{t:'Max request size: 10KB',c:'ok'},{t:'Priority routing: P1 gets dedicated compute',c:'ok'}]},{title:'Anti-Patterns',items:[{t:'No auth check (any user can invoke any pipeline)',c:'warn'},{t:'No priority classification (everything treated equally)',c:'warn'}]}]},
-a1:{title:'Generator',tag:'AGENT',tagColor:'#e8943a',sections:[{title:'What It Does',items:[{t:'Extracts key information from source data and documents',c:'info'},{t:'Calls tools: database query (read-only), internal API (GET)',c:'info'},{t:'Produces structured JSON output for Agent 2',c:'info'},{t:'Cheap model (Haiku) because extraction is simple',c:'info'}]},{title:'Configuration',items:[{t:'Model: claude-haiku (fast, cheap for extraction)',c:'ok'},{t:'System prompt: v3.2 (versioned in git)',c:'ok'},{t:'Max tokens: 2048 | Temperature: 0.1',c:'ok'},{t:'Tools: SQL read-only, internal API GET',c:'ok'},{t:'Failover: claude-haiku backup endpoint',c:'ok'},{t:'Latency budget: 3s | Cost: ~$0.001/call',c:'ok'}]},{title:'Platform Mapping',items:[{t:'Azure: Semantic Kernel agent + Azure OpenAI',c:'plat'},{t:'AWS: Bedrock Agent + Claude via Bedrock',c:'plat'},{t:'Databricks: Mosaic AI Agent + DBRX',c:'plat'},{t:'OSS: LangGraph node + vLLM',c:'plat'}]}]},
-g1:{title:'Safety Qual 1',tag:'GATE',tagColor:'#22b8cf',sections:[{title:'What It Does',items:[{t:'Validates Agent 1 output BEFORE Agent 2 sees it',c:'info'},{t:'Measures T1PR: is the extraction contaminated?',c:'info'},{t:'Validates output schema matches expected JSON format',c:'info'},{t:'Decides: PASS, BLOCK, or ROUTE to human',c:'info'}]},{title:'Checks Performed',items:[{t:'T1PR: contamination score < 0.15 required',c:'ok'},{t:'Schema: output matches expected JSON structure',c:'ok'},{t:'Content policy: no fabricated claims in extraction',c:'ok'},{t:'Confidence: if < 0.75, route to human review',c:'ok'}]},{title:'GAIF-4 (T1PR measured here)',items:[{t:'T1PR at Qual 1: what fraction of contaminated extractions pass?',c:'warn'},{t:'This is the first line of defense in the pipeline',c:'warn'},{t:'Qual 1 T1PR feeds into overall pipeline T1PR',c:'warn'}]}]},
-a2:{title:'Self-Evaluator',tag:'AGENT',tagColor:'#e8943a',sections:[{title:'What It Does',items:[{t:'Reasons over Agent 1 extracted data',c:'info'},{t:'Computes metrics, identifies trends, makes comparisons',c:'info'},{t:'Calls tools: calculator, pandas execution sandbox',c:'info'},{t:'Expensive model (GPT-4o) because reasoning needs quality',c:'info'}]},{title:'Configuration',items:[{t:'Model: gpt-4o (strong reasoning capability)',c:'ok'},{t:'System prompt: v2.8 | Max tokens: 4096 | Temp: 0.2',c:'ok'},{t:'Tools: calculator, pandas sandbox (no network)',c:'ok'},{t:'Failover: claude-sonnet-4',c:'ok'},{t:'Latency budget: 5s | Cost: ~$0.018/call',c:'ok'}]},{title:'Anti-Patterns',items:[{t:'Using cheap model for complex reasoning (quality drops)',c:'warn'},{t:'No tool sandbox (pandas can execute arbitrary code)',c:'warn'},{t:'No factual cross-check with Agent 1 source data',c:'warn'}]}]},
-g2:{title:'Safety Qual 2',tag:'GATE',tagColor:'#22b8cf',sections:[{title:'What It Does',items:[{t:'Cross-checks Agent 2 analysis against Agent 1 source data',c:'info'},{t:'Catches hallucinated metrics or fabricated calculations',c:'info'},{t:'Conditional routing: low confidence -> human analyst',c:'info'}]},{title:'Checks Performed',items:[{t:'Factual consistency: numbers match Agent 1 sources',c:'ok'},{t:'Calculation verification: spot-check computations',c:'ok'},{t:'T1PR: contamination measurement',c:'ok'},{t:'Confidence routing: < 0.75 -> human review queue',c:'ok'}]},{title:'GAIF-4 (cross-agent contamination)',items:[{t:'EMG research: most contamination appears at Qual 2',c:'warn'},{t:'Agent 2 can hallucinate metrics not in Agent 1 data',c:'warn'},{t:'Cross-agent factual consistency is the key check here',c:'warn'}]}]},
-a3:{title:'Reviser',tag:'AGENT',tagColor:'#e8943a',sections:[{title:'What It Does',items:[{t:'Combines Agent 1 extraction + Agent 2 analysis into final output',c:'info'},{t:'Formats with citations referencing source data',c:'info'},{t:'Adapts format: executive summary, detailed report, table',c:'info'}]},{title:'Configuration',items:[{t:'Model: gpt-4o (quality matters for final output)',c:'ok'},{t:'System prompt: v4.1 | Max tokens: 4096 | Temp: 0.1',c:'ok'},{t:'Tools: formatter, template engine',c:'ok'},{t:'Failover: claude-sonnet-4',c:'ok'},{t:'Latency budget: 4s | Cost: ~$0.012/call',c:'ok'}]},{title:'Cost Summary',items:[{t:'Total pipeline: A1($0.001) + A2($0.018) + A3($0.012) = $0.031',c:'plat'},{t:'Latency budget: 3s + 5s + 4s = 12s max end-to-end',c:'plat'},{t:'Cheap model for extraction, expensive for reasoning/synthesis',c:'plat'}]}]},
+a1:{title:'Memory Writer',tag:'AGENT',tagColor:'#e8943a',sections:[{title:'What It Does',items:[{t:'Extracts key information from source data and documents',c:'info'},{t:'Calls tools: database query (read-only), internal API (GET)',c:'info'},{t:'Produces structured JSON output for Agent 2',c:'info'},{t:'Cheap model (Haiku) because extraction is simple',c:'info'}]},{title:'Configuration',items:[{t:'Model: claude-haiku (fast, cheap for extraction)',c:'ok'},{t:'System prompt: v3.2 (versioned in git)',c:'ok'},{t:'Max tokens: 2048 | Temperature: 0.1',c:'ok'},{t:'Tools: SQL read-only, internal API GET',c:'ok'},{t:'Failover: claude-haiku backup endpoint',c:'ok'},{t:'Latency budget: 3s | Cost: ~$0.001/call',c:'ok'}]},{title:'Platform Mapping',items:[{t:'Azure: Semantic Kernel agent + Azure OpenAI',c:'plat'},{t:'AWS: Bedrock Agent + Claude via Bedrock',c:'plat'},{t:'Databricks: Mosaic AI Agent + DBRX',c:'plat'},{t:'OSS: LangGraph node + vLLM',c:'plat'}]}]},
+g1:{title:'Safety Access',tag:'GATE',tagColor:'#22b8cf',sections:[{title:'What It Does',items:[{t:'Access control: validates memory write permissions',c:'info'},{t:'Measures T1PR: is the extraction contaminated?',c:'info'},{t:'Validates output schema matches expected JSON format',c:'info'},{t:'Decides: PASS, BLOCK, or ROUTE to human',c:'info'}]},{title:'Checks Performed',items:[{t:'T1PR: contamination score < 0.15 required',c:'ok'},{t:'Schema: output matches expected JSON structure',c:'ok'},{t:'Content policy: no fabricated claims in extraction',c:'ok'},{t:'Confidence: if < 0.75, route to human review',c:'ok'}]},{title:'GAIF-4 (T1PR measured here)',items:[{t:'T1PR at Access: what fraction of contaminated extractions pass?',c:'warn'},{t:'This is the first line of defense in the pipeline',c:'warn'},{t:'Access T1PR feeds into overall pipeline T1PR',c:'warn'}]}]},
+a2:{title:'Memory Auditor',tag:'AGENT',tagColor:'#e8943a',sections:[{title:'What It Does',items:[{t:'Reasons over Agent 1 extracted data',c:'info'},{t:'Computes metrics, identifies trends, makes comparisons',c:'info'},{t:'Calls tools: calculator, pandas execution sandbox',c:'info'},{t:'Expensive model (GPT-4o) because reasoning needs quality',c:'info'}]},{title:'Configuration',items:[{t:'Model: gpt-4o (strong reasoning capability)',c:'ok'},{t:'System prompt: v2.8 | Max tokens: 4096 | Temp: 0.2',c:'ok'},{t:'Tools: calculator, pandas sandbox (no network)',c:'ok'},{t:'Failover: claude-sonnet-4',c:'ok'},{t:'Latency budget: 5s | Cost: ~$0.018/call',c:'ok'}]},{title:'Anti-Patterns',items:[{t:'Using cheap model for complex reasoning (quality drops)',c:'warn'},{t:'No tool sandbox (pandas can execute arbitrary code)',c:'warn'},{t:'No factual cross-check with Agent 1 source data',c:'warn'}]}]},
+g2:{title:'Safety Retain',tag:'GATE',tagColor:'#22b8cf',sections:[{title:'What It Does',items:[{t:'Retention gate: applies TTL, GDPR, litigation hold policies',c:'info'},{t:'Catches hallucinated metrics or fabricated calculations',c:'info'},{t:'Conditional routing: low confidence -> human analyst',c:'info'}]},{title:'Checks Performed',items:[{t:'Factual consistency: numbers match Agent 1 sources',c:'ok'},{t:'Calculation verification: spot-check computations',c:'ok'},{t:'T1PR: contamination measurement',c:'ok'},{t:'Confidence routing: < 0.75 -> human review queue',c:'ok'}]},{title:'GAIF-4 (cross-agent contamination)',items:[{t:'EMG research: most contamination appears at Retain',c:'warn'},{t:'Agent 2 can hallucinate metrics not in Agent 1 data',c:'warn'},{t:'Cross-agent factual consistency is the key check here',c:'warn'}]}]},
+a3:{title:'Memory Enforcer',tag:'AGENT',tagColor:'#e8943a',sections:[{title:'What It Does',items:[{t:'Combines Agent 1 extraction + Agent 2 analysis into final output',c:'info'},{t:'Formats with citations referencing source data',c:'info'},{t:'Adapts format: executive summary, detailed report, table',c:'info'}]},{title:'Configuration',items:[{t:'Model: gpt-4o (quality matters for final output)',c:'ok'},{t:'System prompt: v4.1 | Max tokens: 4096 | Temp: 0.1',c:'ok'},{t:'Tools: formatter, template engine',c:'ok'},{t:'Failover: claude-sonnet-4',c:'ok'},{t:'Latency budget: 4s | Cost: ~$0.012/call',c:'ok'}]},{title:'Cost Summary',items:[{t:'Total pipeline: A1($0.001) + A2($0.018) + A3($0.012) = $0.031',c:'plat'},{t:'Latency budget: 3s + 5s + 4s = 12s max end-to-end',c:'plat'},{t:'Cheap model for extraction, expensive for reasoning/synthesis',c:'plat'}]}]},
 g3:{title:'Final Gate',tag:'GATE',tagColor:'#22b8cf',sections:[{title:'What It Does',items:[{t:'Pipeline-level validation before delivery to user',c:'info'},{t:'EMR check: emergent dangerous content only visible when agents combine',c:'info'},{t:'This catches issues no single-agent gate would detect',c:'info'}]},{title:'Checks Performed',items:[{t:'EMR: emergent misinformation not in any single agent output',c:'ok'},{t:'Groundedness: final output grounded in source data',c:'ok'},{t:'PHI: no patient data leaked through agent chain',c:'ok'},{t:'Citations: all references map to real source chunks',c:'ok'}]},{title:'GAIF-4 (EMR measured here)',items:[{t:'EMR is ONLY measured at the final gate (pipeline-level)',c:'warn'},{t:'Individual agent outputs may look safe but combine dangerously',c:'warn'},{t:'EMG paper: 74 critical drug interactions emerged at pipeline level',c:'warn'}]}]}
 };
 
@@ -258,40 +258,40 @@ if(t==='clean')await fClean();else if(t==='contam')await fContam();else if(t==='
 document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
 
 async function fClean(){
-log('or','Request: "Write regulatory submission (iterate until quality > 0.9)"');
-hlB('b-orch');hlB('b-plan');log('or','Loop: generate -> self-evaluate -> revise (max 3 iterations)');await W(200);
+log('or','Request: "GDPR deletion request: remove all agent memories for user_4829"');
+hlB('b-orch');hlB('b-plan');log('or','Memory governance: locate memories -> audit -> enforce deletion + report');await W(200);
 hlB('b-req');litA('a0');await W(180);
-hlB('b-a1');log('ag','Agent 1 (claude-haiku): Generator: draft v1 of regulatory submission');await W(300);
+hlB('b-a1');log('ag','Agent 1 (claude-haiku): Memory Writer: locating all memories for user_4829 across agents');await W(300);
 log('ag','Tool: DB query -> Q3 revenue, margins, headcount');aCost(1,'$0.001');await W(200);
-litA('a1');log('gt','Qual 1: T1PR check on extraction');await W(250);
-hlG('g1','pass');gVal(1,'0.02');log('ok','Qual 1 PASS | T1PR: 0.02 | Schema valid');await W(200);
+litA('a1');log('gt','Access: T1PR check on extraction');await W(250);
+hlG('g1','pass');gVal(1,'0.02');log('ok','Access PASS | T1PR: 0.02 | Schema valid');await W(200);
 hlB('b-state');log('or','Checkpoint 1 saved');await W(150);
-litA('a2');hlB('b-a2');log('ag','Agent 2 (gpt-4o): Self-Evaluator: scoring quality 0.72 (threshold 0.9, revision needed)');await W(350);
-log('ag','Quality rubric -> YoY +12.3%, margin +2.1pp');aCost(2,'$0.018');await W(200);
-litA('a3');log('gt','Qual 2: factual cross-check with Agent 1 data');await W(250);
-hlG('g2','pass');gVal(2,'0.01');log('ok','Qual 2 PASS | Numbers consistent');await W(200);
+litA('a2');hlB('b-a2');log('ag','Agent 2 (gpt-4o): Memory Auditor: found 47 memories across 3 agents, checking retention');await W(350);
+log('ag','Retention rules -> YoY +12.3%, margin +2.1pp');aCost(2,'$0.018');await W(200);
+litA('a3');log('gt','Retain: factual cross-check with Agent 1 data');await W(250);
+hlG('g2','pass');gVal(2,'0.01');log('ok','Retain PASS | Numbers consistent');await W(200);
 log('or','Checkpoint 2 saved');await W(150);
-litA('a4');hlB('b-a3');log('ag','Agent 3 (gpt-4o): Reviser: applying fixes, quality now 0.94 (threshold met)');await W(300);aCost(3,'$0.012');
+litA('a4');hlB('b-a3');log('ag','Agent 3 (gpt-4o): Memory Enforcer: cascade-deleting 47 memories, GDPR compliance report');await W(300);aCost(3,'$0.012');
 litA('a5');log('gt','Final Gate: pipeline-level EMR check');await W(250);
 hlG('g3','pass');gVal(3,'0.00');log('ok','Final Gate PASS | EMR: 0.00 | All grounded');await W(180);
 litA('a6');hlB('b-rsp');$('fb-lbl').style.opacity='0.5';
 log('ec','Pipeline: A1 $0.001 + A2 $0.018 + A3 $0.012 = $0.031 | 8.4s');
-resp('ok','200 OK','3 iterations | quality 0.72 -> 0.85 -> 0.94 | all checkpoints saved | 8.4s','$0.031');sM(0.03,0.00,0.01,0.02)}
+resp('ok','200 OK','47 memories deleted | GDPR cascade | audit trail complete | all checkpoints saved | 8.4s','$0.031');sM(0.03,0.00,0.01,0.02)}
 
 async function fContam(){
 log('or','Request: "Review patient medication interactions"');
 hlB('b-orch');hlB('b-plan');await W(200);hlB('b-req');litA('a0');await W(180);
 hlB('b-a1');log('ag','Agent 1: pulling medication lists');aCost(1,'$0.001');await W(250);
-litA('a1');hlG('g1','pass');gVal(1,'0.03');log('ok','Qual 1 PASS');await W(200);
+litA('a1');hlG('g1','pass');gVal(1,'0.03');log('ok','Access PASS');await W(200);
 litA('a2');hlB('b-a2');log('ag','Agent 2 (gpt-4o): checking drug interactions');await W(350);
 log('er','Agent 2 output: "metformin-lisinopril severe interaction" (NOT in source data)');aCost(2,'$0.021');await W(250);
-litA('a3');log('gt','Qual 2: cross-checking against Agent 1 extraction');await W(300);
-log('er','Qual 2: FABRICATED drug interaction detected');
+litA('a3');log('gt','Retain: cross-checking against Agent 1 extraction');await W(300);
+log('er','Retain: FABRICATED drug interaction detected');
 hlG('g2','fail');gVal(2,'0.31');gPath(2,'BLOCKED');
 $('b-a2').style.stroke='#f87171';['b-a3','b-rsp'].forEach(dimB);dimG('g3');['a4','a5','a6'].forEach(id=>$(id).style.opacity='0.08');
 log('er','Pipeline HALTED | Patient safety: fabricated clinical info blocked');
 log('ec','Cost: A1 $0.001 + A2 $0.021 = $0.022 (A3 not executed)');
-resp('er','BLOCKED','Qual 2: hallucinated drug interaction | T1PR: 0.31 | Pipeline halted','$0.022');sM(0.03,0.00,0.08,0.02)}
+resp('er','BLOCKED','Retain: hallucinated drug interaction | T1PR: 0.31 | Pipeline halted','$0.022');sM(0.03,0.00,0.08,0.02)}
 
 async function fRoute(){
 log('or','Request: "Draft vendor termination notice"');
@@ -299,17 +299,17 @@ hlB('b-orch');hlB('b-plan');await W(200);hlB('b-req');litA('a0');await W(180);
 hlB('b-a1');log('ag','Agent 1: extracting contract terms');aCost(1,'$0.002');await W(250);
 litA('a1');hlG('g1','pass');gVal(1,'0.01');await W(200);
 litA('a2');hlB('b-a2');log('ag','Agent 2: drafting termination language');aCost(2,'$0.028');await W(350);
-litA('a3');log('gt','Qual 2: content risk assessment');await W(300);
-log('wn','Qual 2: HIGH-RISK content (legal action) | Confidence: 0.68 (threshold: 0.75)');
+litA('a3');log('gt','Retain: content risk assessment');await W(300);
+log('wn','Retain: HIGH-RISK content (legal action) | Confidence: 0.68 (threshold: 0.75)');
 hlG('g2','route');gVal(2,'0.68');gPath(2,'HUMAN REVIEW');
 $('a-route').style.opacity='0.6';$('a-route').style.stroke='#fbbf24';$('route-lbl').style.opacity='0.8';
 log('wn','ROUTING: confidence below threshold, queuing for legal team');await W(300);
-log('or','Pipeline paused at Qual 2, awaiting human review');await W(400);
+log('or','Pipeline paused at Retain, awaiting human review');await W(400);
 log('ok','Human reviewer: APPROVED with 2 edits (clause 4.2, notice period)');await W(200);
 litA('a4');hlB('b-a3');log('ag','Agent 3: incorporating human edits');aCost(3,'$0.011');await W(250);
 litA('a5');hlG('g3','pass');gVal(3,'0.00');litA('a6');hlB('b-rsp');
 log('ec','Cost: A1 $0.002 + A2 $0.028 + A3 $0.011 = $0.041 + human time');
-resp('wn','200 (Routed)','Qual 2 routed to human (conf 0.68) | Legal approved with 2 edits','$0.041');sM(0.03,0.00,0.01,0.02)}
+resp('wn','200 (Routed)','Retain routed to human (conf 0.68) | Legal approved with 2 edits','$0.041');sM(0.03,0.00,0.01,0.02)}
 
 async function fResume(){
 log('or','Request: "Comprehensive 12-sector market analysis"');
@@ -340,7 +340,7 @@ log('er','Agent 2: gpt-4o UNAVAILABLE (503)');await W(200);
 log('or','FAILOVER: switching Agent 2 from gpt-4o to claude-sonnet');
 $('m-a2').textContent='claude-sonnet';$('m-a2').style.fill='#fbbf24';await W(200);
 hlB('b-a2');log('ag','Agent 2 (claude-sonnet/failover): analyzing medications');aCost(2,'$0.009');await W(350);
-litA('a3');hlG('g2','pass');gVal(2,'0.02');log('ok','Qual 2 PASS (failover model quality OK)');await W(200);
+litA('a3');hlG('g2','pass');gVal(2,'0.02');log('ok','Retain PASS (failover model quality OK)');await W(200);
 litA('a4');hlB('b-a3');log('ag','Agent 3: patient-friendly summary');aCost(3,'$0.008');await W(300);
 litA('a5');hlG('g3','pass');gVal(3,'0.00');litA('a6');hlB('b-rsp');
 log('ec','Cost: A1 $0.001 + A2 $0.009 (failover) + A3 $0.008 = $0.018');
