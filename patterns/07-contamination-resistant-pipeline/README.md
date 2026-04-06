@@ -1,31 +1,29 @@
 # Pattern 07: Contamination-Resistant Pipeline
+**Detect, isolate, validate, recover from contamination in multi-agent LLM systems. 12 variants. Based on EMG and ContamPerc research findings.**
 
-**Prevent, detect, and recover from error propagation in multi-agent LLM pipelines. 12 variants from research-validated architectures.**
+Research basis: EMG paper (74 critical drug interaction events across 4,800 trials, collective delusion behavior, gap inversion), ContamPerc paper (contamination percolation in multi-agent graphs, T1PR metric).
 
-## Which Variant Should You Use?
+| Defense Layer | Variant |
+|--------------|---------|
+| Full defense stack | [Standard Defense](standard-defense/) |
+| Different families per agent | [Model Diversity](model-diversity/) |
+| Architecture-enforced isolation | [Isolation Enforcement](isolation-enforcement/) |
+| Multi-model agreement check | [Consensus Validation](consensus-validation/) |
+| Trace claims to source | [Provenance Tracking](provenance-tracking/) |
+| Agents converge on wrong answer | [Collective Delusion Monitor](collective-delusion-monitor/) |
+| Safest model, worst outcomes | [Gap Inversion Diagnostic](gap-inversion-diagnostic/) |
+| Spread through agent graph | [Contamination Percolation](contamination-percolation/) |
+| Hold suspect outputs | [Quarantine Architecture](quarantine-architecture/) |
+| Swap model, re-run | [Clean Re-Execution](clean-re-execution/) |
+| Revert to clean checkpoint | [Rollback Recovery](rollback-recovery/) |
+| Remove bad claims post-hoc | [Output Scrubbing](output-scrubbing/) |
 
-| Your situation | Variant |
-|---------------|---------|
-| Agents must not share state | [Isolation Barriers](isolation-barriers/) |
-| Block contamination at ingestion | [Input Sanitization](input-sanitization/) |
-| Independent validator at each stage | [Validation Checkpoints](validation-checkpoints/) |
-| Shadow pipeline for divergence | [Canary Pipeline](canary-pipeline/) |
-| Measure error propagation (T1PR) | [Contamination Percolation](contamination-percolation/) |
-| Multiple models to catch inverted safety | [Redundant Generation](redundant-generation/) |
-| Hold suspect outputs for human review | [Output Quarantine](output-quarantine/) |
-| Need to retract contaminated outputs | [Rollback-Capable](rollback-capable/) |
-| Find root cause of contamination | [Contamination Lineage](contamination-lineage/) |
-| Keep serving on contamination (safer path) | [Graceful Degradation](graceful-degradation/) |
-| Contamination leaking between pipelines | [Cross-Pipeline](cross-pipeline/) |
-| Pipeline learns from past contamination | [Adaptive Immune System](immune-system/) |
+## GAIF-4 for Contamination
+| Metric | Application | Source |
+|--------|-----------|--------|
+| T1PR | Contamination passing filters | EMG paper |
+| CFR | Percolation rate across agents | ContamPerc paper |
+| EMR | Emergent misinformation (pipeline) | EMG paper |
+| GDR | Detection effectiveness decay | GAIF-4 framework |
 
-## Research Connection
-
-| Variant | Paper | Key Finding |
-|---------|-------|-------------|
-| Isolation Barriers | EMG | Collective delusion when agents share context |
-| Contamination Percolation | ContamPerc | T1PR gap inversion diagnostic (~210K API calls) |
-| Redundant Generation | EMG | Most safety-trained model produced worst drug interactions |
-| Adaptive Immune System | GDR | Governance should improve over time, not decay |
-
-*Governance: [GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
+*[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
