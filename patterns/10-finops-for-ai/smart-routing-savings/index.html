@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern 10: Smart Routing Savings</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Source+Code+Pro:wght@400;500;600;700&display=swap');
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.12);
+--cost:#f97316;--costL:#fb923c;--save:#10b981;--saveL:#34d399;--budget:#3b82f6;--budgetL:#60a5fa;--over:#ef4444;
+--ok:#34d399;--err:#f87171;--warn:#fbbf24;--ops:#38bdf8;--eco:#fb923c;
+--f:'Poppins',sans-serif;--m:'Source Code Pro',monospace}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:var(--f)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(249,115,22,0.02),transparent 50%);pointer-events:none}
+.pg{max-width:1440px;margin:0 auto;padding:1.2rem}
+.hdr{margin-bottom:0.8rem;display:flex;align-items:center;gap:12px;padding-bottom:0.6rem;border-bottom:1px solid var(--border)}
+.hdr-badge{background:linear-gradient(135deg,var(--cost),var(--save));padding:5px 10px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#fff}
+.hdr h1{font-size:20px;font-weight:800;letter-spacing:-0.3px}.hdr p{font-size:11px;color:var(--text2)}
+.sc-bar{display:flex;gap:5px;margin-bottom:0.6rem;flex-wrap:wrap;align-items:center}
+.sc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 11px;cursor:pointer;font-family:var(--f);font-size:10px;color:var(--text2);transition:all 0.2s;display:flex;align-items:center;gap:4px}
+.sc-btn:hover{border-color:var(--cost);color:var(--text)}.sc-btn.active{border-color:var(--cost);color:var(--cost);background:rgba(249,115,22,0.08);font-weight:600}.sc-btn:disabled{opacity:0.3;cursor:not-allowed}
+.sc-dot{width:6px;height:6px;border-radius:50%}.sc-reset{margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-family:var(--f);font-size:9px;color:var(--text3)}
+.dw{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:8px;margin-bottom:0.6rem;overflow-x:auto}
+.dw svg{width:100%;min-width:1050px;height:auto;display:block}
+svg text{font-family:'Poppins',sans-serif}
+.box{rx:8;ry:8;stroke-width:1.5;cursor:pointer;transition:all 0.3s}.box:hover{filter:brightness(1.15)}.box.hl{stroke-width:2.5;filter:drop-shadow(0 0 6px currentColor)}.box.dim{opacity:0.08}
+/* Cost bar - unique to this pattern */
+.cbar{rx:4;ry:4;transition:all 0.3s;cursor:pointer}.cbar:hover{filter:brightness(1.2)}.cbar.hl{filter:drop-shadow(0 0 6px currentColor)}
+.arr{fill:none;stroke:#8b949e;stroke-width:1.2;opacity:0.25}.arr.li{opacity:1;stroke-width:2}
+.bx-t{font-size:9.5px;font-weight:700;text-anchor:middle}.bx-s{font-size:7px;fill:#b8c0cc;text-anchor:middle}
+.lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.gbar{rx:5;ry:5}.gbar-t{font-size:8px;font-weight:600;letter-spacing:0.5px}
+.cost-big{font-family:'Source Code Pro',monospace;font-weight:700;text-anchor:middle;transition:all 0.3s}
+.hint{font-size:5.5px;fill:#60a5fa;opacity:0.5;text-anchor:middle}
+.dp{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:0.6rem;overflow:hidden;transition:all 0.3s}.dp.closed{max-height:0;border:none;margin:0}.dp.open{max-height:600px}
+.dp-h{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}.dp-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}.dp-tag{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:600;font-family:var(--m)}.dp-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px}
+.dp-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}@media(max-width:900px){.dp-body{grid-template-columns:1fr}}
+.dp-sec-t{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.dp-it{font-size:10px;color:var(--text2);margin-bottom:3px;line-height:1.5;display:flex;align-items:baseline;gap:5px}.dp-it::before{content:'';width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dp-it.ok::before{background:var(--ok)}.dp-it.warn::before{background:var(--warn)}.dp-it.info::before{background:var(--ops)}.dp-it.plat::before{background:var(--cost)}
+.rsp{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;transition:all 0.3s;margin-bottom:0.6rem;flex-wrap:wrap}
+.rsp.ok{border-color:var(--ok);background:rgba(52,211,153,0.06)}.rsp.er{border-color:var(--err);background:rgba(248,113,113,0.06)}.rsp.wn{border-color:var(--warn);background:rgba(251,191,36,0.06)}
+.rsp-c{font-family:var(--m);font-size:12px;font-weight:700}.rsp-m{font-size:10px;color:var(--text2);flex:1}.rsp-${font-family:var(--m);font-size:10px;color:var(--eco)}
+.brow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.6rem}@media(max-width:900px){.brow{grid-template-columns:1fr}}
+.mets{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}@media(max-width:768px){.mets{grid-template-columns:repeat(2,1fr)}}
+.met{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.met-l{font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:3px}.met-b{font-size:6px;padding:1px 4px;border-radius:2px;font-weight:600}
+.met-v{font-size:18px;font-weight:700;font-family:var(--m)}.met-bar{height:2px;border-radius:1px;background:var(--bg4);margin-top:3px;overflow:hidden}.met-f{height:100%;border-radius:1px;transition:width 0.5s}.met-n{font-size:7px;color:var(--text3);margin-top:2px}
+.log{background:var(--bg3);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.log-h{padding:5px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:8px;font-weight:700;color:var(--text3)}
+.log-clr{background:none;border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:7px;color:var(--text3);cursor:pointer;font-family:var(--f)}
+.log-b{max-height:140px;overflow-y:auto;padding:2px 0;font-family:var(--m);font-size:8px}.log-b::-webkit-scrollbar{width:2px}.log-b::-webkit-scrollbar-thumb{background:var(--bg4)}
+.lr{padding:1px 10px;display:flex;gap:6px;animation:fi 0.15s ease}@keyframes fi{from{opacity:0}to{opacity:1}}
+.lr-t{color:var(--text3);min-width:60px}.lr-p{min-width:50px;font-weight:600}.lr-m{color:var(--text2);flex:1}
+.lr-p.co{color:var(--cost)}.lr-p.sv{color:var(--save)}.lr-p.bg{color:var(--budget)}.lr-p.ok{color:var(--ok)}.lr-p.er{color:var(--err)}.lr-p.wn{color:var(--warn)}.lr-p.ec{color:var(--eco)}
+.footer{text-align:center;padding:0.6rem 0;font-size:8px;color:var(--text3)}.footer a{color:var(--cost);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="pg">
+<div class="hdr"><div class="hdr-badge">Pattern 10</div><div><h1>Smart Routing Savings</h1><p>Route simple queries to cheap models, complex to expensive. Cost vs quality. Click any category for details.</p></div></div>
+
+<div class="sc-bar">
+<button class="sc-btn" onclick="run('daily')" id="btn-daily"><div class="sc-dot" style="background:var(--ok)"></div>Daily report</button>
+<button class="sc-btn" onclick="run('spike')" id="btn-spike"><div class="sc-dot" style="background:var(--err)"></div>Cost spike</button>
+<button class="sc-btn" onclick="run('cache')" id="btn-cache"><div class="sc-dot" style="background:var(--save)"></div>Cache savings</button>
+<button class="sc-btn" onclick="run('swap')" id="btn-swap"><div class="sc-dot" style="background:var(--budget)"></div>Model swap save</button>
+<button class="sc-btn" onclick="run('budget')" id="btn-budget"><div class="sc-dot" style="background:var(--warn)"></div>Budget alert</button>
+<button class="sc-reset" onclick="resetAll()">&#8634; Reset</button></div>
+
+<div class="dw">
+<svg viewBox="0 0 1050 440" xmlns="http://www.w3.org/2000/svg">
+<text x="525" y="16" text-anchor="middle" fill="#8b949e" style="font-size:9px;font-style:italic">Click any cost category for breakdown. Run scenarios to see cost optimization in action.</text>
+
+<rect class="gbar" x="10" y="24" width="1030" height="22" fill="rgba(249,115,22,0.08)" stroke="rgba(249,115,22,0.18)"/>
+<text class="gbar-t" x="22" y="38" fill="#f97316">GOVERNANCE</text><text class="gbar-t" x="115" y="38" fill="#8b949e">Budget Policies | Cost Allocation Rules | Chargeback | Approval Thresholds | Spend Alerts</text>
+<rect class="gbar" x="10" y="50" width="1030" height="20" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.12)"/>
+<text class="gbar-t" x="22" y="63" fill="#10b981">OBSERVABILITY</text><text class="gbar-t" x="120" y="63" fill="#8b949e">Real-Time Spend | Token Metering | Model Cost Comparison | Cache Hit Rate | Budget Burn Rate</text>
+
+<!-- TOTAL SPEND (big number, top center) -->
+<rect class="box" id="b-total" x="350" y="78" width="350" height="70" fill="#161b22" stroke="#f97316" stroke-width="2.5" rx="14" onclick="detail('total')"/>
+<text x="525" y="100" text-anchor="middle" fill="#f97316" style="font-size:10px;font-weight:600;letter-spacing:1px">DAILY AI SPEND</text>
+<text class="cost-big" id="total-val" x="525" y="130" fill="#f97316" style="font-size:28px">$412</text>
+<text x="525" y="142" text-anchor="middle" fill="#8b949e" style="font-size:7px" id="total-sub">Budget: $500/day | 82% utilized | on track</text>
+<text class="hint" x="525" y="146">&#9432;</text>
+
+<!-- COST WATERFALL (unique to this pattern) -->
+<text class="lbl" x="20" y="172" fill="#f97316">COST BREAKDOWN</text>
+
+<!-- Model Costs (largest bar) -->
+<rect class="cbar" id="c-model" x="30" y="182" width="320" height="60" fill="rgba(249,115,22,0.12)" stroke="#f97316" rx="6" onclick="detail('model')"/>
+<text x="45" y="202" fill="#f97316" style="font-size:10px;font-weight:700">Model API Costs</text>
+<text class="cost-big" id="cm-val" x="320" y="205" fill="#f97316" style="font-size:18px;text-anchor:end">$328</text>
+<text x="45" y="220" fill="#b8c0cc" style="font-size:7px">gpt-4o: $198 | claude-sonnet: $72 | claude-haiku: $34 | llama: $24</text>
+<text x="45" y="232" fill="#8b949e" style="font-size:6.5px" id="cm-detail">18,244 calls | avg $0.018/call | 2.4M tokens</text>
+
+<!-- Infrastructure -->
+<rect class="cbar" id="c-infra" x="30" y="250" width="200" height="50" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" rx="6" onclick="detail('infra')"/>
+<text x="45" y="270" fill="#3b82f6" style="font-size:10px;font-weight:700">Infrastructure</text>
+<text class="cost-big" id="ci-val" x="210" y="273" fill="#3b82f6" style="font-size:16px;text-anchor:end">$62</text>
+<text x="45" y="288" fill="#b8c0cc" style="font-size:7px">GPU compute: $38 | Vector store: $14 | Gateway: $10</text>
+
+<!-- Governance overhead -->
+<rect class="cbar" id="c-gov" x="30" y="308" width="140" height="45" fill="rgba(139,92,246,0.08)" stroke="#8b5cf6" rx="6" onclick="detail('govcost')"/>
+<text x="45" y="326" fill="#8b5cf6" style="font-size:9px;font-weight:700">Governance</text>
+<text class="cost-big" id="cg-val" x="150" y="329" fill="#8b5cf6" style="font-size:14px;text-anchor:end">$22</text>
+<text x="45" y="342" fill="#8b949e" style="font-size:6.5px">Content safety, DLP, eval, audit</text>
+
+<!-- SAVINGS (green, negative bar - unique visual) -->
+<rect class="cbar" id="c-cache" x="400" y="182" width="250" height="55" fill="rgba(16,185,129,0.08)" stroke="#10b981" rx="6" onclick="detail('savings')"/>
+<text x="415" y="202" fill="#10b981" style="font-size:10px;font-weight:700">Cache Savings</text>
+<text class="cost-big" id="cs-val" x="620" y="205" fill="#10b981" style="font-size:18px;text-anchor:end">-$87</text>
+<text x="415" y="220" fill="#b8c0cc" style="font-size:7px">Semantic cache hit rate: 38% | 6,933 calls avoided</text>
+<text x="415" y="230" fill="#8b949e" style="font-size:6.5px">Without cache: $499/day | With cache: $412/day</text>
+
+<!-- TEAM ALLOCATION (right side table) -->
+<rect class="box" id="b-teams" x="700" y="78" width="310" height="140" fill="#1c2333" stroke="rgba(139,149,168,0.2)" rx="8" onclick="detail('teams')"/>
+<text x="855" y="98" text-anchor="middle" fill="#c9d1d9" style="font-size:10px;font-weight:700">TEAM ALLOCATION</text>
+
+<text x="720" y="118" fill="#f97316" style="font-size:8px;font-weight:600">Clinical AI</text>
+<rect x="820" y="110" width="120" height="8" rx="3" fill="#252d3f"/><rect id="tb-1" x="820" y="110" width="72" height="8" rx="3" fill="#f97316"/>
+<text x="950" y="118" text-anchor="end" fill="#f97316" style="font-size:8px;font-family:'Source Code Pro'" id="tv-1">$198</text>
+
+<text x="720" y="138" fill="#3b82f6" style="font-size:8px;font-weight:600">Claims</text>
+<rect x="820" y="130" width="120" height="8" rx="3" fill="#252d3f"/><rect id="tb-2" x="820" y="130" width="48" height="8" rx="3" fill="#3b82f6"/>
+<text x="950" y="138" text-anchor="end" fill="#3b82f6" style="font-size:8px;font-family:'Source Code Pro'" id="tv-2">$124</text>
+
+<text x="720" y="158" fill="#10b981" style="font-size:8px;font-weight:600">Member Svc</text>
+<rect x="820" y="150" width="120" height="8" rx="3" fill="#252d3f"/><rect id="tb-3" x="820" y="150" width="24" height="8" rx="3" fill="#10b981"/>
+<text x="950" y="158" text-anchor="end" fill="#10b981" style="font-size:8px;font-family:'Source Code Pro'" id="tv-3">$58</text>
+
+<text x="720" y="178" fill="#8b949e" style="font-size:8px;font-weight:600">Other</text>
+<rect x="820" y="170" width="120" height="8" rx="3" fill="#252d3f"/><rect id="tb-4" x="820" y="170" width="16" height="8" rx="3" fill="#8b949e"/>
+<text x="950" y="178" text-anchor="end" fill="#8b949e" style="font-size:8px;font-family:'Source Code Pro'" id="tv-4">$32</text>
+
+<text x="855" y="198" text-anchor="middle" fill="#8b949e" style="font-size:6px">Chargeback: cost allocated to consuming business unit</text>
+<text class="hint" x="855" y="210">&#9432; click for details</text>
+
+<!-- BUDGET VS ACTUAL (bottom bar) -->
+<rect class="box" id="b-budget" x="400" y="250" width="250" height="50" fill="#1c2333" stroke="#3b82f6" rx="6" onclick="detail('budgetc')"/>
+<text x="525" y="268" text-anchor="middle" fill="#3b82f6" style="font-size:9px;font-weight:700">BUDGET vs ACTUAL</text>
+<rect x="415" y="278" width="220" height="8" rx="3" fill="#252d3f"/>
+<rect id="bgt-bar" x="415" y="278" width="181" height="8" rx="3" fill="#3b82f6"/>
+<text x="525" y="298" text-anchor="middle" fill="#8b949e" style="font-size:7px" id="bgt-text">$412 / $500 (82%) | 18 days remaining this month</text>
+
+<!-- Optimization levers -->
+<rect class="box" id="b-opt" x="700" y="240" width="310" height="65" fill="#1c2333" stroke="#10b981" rx="8" onclick="detail('optimize')"/>
+<text x="855" y="260" text-anchor="middle" fill="#10b981" style="font-size:10px;font-weight:700">OPTIMIZATION LEVERS</text>
+<text x="855" y="276" text-anchor="middle" fill="#b8c0cc" style="font-size:7px">Semantic cache (38% hit) | Smart routing (haiku for simple) | Batch processing</text>
+<text x="855" y="288" text-anchor="middle" fill="#34d399" style="font-size:7.5px;font-weight:600" id="opt-savings">Current savings: $87/day ($2,610/month)</text>
+<text class="hint" x="855" y="300">&#9432; click for details</text>
+
+<!-- Forecast -->
+<rect class="box" id="b-forecast" x="700" y="315" width="310" height="45" fill="#1c2333" stroke="rgba(139,149,168,0.2)" rx="6" onclick="detail('forecast')"/>
+<text x="855" y="334" text-anchor="middle" fill="#c9d1d9" style="font-size:9px;font-weight:700">MONTHLY FORECAST</text>
+<text x="855" y="350" text-anchor="middle" fill="#8b949e" style="font-size:7.5px" id="fc-text">Projected: $12,360 / $15,000 budget (82%) | $2,640 under budget</text>
+
+<rect class="gbar" x="10" y="380" width="1030" height="20" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.12)"/>
+<text class="gbar-t" x="22" y="394" fill="#38bdf8">OPERATIONS</text><text class="gbar-t" x="115" y="394" fill="#8b949e">Rate Limit Management | Token Metering | Invoice Reconciliation | Chargeback Processing | Cost Anomaly Detection</text>
+</svg>
+</div>
+
+<div class="dp closed" id="dp"><div class="dp-h"><div class="dp-title" id="dp-title">Component</div><button class="dp-close" onclick="closeDetail()">&#10005;</button></div><div class="dp-body" id="dp-body"></div></div>
+<div class="rsp" id="rsp"><span class="rsp-c" id="rsp-c">---</span><span class="rsp-m" id="rsp-m">Click any cost category, or run a scenario</span><span class="rsp-$" id="rsp-$"></span></div>
+
+<div class="brow">
+<div class="mets">
+<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-t" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:1%;background:#34d399"></div></div><div class="met-n">Untracked spend</div></div>
+<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-c" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:#34d399"></div></div><div class="met-n">Budget violations</div></div>
+<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-e" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:0%;background:#34d399"></div></div><div class="met-n">Cost anomalies</div></div>
+<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:rgba(52,211,153,0.12);color:#34d399">OK</span></div><div class="met-v" id="m-g" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:1%;background:#34d399"></div></div><div class="met-n">Cost tracking decay</div></div>
+</div>
+<div class="log"><div class="log-h"><span>FinOps Log</span><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
+</div>
+<div class="footer"><a href="https://github.com/aman210122/ai-architecture-enterprise-patterns">GitHub</a> | <a href="https://linkedin.com/in/amansharmaarchitect">Aman Sharma</a> | <a href="https://github.com/aman210122/gaif-governance-observatory">GAIF Observatory</a></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);const W=ms=>new Promise(r=>setTimeout(r,ms));let busy=false;
+const DETAILS={
+total:{title:'Daily AI Spend',tag:'TOTAL',tagColor:'#f97316',sections:[{title:'What It Tracks',items:[{t:'Total daily spend across all AI systems and teams',c:'info'},{t:'Real-time: updates every 5 minutes from gateway metering',c:'info'},{t:'Budget comparison: actual vs allocated per day',c:'info'}]},{title:'Spend Components',items:[{t:'Model API: $328/day (80% of total)',c:'plat'},{t:'Infrastructure: $62/day (GPU, vector, gateway)',c:'plat'},{t:'Governance: $22/day (safety, DLP, eval, audit)',c:'plat'},{t:'Cache savings: -$87/day (21% reduction)',c:'ok'}]},{title:'Budget',items:[{t:'Daily budget: $500 | Monthly: $15,000',c:'ok'},{t:'Current utilization: 82% (healthy)',c:'ok'},{t:'Alert at 90% ($450), hard cap at 100% ($500)',c:'warn'}]}]},
+model:{title:'Model API Costs',tag:'COST',tagColor:'#f97316',sections:[{title:'Breakdown by Model',items:[{t:'gpt-4o: $198/day (11,000 calls x $0.018 avg)',c:'plat'},{t:'claude-sonnet: $72/day (9,000 calls x $0.008 avg)',c:'plat'},{t:'claude-haiku: $34/day (34,000 calls x $0.001 avg)',c:'plat'},{t:'llama-3.1-70b: $24/day (8,000 calls x $0.003 avg)',c:'plat'}]},{title:'Token Economics',items:[{t:'Total tokens: 2.4M/day (1.6M input + 0.8M output)',c:'ok'},{t:'Avg tokens/call: 132 (input 88 + output 44)',c:'ok'},{t:'Cost/1K tokens: $0.005 input, $0.015 output (weighted avg)',c:'ok'}]},{title:'Optimization',items:[{t:'Route simple queries to haiku ($0.001) instead of gpt-4o ($0.018)',c:'warn'},{t:'80% of queries are simple enough for haiku',c:'warn'},{t:'Potential savings: $120/day if routing optimized',c:'warn'}]}]},
+infra:{title:'Infrastructure Costs',tag:'COST',tagColor:'#3b82f6',sections:[{title:'Breakdown',items:[{t:'GPU compute: $38/day (inference serving, 2x A100)',c:'plat'},{t:'Vector store: $14/day (Qdrant, 24.3K docs, 3072-dim)',c:'plat'},{t:'Gateway: $10/day (API management, rate limiting)',c:'plat'}]},{title:'Optimization',items:[{t:'GPU utilization: 62% (can serve more traffic)',c:'ok'},{t:'Vector store: consider tiered storage for older docs',c:'ok'},{t:'Gateway: included in platform cost, not optimizable',c:'ok'}]},{title:'Platform',items:[{t:'Databricks: Serverless GPU (pay per second)',c:'plat'},{t:'Azure: AI Foundry managed endpoints',c:'plat'},{t:'AWS: SageMaker inference endpoints',c:'plat'}]}]},
+govcost:{title:'Governance Costs',tag:'OVERHEAD',tagColor:'#8b5cf6',sections:[{title:'Breakdown',items:[{t:'Content safety API: $8/day (every request scanned)',c:'plat'},{t:'DLP (Presidio): $5/day (PHI/PII detection)',c:'plat'},{t:'Eval compute: $4/day (LLM judge scoring)',c:'plat'},{t:'Audit storage: $3/day (immutable log retention)',c:'plat'},{t:'Guardrails: $2/day (gateway enforcement)',c:'plat'}]},{title:'ROI of Governance',items:[{t:'Governance cost: $22/day ($660/month)',c:'ok'},{t:'One HIPAA violation: $100-$50,000',c:'warn'},{t:'One reputational incident: incalculable',c:'warn'},{t:'Governance ROI: prevention cost << incident cost',c:'ok'}]},{title:'Optimization',items:[{t:'Batch DLP scans (not per-request) for low-risk tiers',c:'ok'},{t:'Sample content safety (5%) instead of 100% for Tier 1',c:'ok'}]}]},
+savings:{title:'Cache Savings',tag:'SAVINGS',tagColor:'#10b981',sections:[{title:'How It Works',items:[{t:'Semantic cache: hash similar queries, return cached responses',c:'info'},{t:'Hit rate: 38% of queries served from cache',c:'info'},{t:'Cache avoids: model call ($0.018) + compute + latency',c:'info'}]},{title:'Savings Calculation',items:[{t:'Total calls/day: 18,244',c:'ok'},{t:'Cache hits: 6,933 (38%)',c:'ok'},{t:'Avoided cost: 6,933 x $0.0126 avg = $87/day',c:'ok'},{t:'Monthly savings: $2,610',c:'ok'}]},{title:'Optimization',items:[{t:'Increase cache TTL for stable content (formulary, policies)',c:'ok'},{t:'Decrease TTL for dynamic content (clinical, real-time)',c:'ok'},{t:'Target: 45% hit rate (currently 38%)',c:'ok'}]}]},
+teams:{title:'Team Cost Allocation',tag:'CHARGEBACK',tagColor:'#c9d1d9',sections:[{title:'Allocation Model',items:[{t:'Each team has a budget and sees their actual spend',c:'info'},{t:'Chargeback: cost allocated to consuming business unit',c:'info'},{t:'Teams can optimize their own usage independently',c:'info'}]},{title:'Team Breakdown',items:[{t:'Clinical AI: $198/day (48%) - highest, uses gpt-4o for reasoning',c:'plat'},{t:'Claims: $124/day (30%) - medium, mostly extraction',c:'plat'},{t:'Member Services: $58/day (14%) - chatbot, uses haiku',c:'plat'},{t:'Other: $32/day (8%) - internal tools, experiments',c:'plat'}]},{title:'Team Optimization',items:[{t:'Clinical: switch reasoning from gpt-4o to claude-sonnet (save $60/day)',c:'warn'},{t:'Claims: batch processing during off-peak (save $20/day)',c:'warn'},{t:'Member: already on haiku, well optimized',c:'ok'}]}]},
+budgetc:{title:'Budget vs Actual',tag:'BUDGET',tagColor:'#3b82f6',sections:[{title:'Current Status',items:[{t:'Daily: $412 / $500 (82% utilized)',c:'ok'},{t:'Monthly projected: $12,360 / $15,000 (82%)',c:'ok'},{t:'Under budget by $2,640 this month',c:'ok'}]},{title:'Alert Thresholds',items:[{t:'80%: informational (where we are now)',c:'ok'},{t:'90%: WARNING alert to team leads',c:'warn'},{t:'95%: CRITICAL alert to director + throttle non-essential',c:'warn'},{t:'100%: HARD CAP - rate limit all non-critical queries',c:'warn'}]},{title:'Forecast',items:[{t:'At current burn: finish month at $12,360',c:'ok'},{t:'With growth trend (+2%/week): finish at $13,100',c:'ok'},{t:'Worst case (spike like last Tuesday): $14,200',c:'ok'}]}]},
+optimize:{title:'Optimization Levers',tag:'SAVINGS',tagColor:'#10b981',sections:[{title:'Active Optimizations',items:[{t:'Semantic cache: 38% hit rate, saving $87/day',c:'ok'},{t:'Model routing: simple -> haiku, complex -> gpt-4o',c:'ok'},{t:'Batch processing: claims batch at 2am (30% cheaper)',c:'ok'}]},{title:'Potential Optimizations',items:[{t:'Increase cache to 45%: save additional $30/day',c:'warn'},{t:'Route 80% to haiku (currently 60%): save $40/day',c:'warn'},{t:'Switch clinical reasoning to claude-sonnet: save $60/day',c:'warn'},{t:'Total potential: $130/day additional savings',c:'warn'}]},{title:'ROI Tracking',items:[{t:'Current monthly savings: $2,610',c:'ok'},{t:'Potential monthly savings: $6,510',c:'ok'},{t:'Optimization compute cost: $15/month',c:'ok'},{t:'ROI: 174x return on optimization investment',c:'ok'}]}]},
+forecast:{title:'Monthly Forecast',tag:'FORECAST',tagColor:'#c9d1d9',sections:[{title:'Projection',items:[{t:'Current daily avg: $412',c:'ok'},{t:'Monthly projection: $12,360 (30-day month)',c:'ok'},{t:'Budget: $15,000',c:'ok'},{t:'Projected underspend: $2,640 (17.6%)',c:'ok'}]},{title:'Growth Trend',items:[{t:'Week 1: $380/day avg',c:'ok'},{t:'Week 2: $395/day avg (+3.9%)',c:'ok'},{t:'Week 3: $412/day avg (+4.3%)',c:'ok'},{t:'If trend continues: $430/day by month end',c:'warn'}]},{title:'Risk Factors',items:[{t:'New use case launch could spike by $50-100/day',c:'warn'},{t:'Model price changes (provider announcements)',c:'warn'},{t:'Cache invalidation event (index rebuild)',c:'warn'}]}]}
+};
+
+function detail(id){const d=DETAILS[id];if(!d)return;$('dp-title').innerHTML=`${d.title} <span class="dp-tag" style="background:${d.tagColor}22;color:${d.tagColor}">${d.tag}</span>`;let h='';d.sections.forEach(s=>{h+=`<div><div class="dp-sec-t">${s.title}</div>`;s.items.forEach(i=>{h+=`<div class="dp-it ${i.c}">${i.t}</div>`});h+='</div>'});$('dp-body').innerHTML=h;$('dp').className='dp open'}
+function closeDetail(){$('dp').className='dp closed'}
+
+function log(tp,msg){const el=$('logB');const ts=new Date().toLocaleTimeString('en-US',{hour12:false})+'.'+String(new Date().getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lr-t">${ts}</span><span class="lr-p ${tp}">${tp.toUpperCase()}</span><span class="lr-m">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>50)el.removeChild(el.lastChild)}
+function clearLog(){$('logB').innerHTML=''}
+function hlB(id){$(id)?.classList.add('hl')}
+function setTotal(v,sub){$('total-val').textContent=v;$('total-sub').textContent=sub}
+function rst(){['b-total','b-teams','b-budget','b-opt','b-forecast','c-model','c-infra','c-gov','c-cache'].forEach(id=>{$(id)?.classList.remove('hl','dim')});setTotal('$412','Budget: $500/day | 82% utilized | on track');$('cm-val').textContent='$328';$('ci-val').textContent='$62';$('cg-val').textContent='$22';$('cs-val').textContent='-$87';$('bgt-bar').setAttribute('width','181');$('bgt-text').textContent='$412 / $500 (82%) | 18 days remaining';$('opt-savings').textContent='Current savings: $87/day ($2,610/month)';$('fc-text').textContent='Projected: $12,360 / $15,000 budget (82%) | $2,640 under budget';$('rsp').className='rsp';$('rsp-c').textContent='---';$('rsp-m').textContent='';$('rsp-$').textContent=''}
+function resp(c,code,msg,cost){$('rsp').className='rsp '+c;$('rsp-c').textContent=code;$('rsp-m').textContent=msg;$('rsp-$').textContent=cost||''}
+function sM(t,c,e,g){const mk=(id,v,thL,thH,safe)=>{$(id).textContent=v.toFixed(2);const f=id.replace('m-','mf-'),b=id.replace('m-','mb-');const ok=v<=thL,mid=v<=thH;$(f).style.width=Math.min(v*500,100)+'%';$(f).style.background=ok?'#34d399':mid?'#fbbf24':'#f87171';$(id).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171';$(b).textContent=ok?safe:mid?'WARN':'CRIT';$(b).style.background=ok?'rgba(52,211,153,0.12)':mid?'rgba(251,191,36,0.12)':'rgba(248,113,113,0.12)';$(b).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171'};mk('m-t',t,0.05,0.15,'SAFE');mk('m-c',c,0.005,0.01,'SAFE');mk('m-e',e,0.05,0.15,'SAFE');mk('m-g',g,0.03,0.05,'OK')}
+function resetAll(){if(busy)return;rst();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));sM(0.01,0.00,0.00,0.01)}
+
+async function run(t){if(busy)return;busy=true;document.querySelectorAll('.sc-btn').forEach(b=>{b.classList.remove('active');b.disabled=true});$('btn-'+t).classList.add('active');rst();closeDetail();
+if(t==='daily')await fDaily();else if(t==='spike')await fSpike();else if(t==='cache')await fCache();else if(t==='swap')await fSwap();else if(t==='budget')await fBudget();
+document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
+
+async function fDaily(){
+log('co','Routing: 80% of queries simple enough for haiku, potential 20/day savings');
+hlB('c-model');log('co','Model costs: gpt-4o $198 + claude-sonnet $72 + haiku $34 + llama $24 = $328');await W(250);
+hlB('c-infra');log('co','Infrastructure: GPU $38 + vector $14 + gateway $10 = $62');await W(200);
+hlB('c-gov');log('co','Governance: safety $8 + DLP $5 + eval $4 + audit $3 + guardrails $2 = $22');await W(200);
+hlB('c-cache');log('sv','Cache savings: 6,933 hits x $0.0126 avg = -$87');await W(200);
+hlB('b-total');setTotal('$412','Budget: $500/day | 82% utilized | on track');await W(200);
+hlB('b-teams');log('co','Clinical: $198 | Claims: $124 | Member Svc: $58 | Other: $32');await W(200);
+hlB('b-budget');log('bg','Budget: $412/$500 = 82% | on track for month');await W(200);
+hlB('b-forecast');log('bg','Forecast: $12,360/$15,000 = 82% | $2,640 under budget');
+resp('ok','DAILY REPORT','$412/day | 82% of budget | cache saving $87/day | on track','$412');sM(0.01,0.00,0.00,0.01)}
+
+async function fSpike(){
+log('co','COST ANOMALY detected at 2:14 PM');
+hlB('b-total');setTotal('$847','ALERT: 169% of daily budget!');$('total-val').style.fill='#ef4444';$('b-total').style.stroke='#ef4444';await W(300);
+hlB('c-model');$('cm-val').textContent='$714';$('c-model').style.stroke='#ef4444';
+log('er','Model costs spiked: $328 -> $714 (+118%)');await W(250);
+log('er','Root cause: Claims team runaway loop (agent retrying 4,200 times)');await W(300);
+$('cm-detail').textContent='62,488 calls (+243%) | agent loop in claims pipeline';
+hlB('b-teams');$('tv-2').textContent='$510';$('tb-2').setAttribute('width','96');
+log('er','Claims team: $124 -> $510 | runaway agent loop identified');await W(250);
+hlB('b-budget');$('bgt-bar').setAttribute('width','220');$('bgt-bar').style.fill='#ef4444';$('bgt-text').textContent='$847 / $500 (169%) | OVER BUDGET';
+log('er','Circuit breaker: throttling Claims pipeline to 10 req/min');await W(200);
+log('co','Action: Claims pipeline rate-limited, investigating loop cause');
+resp('er','COST SPIKE','Claims runaway loop: $124 -> $510 | circuit breaker triggered | throttled','$847');sM(0.01,0.02,0.05,0.01)}
+
+async function fCache(){
+log('sv','Cache optimization analysis...');
+hlB('c-cache');await W(200);
+log('sv','Current hit rate: 38% (6,933 / 18,244 calls)');await W(200);
+log('sv','Savings: 6,933 avoided calls x $0.0126 = $87/day');await W(200);
+log('sv','Optimization: increase TTL for formulary queries (stable content)');await W(250);
+log('sv','Projected: hit rate 38% -> 45% (+7%)');await W(200);
+$('cs-val').textContent='-$117';log('sv','New savings: $117/day (was $87)');await W(200);
+hlB('b-total');setTotal('$382','After cache optimization: saved additional $30/day');$('total-val').style.fill='#10b981';
+hlB('b-opt');$('opt-savings').textContent='Optimized savings: $117/day ($3,510/month)';
+log('ec','Cache compute cost: $0.50/day | ROI: 234x');
+resp('ok','CACHE OPTIMIZED','Hit rate: 38% -> 45% | Savings: $87 -> $117/day | +$900/month','$117/day');sM(0.01,0.00,0.00,0.01)}
+
+async function fSwap(){
+log('co','Model swap analysis: clinical team gpt-4o -> claude-sonnet');
+hlB('c-model');await W(200);
+log('co','Current: gpt-4o at $0.018/call for clinical reasoning');await W(200);
+log('co','Alternative: claude-sonnet at $0.008/call (-56%)');await W(200);
+log('co','Quality comparison (from P09 eval): claude 0.95 vs gpt-4o 0.94');await W(250);
+log('sv','Quality is EQUAL OR BETTER, cost is 56% lower');await W(200);
+$('cm-val').textContent='$208';hlB('c-model');
+log('sv','Clinical team: $198 -> $78/day (saving $120/day)');await W(200);
+hlB('b-total');setTotal('$292','After model swap: $120/day saved');$('total-val').style.fill='#10b981';
+hlB('b-teams');$('tv-1').textContent='$78';$('tb-1').setAttribute('width','28');
+$('fc-text').textContent='Projected: $8,760 / $15,000 (58%) | $6,240 under budget';
+log('ec','Annual savings: $120 x 365 = $43,800 from one model swap');
+resp('ok','MODEL SWAP','gpt-4o -> claude-sonnet | quality equal | save $120/day ($43.8K/yr)','$120/day');sM(0.01,0.00,0.00,0.01)}
+
+async function fBudget(){
+log('bg','Budget alert: approaching daily limit');
+hlB('b-budget');hlB('b-total');await W(200);
+setTotal('$462','92% of daily budget');$('total-val').style.fill='#fbbf24';$('b-total').style.stroke='#fbbf24';
+$('bgt-bar').setAttribute('width','203');$('bgt-bar').style.fill='#fbbf24';
+$('bgt-text').textContent='$462 / $500 (92%) | WARNING threshold exceeded';
+log('wn','Alert sent to team leads: 92% of daily budget consumed');await W(300);
+log('wn','Action 1: throttle non-critical queries (experiments, internal tools)');await W(200);
+hlB('b-teams');$('tv-4').textContent='$0';$('tb-4').setAttribute('width','0');
+log('wn','Action 2: Other team queries paused (saving ~$32/day)');await W(200);
+log('bg','Revised projection: $462 - $32 (paused) = $430 end of day');
+setTotal('$430','Throttled non-critical | projected: $430 (86%)');
+$('bgt-bar').setAttribute('width','190');$('bgt-bar').style.fill='#3b82f6';
+resp('wn','BUDGET WARN','92% consumed | non-critical paused | projected $430 (86%) end of day','$462');sM(0.01,0.01,0.00,0.01)}
+</script>
+</body>
+</html>
