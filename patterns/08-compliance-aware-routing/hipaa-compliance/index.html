@@ -59,7 +59,7 @@ svg text{font-family:'DM Sans',sans-serif}
 </head>
 <body>
 <div class="pg">
-<div class="hdr"><div class="hdr-badge">Pattern 08</div><div><h1>DLP Integration</h1><p>Integrate enterprise DLP (Presidio, Purview, Macie) into the routing classifier. Click any component for details.</p></div></div>
+<div class="hdr"><div class="hdr-badge">Pattern 08</div><div><h1>HIPAA Compliance</h1><p>End-to-end HIPAA compliance for LLM pipelines. 18 identifier types, minimum necessary, audit requirements. Click any component for details.</p></div></div>
 
 <div class="sc-bar">
 <button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--std)"></div>Clean query</button>
@@ -222,7 +222,7 @@ if(t==='clean')await fClean();else if(t==='phi')await fPhi();else if(t==='pii')a
 document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
 
 async function fClean(){
-log('st','DLP scan: Presidio detected 2 entities, Purview confirmed, route adjusted');
+log('st','HIPAA check: 18 identifier types scanned, 0 violations this month');
 hlB('b-req');litA('a-rc');await W(200);
 hlB('b-cares');log('st','CARES: scanning for PHI... none. PII... none. Safety... clean.');await W(300);
 litA('a-cd');$('d-phi').classList.add('hl');$('d1-val').textContent='NO';await W(200);

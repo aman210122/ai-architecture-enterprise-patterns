@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pattern 07: Contamination Lineage</title>
+<title>Pattern 07: Clinical Safety Gate</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap');
 :root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.12);
@@ -59,7 +59,7 @@ svg text{font-family:'Space Grotesk',sans-serif}
 </head>
 <body>
 <div class="pg">
-<div class="hdr"><div class="hdr-badge">Pattern 07</div><div><h1>Contamination Lineage</h1><p>Trace contaminated output back to origin: which agent, which model, which input caused it. Click any component for details.</p></div></div>
+<div class="hdr"><div class="hdr-badge">Pattern 07</div><div><h1>Clinical Safety Gate</h1><p>Healthcare-specific barriers: drug interaction DB, clinical guideline verification, dosage range check. Click any component for details.</p></div></div>
 
 <div class="sc-bar">
 <button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--ok)"></div>Clean flow</button>
@@ -238,7 +238,7 @@ if(t==='clean')await fClean();else if(t==='caught')await fCaught();else if(t==='
 document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
 
 async function fClean(){
-log('cl','Lineage: contamination originated at Agent 2 (gpt-4o, prompt v2.8)');
+log('cl','Clinical gate: checking warfarin-aspirin interaction against DrugBank');
 hlB('b-src');litA('a0');await W(200);
 wallPass('w1');log('dt','Wall 1: source data integrity verified');litA('a1');await W(200);
 hlB('b-a1');log('cl','Agent 1: extracted 6 medications, 3 vitals, 2 allergies');$('a1-score').textContent='clean';await W(250);

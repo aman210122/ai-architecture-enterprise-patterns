@@ -1,10 +1,5 @@
-# Variant: Contamination Lineage
-
-**Automatic backwards trace to find exact source of contamination. Root cause analysis architecture.**
-
-## Live Demo
-**[Launch](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/07-contamination-resistant-pipeline/contamination-lineage/index.html)**
-
-**Use:** When contamination is found, need to answer: which stage, which input, which model caused this? Automated root cause, not manual investigation.
-
-*[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
+# Contamination Lineage
+**Trace to origin: agent, model, input.**
+## [Launch Demo](https://aman210122.github.io/ai-architecture-enterprise-patterns/patterns/07-contamination-resistant-pipeline/contamination-lineage/index.html)
+Unique SVG: horizontal flow with vertical barrier walls and quarantine zone. EMG research reference panel. 5 scenarios: clean flow, contamination caught, collective delusion, gap inversion, drug interaction.
+*[AI Architecture Enterprise Patterns](https://github.com/aman210122/ai-architecture-enterprise-patterns) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

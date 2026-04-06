@@ -1,31 +1,28 @@
-# Pattern 08: Compliance-Aware Data Routing
-**CARES algorithm for zero-violation PHI routing. 14 variants. Based on PHI-GUARD research: 0 PHI violations across 30K MIMIC-IV queries.**
+# Pattern 08: Compliance-Aware Routing (CARES)
+**Diamond decision tree routing queries to correct endpoints. PHI to BAA, PII redacted, clean to standard. Based on PHI-GUARD research (zero violations, 30K queries).**
 
-Research basis: PHI-GUARD paper (CARES algorithm, compliance-aware LLM routing, zero violations, TechRxiv DOI: 10.36227/techrxiv.177220388.80392106/v1).
+Unique layout: CARES classifier on left, diamond decision nodes branching to 4 endpoint paths. Visual decision tree, not pipeline.
 
-| Routing Layer | Variant |
-|--------------|---------|
-| Core routing algorithm | [CARES Algorithm](cares-algorithm/) |
-| 18 HIPAA identifier types | [PHI Detection Engine](phi-detection-engine/) |
-| BAA-covered endpoints only | [BAA Routing](baa-routing/) |
-| Jurisdiction-based routing | [Regional Compliance](regional-compliance/) |
-| User consent status | [Consent Routing](consent-routing/) |
-| Per-field masking | [Field Redaction](field-redaction/) |
-| Synthetic replacement | [De-Identification](de-identification/) |
-| Sensitivity-based encryption | [Encryption Router](encryption-routing/) |
-| Non-reversible tokens | [Tokenization](tokenization/) |
-| Geographic enforcement | [Data Residency](data-residency/) |
-| Auto-delete + holds | [Retention Policy](retention-policy/) |
-| RBAC+ABAC on data | [Data Access Control](access-control-data/) |
-| Immutable decision log | [Routing Audit](routing-audit/) |
-| Enterprise DLP connection | [DLP Integration](dlp-integration/) |
+| Compliance Area | Variant | When to Use |
+|----------------|---------|-------------|
+| CARES algorithm | [CARES Algorithm](cares-algorithm/) | Default. Full classification pipeline. |
+| PHI detection + BAA | [PHI Routing](phi-routing/) | Healthcare with BAA endpoints. |
+| PII strip + route | [PII Redaction](pii-redaction/) | Financial, insurance PII handling. |
+| BAA lifecycle | [BAA Management](baa-endpoint-management/) | Managing provider agreements. |
+| End-to-end HIPAA | [HIPAA Compliance](hipaa-compliance/) | Healthcare regulatory compliance. |
+| EU data residency | [GDPR Routing](gdpr-routing/) | European data protection. |
+| State-specific rules | [State Privacy Laws](state-privacy-laws/) | CCPA, CPRA, state regulations. |
+| Multiple regulations | [Multi-Jurisdiction](multi-jurisdiction/) | Cross-border data flows. |
+| 4-level classification | [Sensitivity Classification](sensitivity-classification/) | Data classification system. |
+| Enterprise DLP | [DLP Integration](dlp-integration/) | Presidio, Purview, Macie. |
+| User opt-in/out | [Consent Routing](consent-routing/) | GDPR/CCPA consent flows. |
+| Safe Harbor / Expert | [De-Identification](de-identification/) | Clinical de-identification. |
+| Immutable logging | [Audit Trail](audit-trail/) | 7-year compliance retention. |
+| On-demand evidence | [Regulatory Evidence](regulatory-evidence/) | Audit packages for regulators. |
 
-## GAIF-4 for Compliance Routing
-| Metric | Target | PHI-GUARD Result |
-|--------|--------|-----------------|
-| CFR | 0.00 (zero tolerance) | 0.00 across 30K queries |
-| Routing accuracy | > 0.99 | 0.997 |
-| False positive rate | < 0.05 | 0.032 |
-| Classification latency | < 50ms | 38ms avg |
+## Research Connection
+- PHI-GUARD (TechRxiv DOI: 10.36227/techrxiv.177220388): CARES algorithm, zero violations
+- Submitted IEEE JBHI (Manuscript JBHI-01214-2026)
+- 30,247 MIMIC-IV queries classified with zero PHI leaks
 
 *[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

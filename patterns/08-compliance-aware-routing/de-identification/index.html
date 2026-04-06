@@ -3,333 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pattern 08 / De-Identification Pipeline: Standard RAG | AI Architecture Enterprise Patterns</title>
+<title>Pattern 08: Compliance-Aware Routing</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap');
-:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.12);--border2:rgba(139,149,168,0.2);
---ing:#34d399;--qry:#60a5fa;--vec:#c084fc;--grd:#fbbf24;--ok:#34d399;--err:#f87171;--warn:#fbbf24;--ops:#38bdf8;--eco:#fb923c;
---f:'DM Sans',sans-serif;--m:'JetBrains Mono',monospace}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--bg4:#252d3f;--text:#c9d1d9;--text2:#b8c0cc;--text3:#8b949e;--border:rgba(139,149,168,0.12);
+--phi:#3b82f6;--phiL:#60a5fa;--pii:#f59e0b;--piiL:#fbbf24;--std:#10b981;--stdL:#34d399;--blk:#ef4444;
+--ok:#34d399;--err:#f87171;--warn:#fbbf24;--ops:#38bdf8;--eco:#fb923c;
+--f:'DM Sans',sans-serif;--m:'IBM Plex Mono',monospace}
 *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:var(--f)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(59,130,246,0.02),transparent 50%);pointer-events:none}
 .pg{max-width:1440px;margin:0 auto;padding:1.2rem}
 .hdr{margin-bottom:0.8rem;display:flex;align-items:center;gap:12px;padding-bottom:0.6rem;border-bottom:1px solid var(--border)}
-.hdr-badge{background:linear-gradient(135deg,var(--ing),var(--qry));padding:5px 10px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#000;white-space:nowrap}
-.hdr h1{font-size:20px;font-weight:700;letter-spacing:-0.3px}.hdr p{font-size:11px;color:var(--text2)}
+.hdr-badge{background:linear-gradient(135deg,var(--phi),var(--std));padding:5px 10px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#fff}
+.hdr h1{font-size:20px;font-weight:800;letter-spacing:-0.3px}.hdr p{font-size:11px;color:var(--text2)}
 .sc-bar{display:flex;gap:5px;margin-bottom:0.6rem;flex-wrap:wrap;align-items:center}
 .sc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 11px;cursor:pointer;font-family:var(--f);font-size:10px;color:var(--text2);transition:all 0.2s;display:flex;align-items:center;gap:4px}
-.sc-btn:hover{border-color:var(--qry);color:var(--text)}.sc-btn.active{border-color:var(--qry);color:var(--qry);background:rgba(96,165,250,0.08);font-weight:600}.sc-btn:disabled{opacity:0.3;cursor:not-allowed}
+.sc-btn:hover{border-color:var(--phi);color:var(--text)}.sc-btn.active{border-color:var(--phi);color:var(--phi);background:rgba(59,130,246,0.08);font-weight:600}.sc-btn:disabled{opacity:0.3;cursor:not-allowed}
 .sc-dot{width:6px;height:6px;border-radius:50%}.sc-reset{margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-family:var(--f);font-size:9px;color:var(--text3)}
-
 .dw{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:8px;margin-bottom:0.6rem;overflow-x:auto}
-.dw svg{width:100%;min-width:1000px;height:auto;display:block}
+.dw svg{width:100%;min-width:1050px;height:auto;display:block}
 svg text{font-family:'DM Sans',sans-serif}
-.box{rx:6;ry:6;stroke-width:1.5;cursor:pointer;transition:all 0.3s}.box:hover{filter:brightness(1.15)}.box.hl{stroke-width:2.5;filter:drop-shadow(0 0 6px currentColor)}.box.dim{opacity:0.08}
-.arr{fill:none;stroke:#8b949e;stroke-width:1.2;opacity:0.25}.arr.li{opacity:1;stroke-width:2}.arr.li-i{opacity:1;stroke:var(--ing);stroke-width:2}.arr.li-q{opacity:1;stroke:var(--qry);stroke-width:2}.arr.li-v{opacity:1;stroke:var(--vec);stroke-width:2}.arr.li-d{opacity:1;stroke:var(--err);stroke-width:2}
-.bx-t{font-size:9px;font-weight:700;text-anchor:middle}.bx-s{font-size:7px;fill:#b8c0cc;text-anchor:middle}
-.lbl{font-size:8.5px;fill:#8b949e;font-weight:600;letter-spacing:0.8px}
+.box{rx:8;ry:8;stroke-width:1.5;cursor:pointer;transition:all 0.3s}.box:hover{filter:brightness(1.15)}.box.hl{stroke-width:2.5;filter:drop-shadow(0 0 6px currentColor)}.box.dim{opacity:0.08}
+/* Diamond decision node - unique to this pattern */
+.diamond{cursor:pointer;transition:all 0.3s;stroke-width:2}.diamond:hover{filter:brightness(1.2)}.diamond.hl{stroke-width:3;filter:drop-shadow(0 0 8px currentColor)}
+.arr{fill:none;stroke:#8b949e;stroke-width:1.2;opacity:0.25}.arr.li{opacity:1;stroke-width:2}
+.arr.li-phi{opacity:1;stroke:var(--phi);stroke-width:2.5}.arr.li-pii{opacity:1;stroke:var(--pii);stroke-width:2.5}.arr.li-std{opacity:1;stroke:var(--std);stroke-width:2.5}.arr.li-blk{opacity:1;stroke:var(--blk);stroke-width:2.5;stroke-dasharray:4,2}
+.bx-t{font-size:9.5px;font-weight:700;text-anchor:middle}.bx-s{font-size:7px;fill:#b8c0cc;text-anchor:middle}
+.lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
 .gbar{rx:5;ry:5}.gbar-t{font-size:8px;font-weight:600;letter-spacing:0.5px}
-.sdot{r:3;transition:all 0.3s}
-
-/* Detail panel */
-.dp{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:0.6rem;overflow:hidden;transition:all 0.3s}
-.dp.closed{max-height:0;border:none;margin:0}.dp.open{max-height:600px}
-.dp-h{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.dp-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}.dp-tag{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:600;font-family:var(--m)}
-.dp-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;font-family:var(--f)}
-.dp-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-@media(max-width:900px){.dp-body{grid-template-columns:1fr}}
-.dp-sec{}.dp-sec-t{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.ep-tag{font-size:7px;font-weight:700;letter-spacing:0.5px;text-anchor:middle}
+.hint{font-size:5.5px;fill:#60a5fa;opacity:0.5;text-anchor:middle}
+.dp{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:0.6rem;overflow:hidden;transition:all 0.3s}.dp.closed{max-height:0;border:none;margin:0}.dp.open{max-height:600px}
+.dp-h{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}.dp-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}.dp-tag{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:600;font-family:var(--m)}.dp-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px}
+.dp-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}@media(max-width:900px){.dp-body{grid-template-columns:1fr}}
+.dp-sec-t{font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--border)}
 .dp-it{font-size:10px;color:var(--text2);margin-bottom:3px;line-height:1.5;display:flex;align-items:baseline;gap:5px}.dp-it::before{content:'';width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.dp-it.ok::before{background:var(--ok)}.dp-it.warn::before{background:var(--warn)}.dp-it.info::before{background:var(--qry)}.dp-it.plat::before{background:var(--vec)}
-.dp-kv{display:flex;justify-content:space-between;font-size:9px;color:var(--text2);margin-bottom:2px;font-family:var(--m)}.dp-kv span:last-child{color:var(--text)}
-
-/* Response */
+.dp-it.ok::before{background:var(--ok)}.dp-it.warn::before{background:var(--warn)}.dp-it.info::before{background:var(--ops)}.dp-it.plat::before{background:var(--phi)}
 .rsp{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;transition:all 0.3s;margin-bottom:0.6rem;flex-wrap:wrap}
 .rsp.ok{border-color:var(--ok);background:rgba(52,211,153,0.06)}.rsp.er{border-color:var(--err);background:rgba(248,113,113,0.06)}.rsp.wn{border-color:var(--warn);background:rgba(251,191,36,0.06)}
 .rsp-c{font-family:var(--m);font-size:12px;font-weight:700}.rsp-m{font-size:10px;color:var(--text2);flex:1}.rsp-${font-family:var(--m);font-size:10px;color:var(--eco)}
-
-/* Bottom row */
 .brow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.6rem}@media(max-width:900px){.brow{grid-template-columns:1fr}}
 .mets{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}@media(max-width:768px){.mets{grid-template-columns:repeat(2,1fr)}}
 .met{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px}
-.met-l{font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:3px}
-.met-b{font-size:6px;padding:1px 4px;border-radius:2px;font-weight:600}.met-v{font-size:18px;font-weight:700;font-family:var(--m)}.met-bar{height:2px;border-radius:1px;background:var(--bg4);margin-top:3px;overflow:hidden}.met-f{height:100%;border-radius:1px;transition:width 0.5s}.met-n{font-size:7px;color:var(--text3);margin-top:2px}
-
+.met-l{font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:3px}.met-b{font-size:6px;padding:1px 4px;border-radius:2px;font-weight:600}
+.met-v{font-size:18px;font-weight:700;font-family:var(--m)}.met-bar{height:2px;border-radius:1px;background:var(--bg4);margin-top:3px;overflow:hidden}.met-f{height:100%;border-radius:1px;transition:width 0.5s}.met-n{font-size:7px;color:var(--text3);margin-top:2px}
 .log{background:var(--bg3);border:1px solid var(--border);border-radius:6px;overflow:hidden}
 .log-h{padding:5px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:8px;font-weight:700;color:var(--text3)}
 .log-clr{background:none;border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:7px;color:var(--text3);cursor:pointer;font-family:var(--f)}
 .log-b{max-height:140px;overflow-y:auto;padding:2px 0;font-family:var(--m);font-size:8px}.log-b::-webkit-scrollbar{width:2px}.log-b::-webkit-scrollbar-thumb{background:var(--bg4)}
 .lr{padding:1px 10px;display:flex;gap:6px;animation:fi 0.15s ease}@keyframes fi{from{opacity:0}to{opacity:1}}
-.lr-t{color:var(--text3);min-width:60px}.lr-p{min-width:45px;font-weight:600}.lr-m{color:var(--text2);flex:1}
-.lr-p.i{color:var(--ing)}.lr-p.q{color:var(--qry)}.lr-p.v{color:var(--vec)}.lr-p.g{color:var(--grd)}.lr-p.ok{color:var(--ok)}.lr-p.er{color:var(--err)}.lr-p.w{color:var(--warn)}.lr-p.ec{color:var(--eco)}
-
-.footer{text-align:center;padding:0.6rem 0;font-size:8px;color:var(--text3)}.footer a{color:var(--qry);text-decoration:none}
-.wm{position:fixed;bottom:6px;right:10px;font-size:7px;color:var(--text3);opacity:0.15;font-family:var(--m);pointer-events:none;z-index:99}
+.lr-t{color:var(--text3);min-width:60px}.lr-p{min-width:50px;font-weight:600}.lr-m{color:var(--text2);flex:1}
+.lr-p.ph{color:var(--phi)}.lr-p.pi{color:var(--pii)}.lr-p.st{color:var(--std)}.lr-p.bk{color:var(--blk)}.lr-p.ok{color:var(--ok)}.lr-p.er{color:var(--err)}.lr-p.wn{color:var(--warn)}.lr-p.ec{color:var(--eco)}
+.footer{text-align:center;padding:0.6rem 0;font-size:8px;color:var(--text3)}.footer a{color:var(--phi);text-decoration:none}
 </style>
 </head>
 <body>
-<div class="wm">Designed by Aman Sharma</div>
 <div class="pg">
-<div class="hdr"><div class="hdr-badge">Pattern 08 / De-Identification Pipeline</div><div><h1>Compliance-Aware Data Routing</h1><p>Click any component for full details. Run scenarios to watch data flow through the architecture.</p></div></div>
+<div class="hdr"><div class="hdr-badge">Pattern 08</div><div><h1>De-Identification Pipeline</h1><p>Clinical de-identification (Safe Harbor, Expert Determination) before model processing. Click any component for details.</p></div></div>
 
 <div class="sc-bar">
-<button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--ok)"></div>Clean query</button>
-<button class="sc-btn" onclick="run('phi')" id="btn-phi"><div class="sc-dot" style="background:var(--err)"></div>PHI in retrieval</button>
-<button class="sc-btn" onclick="run('halluc')" id="btn-halluc"><div class="sc-dot" style="background:var(--warn)"></div>Hallucination</button>
-<button class="sc-btn" onclick="run('cache')" id="btn-cache"><div class="sc-dot" style="background:var(--vec)"></div>Cache hit</button>
-<button class="sc-btn" onclick="run('fail')" id="btn-fail"><div class="sc-dot" style="background:var(--text3)"></div>0 results</button>
+<button class="sc-btn" onclick="run('clean')" id="btn-clean"><div class="sc-dot" style="background:var(--std)"></div>Clean query</button>
+<button class="sc-btn" onclick="run('phi')" id="btn-phi"><div class="sc-dot" style="background:var(--phi)"></div>PHI detected</button>
+<button class="sc-btn" onclick="run('pii')" id="btn-pii"><div class="sc-dot" style="background:var(--pii)"></div>PII redact+route</button>
+<button class="sc-btn" onclick="run('block')" id="btn-block"><div class="sc-dot" style="background:var(--blk)"></div>Unsafe blocked</button>
+<button class="sc-btn" onclick="run('mixed')" id="btn-mixed"><div class="sc-dot" style="background:var(--ops)"></div>Mixed PHI+PII</button>
 <button class="sc-reset" onclick="resetAll()">&#8634; Reset</button></div>
 
 <div class="dw">
-<svg viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg">
-<rect class="gbar" x="10" y="8" width="1080" height="24" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.2)"/>
-<text class="gbar-t" x="22" y="24" fill="#60a5fa">GOVERNANCE</text><text class="gbar-t" x="120" y="24" fill="#8b949e">GAIF-4 (T1PR/CFR/EMR/GDR) | Compliance Tagging | Access Control | PHI Detection | Data Lineage | Audit Trail</text>
-<rect class="gbar" x="10" y="36" width="1080" height="20" fill="rgba(52,211,153,0.08)" stroke="rgba(52,211,153,0.15)"/>
-<text class="gbar-t" x="22" y="50" fill="#34d399">OBSERVABILITY</text><text class="gbar-t" x="120" y="50" fill="#8b949e">Per-Stage Tracing | Latency | Retrieval Precision | Recall | MRR | NDCG | Groundedness</text>
+<svg viewBox="0 0 1050 470" xmlns="http://www.w3.org/2000/svg">
+<text x="525" y="16" text-anchor="middle" fill="#8b949e" style="font-size:9px;font-style:italic">Click any node for details. Based on PHI-GUARD CARES algorithm: zero violations across 30K queries.</text>
 
-<text x="550" y="78" text-anchor="middle" fill="#8b949e" style="font-size:9px;font-style:italic;font-family:DM Sans,sans-serif">Click any component box for full architecture details</text>
-<text class="lbl" x="20" y="78" fill="#34d399">&#9679; CLASSIFY + ROUTE</text><text class="lbl" x="880" y="78" fill="#8b949e" style="font-weight:400">PHI detection (18 types), sensitivity scoring, CARES routing</text>
+<rect class="gbar" x="10" y="24" width="1030" height="22" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.18)"/>
+<text class="gbar-t" x="22" y="38" fill="#3b82f6">GOVERNANCE</text><text class="gbar-t" x="115" y="38" fill="#8b949e">HIPAA Compliance | BAA Verification | PHI Classification | PII Detection | Routing Audit | CARES Algorithm</text>
+<rect class="gbar" x="10" y="50" width="1030" height="20" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.12)"/>
+<text class="gbar-t" x="22" y="63" fill="#10b981">OBSERVABILITY</text><text class="gbar-t" x="120" y="63" fill="#8b949e">Classification Accuracy | Route Distribution | Latency per Path | False Positive/Negative | PHI Leak Rate</text>
 
-<rect class="box" id="b-src" x="20" y="86" width="118" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('src')"/><text class="bx-t" x="79" y="107" fill="#34d399">Sensitivity</text><text class="bx-s" x="79" y="119">Auto-classify</text><circle class="sdot" id="d-src" cx="130" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="130" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans;cursor:pointer" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ext" x="162" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('ext')"/><text class="bx-t" x="211" y="107" fill="#34d399">PHI Engine</text><text class="bx-s" x="211" y="119">18 HIPAA types</text><circle class="sdot" id="d-ext" cx="252" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="252" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-proc" x="284" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('proc')"/><text class="bx-t" x="333" y="107" fill="#34d399">Score</text><text class="bx-s" x="333" y="119">0-1 per element</text><circle class="sdot" id="d-proc" cx="374" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="374" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-chunk" x="406" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('chunk')"/><text class="bx-t" x="455" y="107" fill="#34d399">CARES Route</text><text class="bx-s" x="455" y="119">Core algorithm</text><circle class="sdot" id="d-chunk" cx="496" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="496" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-emb" x="528" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('emb')"/><text class="bx-t" x="577" y="107" fill="#34d399">BAA Router</text><text class="bx-s" x="577" y="119">BAA endpoints</text><circle class="sdot" id="d-emb" cx="618" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="618" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-comp" x="650" y="86" width="108" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('comp')"/><text class="bx-t" x="704" y="107" fill="#fbbf24">Regional</text><text class="bx-s" x="704" y="119">Jurisdiction</text><circle class="sdot" id="d-comp" cx="750" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="750" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-qual" x="782" y="86" width="98" height="50" fill="#1c2333" stroke="#34d399" onclick="detail('qual')"/><text class="bx-t" x="831" y="107" fill="#34d399">Consent</text><text class="bx-s" x="831" y="119">Opt-in/out</text><circle class="sdot" id="d-qual" cx="872" cy="94" fill="#8b949e" opacity="0.2"/>
-<text x="872" y="130" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
+<!-- REQUEST INPUT -->
+<rect class="box" id="b-req" x="15" y="90" width="130" height="70" fill="#1c2333" stroke="#8b949e" onclick="detail('req')"/>
+<text class="bx-t" x="80" y="116" fill="#c9d1d9">User Query</text>
+<text class="bx-s" x="80" y="130">Natural language</text>
+<text class="bx-s" x="80" y="142">May contain PHI/PII</text>
+<text class="hint" x="80" y="154">&#9432;</text>
 
-<line class="arr" id="ai1" x1="138" y1="111" x2="162" y2="111"/><line class="arr" id="ai2" x1="260" y1="111" x2="284" y2="111"/><line class="arr" id="ai3" x1="382" y1="111" x2="406" y2="111"/><line class="arr" id="ai4" x1="504" y1="111" x2="528" y2="111"/><line class="arr" id="ai5" x1="626" y1="111" x2="650" y2="111"/><line class="arr" id="ai6" x1="758" y1="111" x2="782" y2="111"/>
-<path class="arr" id="ai7" d="M831 136 L831 165 L550 165 L550 190"/>
+<path class="arr" id="a-rc" d="M145 125 L200 125"/>
 
-<rect class="box" id="b-vs" x="410" y="190" width="280" height="68" fill="#1c2333" stroke="#c084fc" stroke-width="2" rx="10" ry="10" onclick="detail('vs')"/>
-<text class="bx-t" x="550" y="214" fill="#c084fc" style="font-size:11px">Compliance Decision Hub</text>
-<text class="bx-s" x="550" y="228">CFR: 0.00 across 30K MIMIC-IV queries (PHI-GUARD)</text>
-<text class="bx-s" x="550" y="242" fill="#8b949e">Routes: BAA-covered / Non-BAA / Redact / Block</text>
-<text x="682" y="252" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
+<!-- CARES CLASSIFIER (unique large box) -->
+<rect class="box" id="b-cares" x="200" y="78" width="200" height="94" fill="#161b22" stroke="#3b82f6" stroke-width="2" rx="12" onclick="detail('cares')"/>
+<text x="300" y="102" text-anchor="middle" fill="#3b82f6" style="font-size:12px;font-weight:800">CARES Classifier</text>
+<text x="300" y="118" text-anchor="middle" fill="#b8c0cc" style="font-size:7.5px">Compliance-Aware Routing</text>
+<text x="300" y="132" text-anchor="middle" fill="#b8c0cc" style="font-size:7.5px">and Enforcement System</text>
+<text x="300" y="148" text-anchor="middle" fill="#8b949e" style="font-size:6.5px;font-family:'IBM Plex Mono'" id="cares-stat">30,247 queries classified</text>
+<text x="300" y="162" text-anchor="middle" fill="#34d399" style="font-size:6.5px;font-weight:700" id="cares-viol">0 violations</text>
+<text class="hint" x="300" y="168">&#9432; click for details</text>
 
-<path class="arr" id="aq-vs" d="M550 258 L550 282 L435 282 L435 312"/>
+<!-- DECISION DIAMOND 1: Contains PHI? -->
+<polygon class="diamond" id="d-phi" points="490,125 530,90 570,125 530,160" fill="#161b22" stroke="#3b82f6" onclick="detail('dphi')"/>
+<text x="530" y="122" text-anchor="middle" fill="#3b82f6" style="font-size:8px;font-weight:700">PHI?</text>
+<text x="530" y="134" text-anchor="middle" fill="#60a5fa" style="font-size:6px" id="d1-val">--</text>
 
-<text class="lbl" x="20" y="305" fill="#60a5fa">&#9679; PROTECT + ENFORCE + AUDIT</text><text class="lbl" x="880" y="305" fill="#8b949e" style="font-weight:400">Field redaction, de-ID, encryption, residency, retention, audit</text>
+<path class="arr" id="a-cd" d="M400 125 L490 125"/>
 
-<rect class="box" id="b-qin" x="20" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('qin')"/><text class="bx-t" x="68" y="333" fill="#60a5fa">Field Redact</text><text class="bx-s" x="68" y="345">Per-field mask</text><circle class="sdot" id="d-qin" cx="108" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="108" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-cls" x="138" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('cls')"/><text class="bx-t" x="181" y="333" fill="#60a5fa">De-ID</text><text class="bx-s" x="181" y="345">Synthetic replace</text><circle class="sdot" id="d-cls" cx="216" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="216" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-enh" x="246" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('enh')"/><text class="bx-t" x="289" y="333" fill="#60a5fa">Encrypt Route</text><text class="bx-s" x="289" y="345">Level per data</text><circle class="sdot" id="d-enh" cx="324" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="324" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ret" x="354" y="312" width="106" height="50" fill="#1c2333" stroke="#c084fc" onclick="detail('ret')"/><text class="bx-t" x="407" y="333" fill="#c084fc">Tokenize</text><text class="bx-s" x="407" y="345">Non-reversible</text><circle class="sdot" id="d-ret" cx="452" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="452" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-rer" x="482" y="312" width="86" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('rer')"/><text class="bx-t" x="525" y="333" fill="#60a5fa">Residency</text><text class="bx-s" x="525" y="345">Geo enforcement</text><circle class="sdot" id="d-rer" cx="560" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="560" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-ctx" x="590" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('ctx')"/><text class="bx-t" x="638" y="333" fill="#60a5fa">Retention</text><text class="bx-s" x="638" y="345">Auto-delete</text><circle class="sdot" id="d-ctx" cx="678" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="678" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-gen" x="708" y="312" width="96" height="50" fill="#1c2333" stroke="#60a5fa" onclick="detail('gen')"/><text class="bx-t" x="756" y="333" fill="#60a5fa">Routing Log</text><text class="bx-s" x="756" y="345">Every decision</text><circle class="sdot" id="d-gen" cx="796" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="796" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-grd" x="826" y="312" width="106" height="50" fill="#1c2333" stroke="#fbbf24" onclick="detail('grd')"/><text class="bx-t" x="879" y="333" fill="#fbbf24">Verify</text><text class="bx-s" x="879" y="345">Post-route check</text><circle class="sdot" id="d-grd" cx="924" cy="320" fill="#8b949e" opacity="0.2"/>
-<text x="924" y="356" fill="#60a5fa" opacity="0.5" style="font-size:6px;font-family:DM Sans" text-anchor="end">&#9432; details</text>
-<rect class="box" id="b-rsp" x="954" y="312" width="86" height="50" fill="#1c2333" stroke="#34d399" stroke-dasharray="4,2"/><text class="bx-t" x="997" y="333" fill="#34d399">Response</text><text class="bx-s" x="997" y="345">Compliant out</text>
+<!-- YES PHI -> BAA Endpoint (top right) -->
+<path class="arr" id="a-phi" d="M530 90 L530 70 L760 70"/>
+<text x="640" y="65" text-anchor="middle" fill="#3b82f6" style="font-size:7px;font-weight:600;opacity:0" id="lbl-phi">YES: PHI detected</text>
 
-<line class="arr" id="aq1" x1="116" y1="337" x2="138" y2="337"/><line class="arr" id="aq2" x1="224" y1="337" x2="246" y2="337"/><line class="arr" id="aq3" x1="332" y1="337" x2="354" y2="337"/><line class="arr" id="aq4" x1="460" y1="337" x2="482" y2="337"/><line class="arr" id="aq5" x1="568" y1="337" x2="590" y2="337"/><line class="arr" id="aq6" x1="686" y1="337" x2="708" y2="337"/><line class="arr" id="aq7" x1="804" y1="337" x2="826" y2="337"/><line class="arr" id="aq8" x1="932" y1="337" x2="954" y2="337"/>
+<rect class="box" id="b-baa" x="760" y="48" width="200" height="62" fill="#1c2333" stroke="#3b82f6" onclick="detail('baa')"/>
+<text class="bx-t" x="860" y="70" fill="#3b82f6">BAA Endpoint</text>
+<text class="bx-s" x="860" y="84">HIPAA-compliant model provider</text>
+<text class="bx-s" x="860" y="96">Azure OpenAI (BAA signed)</text>
+<text class="hint" x="860" y="106">&#9432;</text>
 
-<path class="arr" id="a-cache" d="M181 362 Q181 392 550 392 Q879 392 879 362" stroke-dasharray="4,3" opacity="0.08"/>
-<text x="530" y="405" class="bx-s" fill="#c084fc" opacity="0.25" text-anchor="middle" id="cache-lbl">Break-glass access (reversible de-ID for authorized users)</text>
-<path class="arr" id="a-fb" d="M997 362 Q997 415 550 425 Q68 435 68 370" stroke-dasharray="4,3" opacity="0.08"/>
-<text x="530" y="442" class="bx-s" fill="#34d399" opacity="0.2" text-anchor="middle" id="fb-lbl">DLP integration feeds classification improvements</text>
+<!-- NO PHI -> Decision Diamond 2: Contains PII? -->
+<path class="arr" id="a-nophi" d="M570 125 L620 125"/>
+<text x="595" y="120" text-anchor="middle" fill="#8b949e" style="font-size:6px;opacity:0" id="lbl-nophi">NO PHI</text>
 
-<rect class="gbar" x="10" y="458" width="1080" height="20" fill="rgba(56,189,248,0.07)" stroke="rgba(56,189,248,0.15)"/>
-<text class="gbar-t" x="22" y="472" fill="#38bdf8">OPERATIONS</text><text class="gbar-t" x="115" y="472" fill="#8b949e">Cache | Rate Limit | Circuit Breaker | Fallback | Error Handling | Index Versioning</text>
-<rect class="gbar" x="10" y="482" width="1080" height="20" fill="rgba(251,146,60,0.07)" stroke="rgba(251,146,60,0.15)"/>
-<text class="gbar-t" x="22" y="496" fill="#fb923c">ECONOMICS</text><text class="gbar-t" x="115" y="496" fill="#8b949e">Token Cost/Stage | Cache Savings | Model Routing | Total Cost/Query | Chargeback</text>
-<defs><filter id="gl"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<polygon class="diamond" id="d-pii" points="620,125 660,90 700,125 660,160" fill="#161b22" stroke="#f59e0b" onclick="detail('dpii')"/>
+<text x="660" y="122" text-anchor="middle" fill="#f59e0b" style="font-size:8px;font-weight:700">PII?</text>
+<text x="660" y="134" text-anchor="middle" fill="#fbbf24" style="font-size:6px" id="d2-val">--</text>
+
+<!-- YES PII -> Redact then Standard -->
+<path class="arr" id="a-pii" d="M660 160 L660 195 L760 195"/>
+<text x="710" y="190" text-anchor="middle" fill="#f59e0b" style="font-size:7px;font-weight:600;opacity:0" id="lbl-pii">YES: PII found</text>
+
+<rect class="box" id="b-redact" x="760" y="150" width="90" height="55" fill="#1c2333" stroke="#f59e0b" onclick="detail('redact')"/>
+<text class="bx-t" x="805" y="172" fill="#f59e0b">Redact</text>
+<text class="bx-s" x="805" y="186">Strip PII</text>
+<text class="bx-s" x="805" y="196">Presidio</text>
+
+<path class="arr" id="a-red-std" d="M850 177 L880 177"/>
+
+<rect class="box" id="b-redstd" x="880" y="155" width="100" height="50" fill="#1c2333" stroke="#10b981"/>
+<text class="bx-t" x="930" y="176" fill="#10b981">Standard</text>
+<text class="bx-s" x="930" y="190">PII removed</text>
+
+<!-- NO PII -> Clean Standard Endpoint -->
+<path class="arr" id="a-std" d="M700 125 L760 125"/>
+<text x="730" y="120" text-anchor="middle" fill="#10b981" style="font-size:6px;opacity:0" id="lbl-std">CLEAN</text>
+
+<rect class="box" id="b-std" x="760" y="116" width="200" height="40" fill="#1c2333" stroke="#10b981" onclick="detail('std')"/>
+<text class="bx-t" x="860" y="136" fill="#10b981">Standard Endpoint</text>
+<text class="bx-s" x="860" y="148">Any approved model provider</text>
+
+<!-- BLOCK path (from CARES directly down) -->
+<path class="arr" id="a-blk" d="M300 172 L300 240 L760 240"/>
+<text x="530" y="236" text-anchor="middle" fill="#ef4444" style="font-size:7px;font-weight:600;opacity:0" id="lbl-blk">BLOCKED: unsafe content</text>
+
+<rect class="box" id="b-block" x="760" y="222" width="200" height="50" fill="#1c2333" stroke="#ef4444" onclick="detail('block')"/>
+<text class="bx-t" x="860" y="244" fill="#ef4444">BLOCKED</text>
+<text class="bx-s" x="860" y="258">Unsafe content rejected</text>
+
+<!-- PHI-GUARD Research Reference -->
+<rect x="15" y="200" width="220" height="80" fill="#1c2333" stroke="rgba(59,130,246,0.2)" rx="8" cursor="pointer" onclick="detail('research')"/>
+<text x="125" y="220" text-anchor="middle" fill="#3b82f6" style="font-size:8px;font-weight:700">PHI-GUARD RESEARCH</text>
+<text x="125" y="234" text-anchor="middle" fill="#b8c0cc" style="font-size:7px">CARES algorithm: zero PHI violations</text>
+<text x="125" y="246" text-anchor="middle" fill="#b8c0cc" style="font-size:7px">across 30,247 MIMIC-IV queries</text>
+<text x="125" y="258" text-anchor="middle" fill="#b8c0cc" style="font-size:7px">Submitted IEEE JBHI</text>
+<text x="125" y="270" text-anchor="middle" fill="#60a5fa" style="font-size:6px">DOI: 10.36227/techrxiv.177220388</text>
+
+<!-- Routing statistics -->
+<rect x="15" y="300" width="220" height="60" fill="#1c2333" stroke="rgba(139,149,168,0.15)" rx="6"/>
+<text x="125" y="318" text-anchor="middle" fill="#8b949e" style="font-size:8px;font-weight:600">ROUTE DISTRIBUTION</text>
+<text x="60" y="336" text-anchor="middle" fill="#3b82f6" style="font-size:7px" id="rd-phi">PHI: 23%</text>
+<text x="125" y="336" text-anchor="middle" fill="#f59e0b" style="font-size:7px" id="rd-pii">PII: 12%</text>
+<text x="190" y="336" text-anchor="middle" fill="#10b981" style="font-size:7px" id="rd-std">Clean: 64%</text>
+<text x="125" y="350" text-anchor="middle" fill="#ef4444" style="font-size:7px" id="rd-blk">Blocked: 1%</text>
+
+<rect class="gbar" x="10" y="385" width="1030" height="20" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.12)"/>
+<text class="gbar-t" x="22" y="399" fill="#38bdf8">OPERATIONS</text><text class="gbar-t" x="115" y="399" fill="#8b949e">BAA Verification | Classifier Update | Redaction Rules | Endpoint Health | Secret Rotation | DLP Sync</text>
+<rect class="gbar" x="10" y="409" width="1030" height="20" fill="rgba(251,146,60,0.06)" stroke="rgba(251,146,60,0.12)"/>
+<text class="gbar-t" x="22" y="423" fill="#fb923c">ECONOMICS</text><text class="gbar-t" x="115" y="423" fill="#8b949e">BAA Endpoint Premium | Redaction Compute | Classification Latency | Cost per Route | Compliance Overhead</text>
 </svg>
 </div>
 
-<!-- DETAIL PANEL (click any component) -->
-<div class="dp closed" id="dp">
-<div class="dp-h"><div class="dp-title" id="dp-title">Component</div><button class="dp-close" onclick="closeDetail()">&#10005;</button></div>
-<div class="dp-body" id="dp-body"></div>
-</div>
-
-<div class="rsp" id="rsp"><span class="rsp-c" id="rsp-c">---</span><span class="rsp-m" id="rsp-m">Click any component for details, or run a scenario</span><span class="rsp-$" id="rsp-$"></span></div>
+<div class="dp closed" id="dp"><div class="dp-h"><div class="dp-title" id="dp-title">Component</div><button class="dp-close" onclick="closeDetail()">&#10005;</button></div><div class="dp-body" id="dp-body"></div></div>
+<div class="rsp" id="rsp"><span class="rsp-c" id="rsp-c">---</span><span class="rsp-m" id="rsp-m">Click any node, or run a scenario</span><span class="rsp-$" id="rsp-$"></span></div>
 
 <div class="brow">
 <div class="mets">
-<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-t" style="color:#34d399">0.02</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:2%;background:#34d399"></div></div><div class="met-n">CFR: compliance failures (target 0.00)</div></div>
-<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-c" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:#34d399"></div></div><div class="met-n">Routing accuracy rate</div></div>
-<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-e" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:1%;background:#34d399"></div></div><div class="met-n">False positive (over-blocked)</div></div>
-<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:rgba(52,211,153,0.12);color:#34d399">OK</span></div><div class="met-v" id="m-g" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:1%;background:#34d399"></div></div><div class="met-n">Classification accuracy decay</div></div>
+<div class="met"><div class="met-l">T1PR <span class="met-b" id="mb-t" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-t" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-t" style="width:0%;background:#34d399"></div></div><div class="met-n">PHI reaching non-BAA</div></div>
+<div class="met"><div class="met-l">CFR <span class="met-b" id="mb-c" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-c" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-c" style="width:0%;background:#34d399"></div></div><div class="met-n">HIPAA violations</div></div>
+<div class="met"><div class="met-l">EMR <span class="met-b" id="mb-e" style="background:rgba(52,211,153,0.12);color:#34d399">SAFE</span></div><div class="met-v" id="m-e" style="color:#34d399">0.00</div><div class="met-bar"><div class="met-f" id="mf-e" style="width:0%;background:#34d399"></div></div><div class="met-n">PHI in output</div></div>
+<div class="met"><div class="met-l">GDR <span class="met-b" id="mb-g" style="background:rgba(52,211,153,0.12);color:#34d399">OK</span></div><div class="met-v" id="m-g" style="color:#34d399">0.01</div><div class="met-bar"><div class="met-f" id="mf-g" style="width:1%;background:#34d399"></div></div><div class="met-n">Classifier drift</div></div>
 </div>
 <div class="log"><div class="log-h"><span>Compliance Routing Log</span><button class="log-clr" onclick="clearLog()">Clear</button></div><div class="log-b" id="logB"></div></div>
 </div>
-<div class="footer"><a href="https://github.com/aman210122/ai-architecture-enterprise-patterns">GitHub</a> | <a href="https://linkedin.com/in/amansharmaarchitect">Aman Sharma</a> | <a href="https://github.com/aman210122/gaif-governance-observatory">GAIF Observatory</a></div>
+<div class="footer"><a href="https://github.com/aman210122/ai-architecture-enterprise-patterns">GitHub</a> | <a href="https://linkedin.com/in/amansharmaarchitect">Aman Sharma</a> | <a href="https://github.com/aman210122/gaif-governance-observatory">GAIF Observatory</a> | <a href="https://doi.org/10.36227/techrxiv.177220388.80392106/v1">PHI-GUARD Paper</a></div>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);const W=ms=>new Promise(r=>setTimeout(r,ms));let busy=false;
-
 const DETAILS={
-src:{title:'Data Sources',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Connects to document repositories, databases, APIs, and clinical systems',c:'info'},{t:'Supports incremental sync (CDC) and full sync modes',c:'info'},{t:'Schedules ingestion (cron, event-triggered, webhook)',c:'info'},{t:'Audits every source access for compliance trail',c:'info'}]},
-{title:'Configuration',items:[{t:'Connector: SharePoint, S3, GCS, FHIR, Confluence, databases',c:'ok'},{t:'Sync: incremental (CDC via Debezium) + full rebuild',c:'ok'},{t:'Schedule: cron (hourly) or event-driven (webhook)',c:'ok'},{t:'Auth: service principal, managed identity, API key (rotated)',c:'ok'},{t:'Freshness SLA: < 2h for clinical, < 24h for policies',c:'warn'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Data Factory, Blob Storage connectors',c:'plat'},{t:'AWS: Glue, S3, Lambda triggers',c:'plat'},{t:'GCP: Dataflow, Cloud Storage, Pub/Sub triggers',c:'plat'},{t:'Databricks: Auto Loader, Unity Catalog volumes',c:'plat'},{t:'OSS: Airbyte, custom Python connectors',c:'plat'}]}]},
-ext:{title:'Document Extraction',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Parses 18 HIPAA types, PPTX, Markdown, plain text',c:'info'},{t:'Preserves document structure: headings, lists, tables',c:'info'},{t:'Extracts metadata: author, date, title, classification',c:'info'},{t:'Handles encoding normalization and language detection',c:'info'}]},
-{title:'Configuration',items:[{t:'PDF: PyMuPDF / pdfplumber (text-based), Azure DI (scanned)',c:'ok'},{t:'DOCX: python-docx with style mapping',c:'ok'},{t:'HTML: Beautiful Soup with boilerplate removal',c:'ok'},{t:'Tables: preserve as markdown tables with headers',c:'ok'},{t:'Max file size: 50MB | Timeout: 60s per document',c:'warn'}]},
-{title:'Anti-Patterns',items:[{t:'Stripping all formatting (loses document structure)',c:'warn'},{t:'Ignoring table data (tables contain critical info)',c:'warn'},{t:'No language detection (mixing languages in one index)',c:'warn'},{t:'No metadata preservation (lose audit trail)',c:'warn'}]}]},
-proc:{title:'Document Processing',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'OCR for scanned documents and handwritten notes',c:'info'},{t:'Table structure extraction to markdown/JSON',c:'info'},{t:'Image captioning for diagrams and charts',c:'info'},{t:'DICOM medical image to clinical findings text',c:'info'},{t:'Chart data extraction (bar, line, pie to tabular data)',c:'info'}]},
-{title:'Configuration',items:[{t:'OCR: Tesseract (OSS) / Azure Document Intelligence / Textract',c:'ok'},{t:'Table: Camelot / Azure DI table extraction',c:'ok'},{t:'Images: GPT-4V captioning for complex diagrams',c:'ok'},{t:'DICOM: MONAI / custom radiology NLP',c:'ok'},{t:'Charts: ChartOCR / DePlot for data extraction',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'T1PR: OCR errors propagate as contamination downstream',c:'warn'},{t:'EMR: Bad OCR can cause hallucinated content',c:'warn'},{t:'GDR: OCR quality should be monitored over time',c:'warn'}]}]},
-chunk:{title:'Chunking Strategy',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Splits documents into retrieval-optimized segments',c:'info'},{t:'Preserves semantic boundaries (paragraphs, sections)',c:'info'},{t:'Adds overlap for context continuity across chunks',c:'info'},{t:'Attaches metadata per chunk (source, page, section)',c:'info'},{t:'Creates parent-child relationships for hierarchical retrieval',c:'info'}]},
-{title:'Configuration',items:[{t:'Strategy: semantic (paragraph-based) preferred over fixed-size',c:'ok'},{t:'Size: 512-1024 tokens (balance retrieval vs context)',c:'ok'},{t:'Overlap: 10-20% (ensures no context lost at boundaries)',c:'ok'},{t:'Metadata per chunk: source_id, page, section, doc_type',c:'ok'},{t:'Parent-child: summary chunk -> detail chunks',c:'ok'},{t:'Token counter: tiktoken for accurate token budgeting',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'Fixed 500-char splits (breaks mid-sentence)',c:'warn'},{t:'No overlap (loses context at chunk boundaries)',c:'warn'},{t:'Too large chunks (>2000t reduce retrieval precision)',c:'warn'},{t:'No metadata (cannot filter or trace back to source)',c:'warn'}]}]},
-emb:{title:'Embedding',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Converts text chunks into dense vector representations',c:'info'},{t:'Enables semantic similarity search across documents',c:'info'},{t:'Batch processing for ingestion, single-query for search',c:'info'}]},
-{title:'Configuration',items:[{t:'Model: text-embedding-3-large (OpenAI) / 3072 dimensions',c:'ok'},{t:'Alt: text-embedding-ada-002 (1536d, cheaper)',c:'ok'},{t:'Batch size: 100 chunks per API call',c:'ok'},{t:'Rate limit handling: exponential backoff',c:'ok'},{t:'Embedding cache: hash-based dedup (skip unchanged chunks)',c:'ok'},{t:'Cost: ~$0.00013 per 1K tokens',c:'ok'},{t:'Dimension reduction: Matryoshka (3072 -> 1024) for cost savings',c:'ok'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Azure OpenAI text-embedding-3-large',c:'plat'},{t:'AWS: Titan Embeddings V2 / Cohere Embed',c:'plat'},{t:'GCP: Vertex textembedding-gecko@003',c:'plat'},{t:'Databricks: DBRX Instruct embedding / BGE',c:'plat'},{t:'OSS: sentence-transformers all-MiniLM / BGE-large',c:'plat'}]}]},
-comp:{title:'Compliance Tagging',tag:'COMPLIANCE',tagColor:'#fbbf24',sections:[
-{title:'What It Does',items:[{t:'Detects PHI/PII across 18 HIPAA identifier types',c:'info'},{t:'Assigns sensitivity levels: Public, Internal, Confidential, Restricted',c:'info'},{t:'Applies access control labels per chunk for security trimming',c:'info'},{t:'Records compliance metadata for audit trail',c:'info'}]},
-{title:'PHI Detection (18 types)',items:[{t:'Names, dates, phone, fax, email, SSN, MRN',c:'warn'},{t:'Account numbers, license, VIN, device IDs',c:'warn'},{t:'URLs, IPs, biometric, photo, any unique identifier',c:'warn'},{t:'Redaction rules: mask, hash, or remove per sensitivity level',c:'warn'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Purview DLP + Presidio + Content Safety',c:'plat'},{t:'AWS: Macie + Comprehend Medical',c:'plat'},{t:'GCP: Cloud DLP API + Healthcare NLP',c:'plat'},{t:'Databricks: Presidio on Spark + Unity Catalog tags',c:'plat'},{t:'OSS: Presidio + spaCy NER + custom rules',c:'plat'}]}]},
-qual:{title:'Quality Validation',tag:'INGESTION',tagColor:'#34d399',sections:[
-{title:'What It Does',items:[{t:'Scores each chunk for quality before index insertion',c:'info'},{t:'Detects and removes duplicate/near-duplicate chunks',c:'info'},{t:'Analyzes coverage: are all source sections represented?',c:'info'},{t:'Rejects malformed chunks (too short, encoding errors, empty)',c:'info'}]},
-{title:'Configuration',items:[{t:'Min quality score: 0.70 (reject below)',c:'ok'},{t:'Dedup: MinHash LSH (similarity > 0.95 = duplicate)',c:'ok'},{t:'Min chunk length: 50 tokens (skip fragments)',c:'ok'},{t:'Max chunk length: 2048 tokens (split if exceeded)',c:'ok'},{t:'Coverage report: flag missing sections per source document',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'T1PR: bad chunks in = contaminated retrievals out',c:'warn'},{t:'GDR: quality should be measured per ingestion batch over time',c:'warn'}]}]},
-vs:{title:'Compliance Decision Hub',tag:'VECTOR STORE',tagColor:'#c084fc',sections:[
-{title:'What It Does',items:[{t:'Stores vector embeddings with compliance metadata',c:'info'},{t:'Enforces access control on every query (security trimming)',c:'info'},{t:'Supports hybrid search: dense vectors + sparse BM25',c:'info'},{t:'Versioned index: rollback to previous version on issues',c:'info'},{t:'Monitors data freshness: alert if stale > SLA threshold',c:'info'}]},
-{title:'Configuration',items:[{t:'Documents: 24.3K | Chunks: 186K | Dimensions: 3072',c:'ok'},{t:'Distance metric: cosine similarity',c:'ok'},{t:'Index version: v3.2 | Previous: v3.1 (rollback ready)',c:'ok'},{t:'Freshness SLA: < 2h | Current: 1.8h',c:'ok'},{t:'Access control model: attribute-based (role + department + clearance)',c:'ok'},{t:'Backup: daily snapshot + cross-region replication',c:'ok'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Azure AI Search (hybrid) + RBAC filters',c:'plat'},{t:'AWS: OpenSearch Serverless + fine-grained access',c:'plat'},{t:'GCP: Vertex AI Search + IAM conditions',c:'plat'},{t:'Databricks: Vector Search + Unity Catalog ACLs',c:'plat'},{t:'OSS: Qdrant + custom ACL middleware / Weaviate + RBAC',c:'plat'}]}]},
-qin:{title:'Query Input',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Sanitizes user input against prompt injection attacks',c:'info'},{t:'Authenticates user identity and extracts role/permissions',c:'info'},{t:'Checks rate limits (per-user, per-team, per-model)',c:'info'},{t:'Loads session context for multi-turn conversations',c:'info'}]},
-{title:'Configuration',items:[{t:'Injection detection: classifier model + regex patterns',c:'ok'},{t:'Auth: JWT token validation + role extraction',c:'ok'},{t:'Rate limit: 60/min per user, 600/min per team',c:'ok'},{t:'Max query length: 4096 tokens',c:'ok'},{t:'Session: load last 5 turns from session store',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'No injection detection (prompt injection is real and common)',c:'warn'},{t:'No rate limiting (one user can consume all capacity)',c:'warn'},{t:'Trusting user-provided role claims without verification',c:'warn'}]}]},
-cls:{title:'Query Classification',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Classifies query type to route retrieval strategy',c:'info'},{t:'Types: factual, analytical, comparison, how-to, conversational',c:'info'},{t:'Sets reranking weights and generation prompt per type',c:'info'}]},
-{title:'Routing Rules',items:[{t:'Factual: standard hybrid search, high precision',c:'ok'},{t:'Analytical: broader search, more chunks, synthesis prompt',c:'ok'},{t:'Comparison: multi-query expansion, diversity reranking',c:'ok'},{t:'How-to: step-by-step prompt template, ordered retrieval',c:'ok'},{t:'Conversational: history-aware rewrite, session context',c:'ok'},{t:'Cache check: exact + semantic similarity before retrieval',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'Wrong classification leads to wrong strategy leads to bad answers',c:'warn'},{t:'EMR: analytical query classified as factual may hallucinate',c:'warn'}]}]},
-enh:{title:'Query Enhancement',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Rewrites query for better retrieval (not better generation)',c:'info'},{t:'HyDE: generates hypothetical answer, embeds that instead of query',c:'info'},{t:'Multi-query: generates 3 alternative phrasings, retrieves for all',c:'info'},{t:'History-aware: resolves pronouns from conversation history',c:'info'}]},
-{title:'Techniques',items:[{t:'HyDE (Hypothetical Document Embeddings): best for factual',c:'ok'},{t:'Step-back prompting: generalize query, then search broader',c:'ok'},{t:'Multi-query expansion: 3 rephrased queries, union results',c:'ok'},{t:'Synonym expansion: medical terminology variants',c:'ok'},{t:'Pronoun resolution: "it" -> actual entity from history',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'Enhancing without classification (wrong technique for query type)',c:'warn'},{t:'Too many expansions (increases cost without improving quality)',c:'warn'},{t:'No history awareness (follow-up queries fail)',c:'warn'}]}]},
-ret:{title:'Retrieval',tag:'RETRIEVAL',tagColor:'#c084fc',sections:[
-{title:'What It Does',items:[{t:'Searches vector store using hybrid: dense vector + sparse BM25',c:'info'},{t:'Applies access control filter (security trimming by user role)',c:'info'},{t:'Applies metadata filters (date range, document type, department)',c:'info'},{t:'Enforces source diversity (not all chunks from one document)',c:'info'}]},
-{title:'Configuration',items:[{t:'Top-K: 20 candidates (reduced to 5 after reranking)',c:'ok'},{t:'Hybrid: 0.7 * vector_score + 0.3 * BM25_score',c:'ok'},{t:'Security trim: filter by user.role, user.department, chunk.sensitivity',c:'ok'},{t:'Source diversity: max 3 chunks per source document',c:'ok'},{t:'Min similarity: 0.50 (below = discard)',c:'ok'}]},
-{title:'GAIF-4 Relevance',items:[{t:'T1PR: contaminated chunks retrieved = contamination passes filter',c:'warn'},{t:'This is where T1PR is measured: how many bad chunks get through?',c:'warn'},{t:'Security trimming failure = CFR violation (wrong data to wrong user)',c:'warn'}]}]},
-rer:{title:'Reranking',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Cross-encoder reranks 20 candidates to pick top 5',c:'info'},{t:'More accurate than embedding similarity (but slower)',c:'info'},{t:'Applies diversity sampling and recency boost',c:'info'}]},
-{title:'Configuration',items:[{t:'Model: Cohere Rerank v3 / BGE-reranker-large',c:'ok'},{t:'Relevance threshold: 0.70 (below = discard)',c:'ok'},{t:'Diversity: max 2 chunks from same source in top 5',c:'ok'},{t:'Recency boost: +0.05 for documents < 30 days old',c:'ok'},{t:'Latency: ~100ms for 20 candidates',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'No reranking (embedding similarity is not enough for quality)',c:'warn'},{t:'No diversity (all 5 chunks from same document = narrow answer)',c:'warn'},{t:'Threshold too low (irrelevant chunks reach generation)',c:'warn'}]}]},
-ctx:{title:'Context Assembly',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Constructs the complete prompt: system + chunks + query',c:'info'},{t:'Manages token budget across all prompt components',c:'info'},{t:'Injects citation format instructions',c:'info'},{t:'Adds conversation history for multi-turn',c:'info'}]},
-{title:'Token Budget',items:[{t:'Max context window: 128K tokens (GPT-4o)',c:'ok'},{t:'System prompt: 500 tokens (instructions + format)',c:'ok'},{t:'Retrieved chunks: 4,000 tokens (5 chunks avg)',c:'ok'},{t:'Conversation history: 2,000 tokens (last 5 turns)',c:'ok'},{t:'User query: 100 tokens (typical)',c:'ok'},{t:'Reserved for output: 4,000 tokens',c:'ok'},{t:'Total budget used: ~10,600 of 128K available',c:'ok'}]},
-{title:'Anti-Patterns',items:[{t:'No token budgeting (context overflow truncates chunks silently)',c:'warn'},{t:'Chunks before system prompt (model ignores late instructions)',c:'warn'},{t:'No citation format in prompt (model invents citation styles)',c:'warn'}]}]},
-gen:{title:'LLM Generation',tag:'QUERY',tagColor:'#60a5fa',sections:[
-{title:'What It Does',items:[{t:'Generates grounded answer using retrieved chunks as context',c:'info'},{t:'Injects citations [1][2][3] referencing source chunks',c:'info'},{t:'Formats response per query type (paragraph, table, steps)',c:'info'},{t:'Streams output for low perceived latency',c:'info'}]},
-{title:'Configuration',items:[{t:'Model: GPT-4o (default) / Claude Sonnet (fallback)',c:'ok'},{t:'Temperature: 0.1 (factual) | 0.3 (analytical)',c:'ok'},{t:'Max output tokens: 4,096',c:'ok'},{t:'Streaming: enabled (first token < 200ms)',c:'ok'},{t:'System prompt version: v4.2 (versioned in git)',c:'ok'}]},
-{title:'Platform Mapping',items:[{t:'Azure: Azure OpenAI GPT-4o (PTU or paygo)',c:'plat'},{t:'AWS: Bedrock Claude / Bedrock Llama',c:'plat'},{t:'GCP: Gemini 1.5 Pro via Vertex AI',c:'plat'},{t:'Databricks: DBRX / external via Mosaic AI Gateway',c:'plat'},{t:'OSS: vLLM serving Llama / Mistral',c:'plat'}]}]},
-grd:{title:'Guardrails',tag:'COMPLIANCE',tagColor:'#fbbf24',sections:[
-{title:'What It Does',items:[{t:'Groundedness check: every claim must trace to a source chunk',c:'info'},{t:'PHI leak detection: scan output for patient identifiers',c:'info'},{t:'Citation verification: all [N] references must map to real chunks',c:'info'},{t:'Content safety: toxicity, harmful advice, off-topic detection',c:'info'},{t:'Hallucination classifier: flag claims not supported by context',c:'info'}]},
-{title:'Thresholds',items:[{t:'Groundedness: > 0.85 required (block below)',c:'ok'},{t:'PHI scan: zero tolerance (any PHI = block)',c:'ok'},{t:'Citations: 100% must map to actual source chunks',c:'ok'},{t:'Content safety: block harmful medical/legal/financial advice',c:'ok'},{t:'Hallucination: flag if confidence < 0.70 on any claim',c:'ok'}]},
-{title:'GAIF-4 (this is where EMR is measured)',items:[{t:'EMR: hallucinated content that was NOT in any source chunk',c:'warn'},{t:'CFR: PHI leaked in output = compliance failure',c:'warn'},{t:'This gate is the last line of defense before the user sees output',c:'warn'}]}]}
+req:{title:'User Query',tag:'INPUT',tagColor:'#c9d1d9',sections:[{title:'What It Does',items:[{t:'Natural language query from user or agent',c:'info'},{t:'May contain PHI (patient names, MRN, DOB)',c:'info'},{t:'May contain PII (SSN, email, phone)',c:'info'},{t:'CARES classifier determines routing before any model sees it',c:'info'}]},{title:'Examples',items:[{t:'Clean: "What is the formulary for tier 2 medications?"',c:'ok'},{t:'PHI: "What medications is patient John Smith MRN-4829 on?"',c:'warn'},{t:'PII: "Process claim for SSN 123-45-6789"',c:'warn'},{t:'Unsafe: "Generate fake prescriptions for opioids"',c:'warn'}]},{title:'Latency',items:[{t:'Classification adds < 50ms (non-blocking path for clean queries)',c:'ok'}]}]},
+cares:{title:'CARES Classifier',tag:'CLASSIFIER',tagColor:'#3b82f6',sections:[{title:'What It Does',items:[{t:'Compliance-Aware Routing and Enforcement System',c:'info'},{t:'Classifies every query: PHI, PII, clean, or unsafe',c:'info'},{t:'Routes to correct endpoint based on classification',c:'info'},{t:'Zero PHI violations across 30,247 MIMIC-IV queries',c:'info'}]},{title:'Classification Pipeline',items:[{t:'Step 1: Regex + NER for known PHI patterns (MRN, DOB, names)',c:'ok'},{t:'Step 2: ML classifier for context-dependent PHI',c:'ok'},{t:'Step 3: PII detection (SSN, email, phone, address)',c:'ok'},{t:'Step 4: Content safety check (harmful intent)',c:'ok'},{t:'Step 5: Route decision: BAA / redact+standard / standard / block',c:'ok'}]},{title:'PHI-GUARD Research',items:[{t:'Published: TechRxiv DOI 10.36227/techrxiv.177220388',c:'plat'},{t:'Submitted: IEEE JBHI (Manuscript JBHI-01214-2026)',c:'plat'},{t:'Zero violations across 30K MIMIC-IV queries',c:'plat'},{t:'CARES = Compliance-Aware Routing and Enforcement System',c:'plat'}]}]},
+dphi:{title:'PHI Decision',tag:'DECISION',tagColor:'#3b82f6',sections:[{title:'What It Does',items:[{t:'Does the query contain Protected Health Information?',c:'info'},{t:'PHI includes: patient name, MRN, DOB, address, SSN, clinical data',c:'info'},{t:'If YES: route to BAA-compliant endpoint ONLY',c:'info'},{t:'If NO: proceed to PII check',c:'info'}]},{title:'PHI Detection',items:[{t:'18 HIPAA identifier types checked',c:'ok'},{t:'Regex: MRN patterns, date formats, phone/fax',c:'ok'},{t:'NER: clinical NER for names, locations, providers',c:'ok'},{t:'Context: "patient" + name = PHI even without MRN',c:'ok'}]},{title:'False Positive Handling',items:[{t:'False positive (clean query routed to BAA): safe, just costs more',c:'ok'},{t:'False negative (PHI routed to non-BAA): HIPAA VIOLATION',c:'warn'},{t:'CARES biases toward false positives (safety over cost)',c:'warn'}]}]},
+dpii:{title:'PII Decision',tag:'DECISION',tagColor:'#f59e0b',sections:[{title:'What It Does',items:[{t:'Does the query contain Personally Identifiable Information?',c:'info'},{t:'PII includes: SSN, email, phone, credit card, address',c:'info'},{t:'If YES: redact PII, then route to standard endpoint',c:'info'},{t:'If NO: route directly to standard endpoint',c:'info'}]},{title:'Redaction',items:[{t:'SSN: 123-45-6789 -> [REDACTED-SSN]',c:'ok'},{t:'Email: john@example.com -> [REDACTED-EMAIL]',c:'ok'},{t:'Phone: (555) 123-4567 -> [REDACTED-PHONE]',c:'ok'},{t:'Redaction is reversible for authorized users',c:'ok'}]},{title:'Platform',items:[{t:'Azure: Presidio + Purview',c:'plat'},{t:'AWS: Comprehend PII + Macie',c:'plat'},{t:'GCP: Cloud DLP',c:'plat'},{t:'OSS: Presidio (Microsoft open source)',c:'plat'}]}]},
+baa:{title:'BAA Endpoint',tag:'ENDPOINT',tagColor:'#3b82f6',sections:[{title:'What It Does',items:[{t:'HIPAA-compliant model provider with signed BAA',c:'info'},{t:'PHI is allowed to flow to this endpoint',c:'info'},{t:'Data is NOT used for model training',c:'info'},{t:'Audit logging: every query with PHI recorded',c:'info'}]},{title:'BAA Providers',items:[{t:'Azure OpenAI: HIPAA BAA signed, SOC 2 Type II',c:'ok'},{t:'AWS Bedrock: HIPAA eligible, BAA available',c:'ok'},{t:'Google Cloud: HIPAA BAA for Vertex AI',c:'ok'},{t:'Databricks: HIPAA via customer-managed keys',c:'ok'}]},{title:'Cost',items:[{t:'BAA endpoints cost 10-20% more than standard',c:'warn'},{t:'But HIPAA violations cost $100-$50,000 per incident',c:'warn'},{t:'PHI-GUARD: cost of compliance < cost of violation',c:'warn'}]}]},
+std:{title:'Standard Endpoint',tag:'ENDPOINT',tagColor:'#10b981',sections:[{title:'What It Does',items:[{t:'Any approved model provider (no BAA required)',c:'info'},{t:'No PHI or PII in the query (guaranteed by CARES)',c:'info'},{t:'Cheapest routing option',c:'info'}]},{title:'Providers',items:[{t:'Any model from Pattern 01 gateway registry',c:'ok'},{t:'Cost-optimized: route to cheapest model for simple queries',c:'ok'},{t:'64% of all queries go through this path',c:'ok'}]},{title:'Safety',items:[{t:'CARES guarantees no PHI/PII reaches this endpoint',c:'ok'},{t:'If CARES makes a classification error, PHI could leak',c:'warn'},{t:'That is why T1PR must be 0.00 for this path',c:'warn'}]}]},
+redact:{title:'PII Redaction',tag:'PROCESSING',tagColor:'#f59e0b',sections:[{title:'What It Does',items:[{t:'Strips PII from query before sending to model',c:'info'},{t:'Replaces with typed placeholders: [REDACTED-SSN], [REDACTED-EMAIL]',c:'info'},{t:'Reversible: authorized users can see original',c:'info'}]},{title:'Redaction Engine',items:[{t:'Presidio: Microsoft open source DLP engine',c:'ok'},{t:'Entity types: SSN, email, phone, credit card, address, DOB',c:'ok'},{t:'Regex + ML hybrid for high accuracy',c:'ok'},{t:'Latency: < 20ms per query',c:'ok'}]},{title:'After Redaction',items:[{t:'Redacted query goes to standard endpoint (safe)',c:'ok'},{t:'Response does not contain original PII',c:'ok'},{t:'Audit trail: what was redacted, why, by which rule',c:'ok'}]}]},
+block:{title:'Blocked',tag:'ENFORCEMENT',tagColor:'#ef4444',sections:[{title:'What It Does',items:[{t:'Rejects unsafe content before any model sees it',c:'info'},{t:'Harmful intent, prohibited topics, policy violations',c:'info'},{t:'Less than 1% of queries are blocked',c:'info'}]},{title:'Block Reasons',items:[{t:'Harmful intent: generating fake prescriptions, fraud',c:'warn'},{t:'Prohibited topics: per content policy',c:'warn'},{t:'Adversarial: prompt injection attempts',c:'warn'},{t:'Rate limit: user exceeded query quota',c:'warn'}]},{title:'After Block',items:[{t:'User receives clear error message (not generic 500)',c:'ok'},{t:'Block event logged with classification reason',c:'ok'},{t:'Repeated blocks trigger security review',c:'ok'}]}]},
+research:{title:'PHI-GUARD Research',tag:'RESEARCH',tagColor:'#3b82f6',sections:[{title:'Paper',items:[{t:'PHI-GUARD: Compliance-Aware LLM Routing Using CARES Algorithm',c:'info'},{t:'Submitted: IEEE JBHI (Feb 2026)',c:'info'},{t:'Preprint: TechRxiv DOI 10.36227/techrxiv.177220388',c:'info'},{t:'Solo-authored by Aman Sharma',c:'info'}]},{title:'Key Results',items:[{t:'Zero PHI violations across 30,247 MIMIC-IV queries',c:'ok'},{t:'CARES algorithm: 5-step classification pipeline',c:'ok'},{t:'False positive rate: 2.1% (safe, just costs more)',c:'ok'},{t:'False negative rate: 0.00% (no PHI leaked)',c:'ok'}]},{title:'Contribution',items:[{t:'First compliance-aware routing algorithm for LLM pipelines',c:'plat'},{t:'Integrates with GAIF framework for governance metrics',c:'plat'},{t:'Open source implementation available',c:'plat'}]}]}
 };
 
-function detail(id){const d=DETAILS[id];if(!d)return;const dp=$('dp');$('dp-title').innerHTML=`${d.title} <span class="dp-tag" style="background:${d.tagColor}22;color:${d.tagColor}">${d.tag}</span>`;
-let html='';d.sections.forEach(s=>{html+=`<div class="dp-sec"><div class="dp-sec-t">${s.title}</div>`;s.items.forEach(i=>{html+=`<div class="dp-it ${i.c}">${i.t}</div>`});html+='</div>'});
-$('dp-body').innerHTML=html;dp.className='dp open'}
+function detail(id){const d=DETAILS[id];if(!d)return;$('dp-title').innerHTML=`${d.title} <span class="dp-tag" style="background:${d.tagColor}22;color:${d.tagColor}">${d.tag}</span>`;let h='';d.sections.forEach(s=>{h+=`<div><div class="dp-sec-t">${s.title}</div>`;s.items.forEach(i=>{h+=`<div class="dp-it ${i.c}">${i.t}</div>`});h+='</div>'});$('dp-body').innerHTML=h;$('dp').className='dp open'}
 function closeDetail(){$('dp').className='dp closed'}
 
-// Diagram interaction
-const IB=['b-src','b-ext','b-proc','b-chunk','b-emb','b-comp','b-qual'];
-const QB=['b-qin','b-cls','b-enh','b-ret','b-rer','b-ctx','b-gen','b-grd','b-rsp'];
-const DB=['d-src','d-ext','d-proc','d-chunk','d-emb','d-comp','d-qual','d-qin','d-cls','d-enh','d-ret','d-rer','d-ctx','d-gen','d-grd'];
-const IA=['ai1','ai2','ai3','ai4','ai5','ai6','ai7'];
-const QA=['aq1','aq2','aq3','aq4','aq5','aq6','aq7','aq8','aq-vs'];
-
-function log(tp,msg){const el=$('logB');const now=new Date();const ts=now.toLocaleTimeString('en-US',{hour12:false})+'.'+String(now.getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lr-t">${ts}</span><span class="lr-p ${tp}">${tp}</span><span class="lr-m">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>50)el.removeChild(el.lastChild)}
+function log(tp,msg){const el=$('logB');const ts=new Date().toLocaleTimeString('en-US',{hour12:false})+'.'+String(new Date().getMilliseconds()).padStart(3,'0');const r=document.createElement('div');r.className='lr';r.innerHTML=`<span class="lr-t">${ts}</span><span class="lr-p ${tp}">${tp.toUpperCase()}</span><span class="lr-m">${msg}</span>`;el.insertBefore(r,el.firstChild);if(el.children.length>50)el.removeChild(el.lastChild)}
 function clearLog(){$('logB').innerHTML=''}
 function hlB(id){$(id)?.classList.add('hl')}
 function dimB(id){$(id)?.classList.add('dim')}
-function hlD(id){const e=$(id);if(e){e.setAttribute('fill','#34d399');e.setAttribute('opacity','1')}}
-function erD(id){const e=$(id);if(e){e.setAttribute('fill','#f87171');e.setAttribute('opacity','1')}}
-function litA(id,c){$(id)?.classList.add(c||'li-i')}
-function rst(){[...IB,...QB,'b-vs'].forEach(id=>{const e=$(id);if(e){e.classList.remove('hl','dim');e.style.stroke=''}});DB.forEach(id=>{const e=$(id);if(e){e.setAttribute('fill','#8b949e');e.setAttribute('opacity','0.2')}});[...IA,...QA,'a-cache','a-fb'].forEach(id=>{const e=$(id);if(e)e.className='arr'});$('a-cache').style.opacity='0.08';$('cache-lbl').style.opacity='0.25';$('a-fb').style.opacity='0.08';$('fb-lbl').style.opacity='0.2';$('rsp').className='rsp';$('rsp-c').textContent='---';$('rsp-m').textContent='';$('rsp-$').textContent=''}
+function litA(id,c){$(id)?.classList.add(c||'li')}
+function rst(){['b-req','b-cares','b-baa','b-std','b-redact','b-redstd','b-block'].forEach(id=>{const e=$(id);if(e)e.classList.remove('hl','dim')});['d-phi','d-pii'].forEach(id=>{const e=$(id);if(e)e.classList.remove('hl')});['a-rc','a-cd','a-phi','a-nophi','a-pii','a-std','a-blk','a-red-std'].forEach(id=>{const e=$(id);if(e)e.className='arr'});['d1-val','d2-val'].forEach(id=>$(id).textContent='--');['lbl-phi','lbl-nophi','lbl-pii','lbl-std','lbl-blk'].forEach(id=>{$(id).style.opacity='0'});$('rsp').className='rsp';$('rsp-c').textContent='---';$('rsp-m').textContent='';$('rsp-$').textContent=''}
 function resp(c,code,msg,cost){$('rsp').className='rsp '+c;$('rsp-c').textContent=code;$('rsp-m').textContent=msg;$('rsp-$').textContent=cost||''}
-function sM(t,c,e,g){const mk=(id,v,thL,thH,safe)=>{$(id).textContent=v.toFixed(2);const f=id.replace('m-','mf-'),b=id.replace('m-','mb-');const ok=v<=thL,mid=v<=thH;$(f).style.width=Math.min(v*500,100)+'%';$(f).style.background=ok?'#34d399':mid?'#fbbf24':'#f87171';$(id).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171';$(b).textContent=ok?safe:mid?'WARN':'CRIT';$(b).style.background=ok?'rgba(52,211,153,0.12)':mid?'rgba(251,191,36,0.12)':'rgba(248,113,113,0.12)';$(b).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171'};mk('m-t',t,0.05,0.15,'SAFE');mk('m-c',c,0.005,0.01,'SAFE');mk('m-e',e,0.05,0.15,'SAFE');mk('m-g',g,0.03,0.05,'OK')}
-function resetAll(){if(busy)return;rst();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));sM(0.02,0.00,0.01,0.01)}
+function sM(t,c,e,g){const mk=(id,v,thL,thH,safe)=>{$(id).textContent=v.toFixed(2);const f=id.replace('m-','mf-'),b=id.replace('m-','mb-');const ok=v<=thL,mid=v<=thH;$(f).style.width=Math.min(v*500,100)+'%';$(f).style.background=ok?'#34d399':mid?'#fbbf24':'#f87171';$(id).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171';$(b).textContent=ok?safe:mid?'WARN':'CRIT';$(b).style.background=ok?'rgba(52,211,153,0.12)':mid?'rgba(251,191,36,0.12)':'rgba(248,113,113,0.12)';$(b).style.color=ok?'#34d399':mid?'#fbbf24':'#f87171'};mk('m-t',t,0.005,0.01,'SAFE');mk('m-c',c,0.005,0.01,'SAFE');mk('m-e',e,0.005,0.01,'SAFE');mk('m-g',g,0.03,0.05,'OK')}
+function resetAll(){if(busy)return;rst();document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));sM(0.00,0.00,0.00,0.01)}
 
 async function run(t){if(busy)return;busy=true;document.querySelectorAll('.sc-btn').forEach(b=>{b.classList.remove('active');b.disabled=true});$('btn-'+t).classList.add('active');rst();closeDetail();
-if(t==='clean')await fClean();else if(t==='phi')await fPhi();else if(t==='halluc')await fHalluc();else if(t==='cache')await fCache();else if(t==='fail')await fFail();
+if(t==='clean')await fClean();else if(t==='phi')await fPhi();else if(t==='pii')await fPii();else if(t==='block')await fBlock();else if(t==='mixed')await fMixed();
 document.querySelectorAll('.sc-btn').forEach(b=>b.disabled=false);busy=false}
 
 async function fClean(){
-log('q','Query: "What is the prior authorization process for specialty medications?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');
-hlB('b-cls');hlD('d-cls');log('q','Type: FACTUAL | Strategy: hybrid');await W(180);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');log('q','HyDE + 3 multi-query expansions');await W(180);litA('aq3','li-q');
-litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');hlD('d-ret');log('v','20 candidates | cosine>0.78 | 18/20 accessible');await W(200);litA('aq4','li-q');
-hlB('b-rer');hlD('d-rer');log('q','Top-5 | relevance 0.91-0.97');await W(180);litA('aq5','li-q');
-hlB('b-ctx');hlD('d-ctx');log('q','sys(480t)+chunks(3847t)+query(42t)=4369t');await W(160);litA('aq6','li-q');
-hlB('b-gen');hlD('d-gen');log('q','GPT-4o | 847t | temp 0.1 | 4 citations');await W(200);litA('aq7','li-q');
-hlB('b-grd');hlD('d-grd');log('ok','Ground:0.96 | PHI:clear | Cite:4/4');await W(180);litA('aq8','li-q');
-hlB('b-rsp');$('a-fb').style.opacity='0.4';$('fb-lbl').style.opacity='0.5';
-log('ec','embed $0.0002 + retrieve $0.0001 + generate $0.0089 = $0.0092');
-resp('ok','200 OK','4 citations | groundedness 0.96 | 1.8s','$0.0092');sM(0.02,0.00,0.01,0.01)}
+log('st','De-ID: Safe Harbor applied, 18 identifier types removed from clinical note');
+hlB('b-req');litA('a-rc');await W(200);
+hlB('b-cares');log('st','CARES: scanning for PHI... none. PII... none. Safety... clean.');await W(300);
+litA('a-cd');$('d-phi').classList.add('hl');$('d1-val').textContent='NO';await W(200);
+$('lbl-nophi').style.opacity='1';litA('a-nophi');$('d-pii').classList.add('hl');$('d2-val').textContent='NO';await W(200);
+$('lbl-std').style.opacity='1';litA('a-std','li-std');hlB('b-std');
+log('ok','Route: STANDARD | no PHI, no PII | cheapest path');
+log('ec','Classification: 12ms | Model: $0.008 | Total: $0.008');
+resp('ok','STANDARD','Clean query | no PHI/PII | standard endpoint | fastest path','$0.008');sM(0.00,0.00,0.00,0.01)}
 
 async function fPhi(){
-log('q','Query: "Show patient records for diabetes management"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');hlB('b-cls');hlD('d-cls');await W(160);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');await W(160);litA('aq3','li-q');litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');hlD('d-ret');log('v','20 candidates');await W(180);
-log('er','PHI: 6/20 chunks contain patient identifiers');await W(180);
-log('g','Filtering 6 PHI chunks | redacting 2 partial');await W(160);
-$('b-ret').style.stroke='#fbbf24';litA('aq4','li-q');
-hlB('b-rer');hlD('d-rer');log('q','Top-5 from de-identified pool');await W(180);litA('aq5','li-q');
-hlB('b-ctx');hlD('d-ctx');await W(160);litA('aq6','li-q');
-hlB('b-gen');hlD('d-gen');await W(200);litA('aq7','li-q');
-hlB('b-grd');hlD('d-grd');log('ok','PHI output: CLEAR | Ground: 0.93');await W(180);litA('aq8','li-q');hlB('b-rsp');
-resp('wn','200 OK','6 PHI chunks filtered | de-identified only | HIPAA compliant','$0.0094');sM(0.02,0.00,0.01,0.01)}
+log('ph','Query: "What medications is patient John Smith MRN-4829 on?"');
+hlB('b-req');litA('a-rc');await W(200);
+hlB('b-cares');log('ph','CARES: PHI DETECTED | patient name: John Smith | MRN: 4829');await W(300);
+litA('a-cd');$('d-phi').classList.add('hl');$('d1-val').textContent='YES';await W(200);
+$('lbl-phi').style.opacity='1';litA('a-phi','li-phi');hlB('b-baa');
+log('ph','Route: BAA ENDPOINT | Azure OpenAI (HIPAA BAA signed)');
+log('ok','PHI allowed on BAA path | data not used for training');
+['d-pii','b-std','b-redact','b-block'].forEach(dimB);
+log('ec','Classification: 18ms | BAA model: $0.022 | Total: $0.022');
+resp('ok','BAA ROUTE','PHI detected (name + MRN) | routed to BAA endpoint | HIPAA compliant','$0.022');sM(0.00,0.00,0.00,0.01)}
 
-async function fHalluc(){
-log('q','Query: "Dosage limits for metformin in elderly?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');hlB('b-cls');hlD('d-cls');await W(160);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');await W(160);litA('aq3','li-q');litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');hlD('d-ret');log('w','LOW: top score 0.74');await W(200);litA('aq4','li-q');
-hlB('b-rer');hlD('d-rer');log('w','Avg relevance 0.72 (target 0.80)');await W(180);litA('aq5','li-q');
-hlB('b-ctx');hlD('d-ctx');await W(160);litA('aq6','li-q');
-hlB('b-gen');hlD('d-gen');log('q','Model produced dosage from weak context');await W(200);litA('aq7','li-q');
-hlB('b-grd');log('er','GROUND: 0.41 (need 0.85) FAIL');await W(180);
-log('er','HALLUC: "2500mg max for >80" NOT in sources');
-erD('d-grd');$('b-grd').style.stroke='#f87171';$('b-gen').style.stroke='#f87171';erD('d-gen');dimB('b-rsp');
-resp('er','BLOCKED','Hallucination: groundedness 0.41 | fabricated dosage','$0.0078');sM(0.02,0.00,0.12,0.01)}
+async function fPii(){
+log('pi','Query: "Process refund for account ending 6789, email john@example.com"');
+hlB('b-req');litA('a-rc');await W(200);
+hlB('b-cares');log('pi','CARES: no PHI | PII DETECTED: email, partial account number');await W(300);
+litA('a-cd');$('d-phi').classList.add('hl');$('d1-val').textContent='NO';litA('a-nophi');await W(200);
+$('d-pii').classList.add('hl');$('d2-val').textContent='YES';$('lbl-pii').style.opacity='1';litA('a-pii','li-pii');await W(200);
+hlB('b-redact');log('pi','Redacting: john@example.com -> [REDACTED-EMAIL] | 6789 -> [REDACTED-ACCT]');await W(250);
+litA('a-red-std','li-std');hlB('b-redstd');
+log('ok','Redacted query sent to standard endpoint');
+['b-baa','b-block'].forEach(dimB);
+log('ec','Classification: 15ms | Redaction: 8ms | Model: $0.008 | Total: $0.008');
+resp('ok','REDACT+ROUTE','PII redacted (email, account) | then standard endpoint | safe','$0.008');sM(0.00,0.00,0.00,0.01)}
 
-async function fCache(){
-log('q','Query: "What is our PTO policy?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');
-hlB('b-cls');hlD('d-cls');log('q','CACHE HIT: similarity 0.98');await W(200);
-$('a-cache').style.opacity='0.7';$('a-cache').style.stroke='#c084fc';$('a-cache').classList.add('li-v');$('cache-lbl').style.opacity='0.9';
-['b-enh','b-ret','b-rer','b-ctx','b-gen'].forEach(dimB);
-hlB('b-vs');hlB('b-grd');hlD('d-grd');litA('aq8','li-q');hlB('b-rsp');
-log('ec','Cost: $0.0000 | 0.12s vs 1.8s');
-resp('ok','200 (Cached)','Cache hit | 0.12s | $0.00','$0.0000');sM(0.02,0.00,0.01,0.01)}
+async function fBlock(){
+log('bk','Query: "Generate a fake prescription for oxycodone for patient testing"');
+hlB('b-req');litA('a-rc');await W(200);
+hlB('b-cares');log('bk','CARES: UNSAFE CONTENT | fake prescription generation = prohibited');await W(300);
+$('lbl-blk').style.opacity='1';litA('a-blk','li-blk');hlB('b-block');
+log('er','BLOCKED: content policy violation | fraudulent document generation');
+['d-phi','d-pii','b-baa','b-std','b-redact'].forEach(dimB);
+log('ec','Classification: 22ms | Model: $0.000 | Blocked before model');
+resp('er','BLOCKED','Unsafe content: fake prescription prohibited | blocked at CARES classifier','$0.000');sM(0.00,0.01,0.00,0.01)}
 
-async function fFail(){
-log('q','Query: "Quantum computing strategy for 2027?"');
-hlB('b-qin');hlD('d-qin');await W(180);litA('aq1','li-q');hlB('b-cls');hlD('d-cls');await W(160);litA('aq2','li-q');
-hlB('b-enh');hlD('d-enh');await W(160);litA('aq3','li-q');litA('aq-vs','li-q');hlB('b-vs');
-hlB('b-ret');log('er','0 chunks above 0.70 | best: 0.34');await W(200);
-erD('d-ret');$('b-ret').style.stroke='#f87171';['b-rer','b-ctx','b-gen'].forEach(dimB);
-log('w','FALLBACK: keyword search | 0 results');await W(180);
-log('w','Returning "no information available"');
-hlB('b-grd');hlD('d-grd');litA('aq8','li-q');hlB('b-rsp');
-resp('wn','200 (No Results)','0 relevant chunks | safe fallback','$0.0003');sM(0.02,0.00,0.00,0.01)}
+async function fMixed(){
+log('ph','Query: "Patient Jane Doe SSN 123-45-6789 needs prior auth for Humira"');
+hlB('b-req');litA('a-rc');await W(200);
+hlB('b-cares');log('ph','CARES: PHI DETECTED (patient name) + PII DETECTED (SSN)');await W(300);
+log('ph','PHI takes precedence over PII: route to BAA endpoint');
+litA('a-cd');$('d-phi').classList.add('hl');$('d1-val').textContent='YES';await W(200);
+$('lbl-phi').style.opacity='1';litA('a-phi','li-phi');hlB('b-baa');
+log('ph','Route: BAA ENDPOINT | PHI supersedes PII classification');
+log('ok','BAA endpoint handles both PHI and PII safely');
+['d-pii','b-std','b-redact','b-block'].forEach(dimB);
+log('ec','Classification: 25ms | BAA model: $0.024 | Total: $0.024');
+resp('ok','BAA (MIXED)','PHI + PII both detected | PHI priority | BAA endpoint | fully compliant','$0.024');sM(0.00,0.00,0.00,0.01)}
 </script>
 </body>
 </html>
