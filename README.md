@@ -1,6 +1,6 @@
 # AI Architecture Enterprise Patterns
 
-**210+ interactive SVG architecture diagrams for enterprise AI. Click any component for full details. Run scenarios to watch data flow through the architecture.**
+**222+ interactive SVG architecture diagrams for enterprise AI. Click any component for full details. Run scenarios to watch data flow through the architecture.**
 
 Every diagram includes: spatial box-and-arrow layout, click-to-detail panels (configuration, platform mapping, anti-patterns, GAIF-4 relevance), 5 animated scenarios, 4 cross-cutting governance bars, and per-query cost tracking.
 
@@ -51,6 +51,7 @@ Governance: [GAIF Governance Observatory](https://github.com/aman210122/gaif-gov
 | 15 | [Migration and Interoperability](patterns/15-migration-interoperability/) | 12 | How do I migrate AI systems across clouds and providers? |
 | 16 | [Agent Memory Architecture](patterns/16-agent-memory-architecture/) | 12 | How do agents remember across sessions with governance? |
 | 17 | [Data Sovereignty and Local-First AI](patterns/17-data-sovereignty-local-first/) | 12 | Where should AI computation happen? |
+| 18 | [AI Resilience Engineering](patterns/18-ai-resilience-engineering/) | 12 | How do AI systems fail and recover differently? |
 
 ---
 
@@ -76,19 +77,17 @@ Governance: [GAIF Governance Observatory](https://github.com/aman210122/gaif-gov
     |          |           |          |           |
     +----------+-----------+----------+-----------+
                            |
-              observed, operated, and hosted on
+              resilient, observable, and hosted on
                            |
-    +----------+-----------+----------+-----------+
-    |          |           |          |           |
-[01. Gateway] [12. Platform] [13. Observ] [15. Migrate] [17. Sovereignty]
-                                          [09. Eval]
+    +----------+-----------+----------+-----------+----------+
+    |          |           |          |           |          |
+[01. GW]  [12. Platform] [13. Observe] [15. Migrate] [17. Sov] [18. Resilience]
+                                       [09. Eval]
 ```
 
 ---
 
 ## GAIF-4 Governance Metrics
-
-Every pattern integrates [GAIF-4](https://github.com/aman210122/gaif-governance-observatory) metrics:
 
 | Metric | What It Measures | Safe | Critical |
 |--------|-----------------|------|----------|
@@ -129,23 +128,21 @@ Every pattern integrates [GAIF-4](https://github.com/aman210122/gaif-governance-
 
 ## Getting Started
 
-**For CTOs:** Open any pattern, glance at the spatial diagram. The architecture tells the story in 10 seconds.
+**For CTOs:** Glance at the spatial diagram. Architecture tells the story in 10 seconds.
 
-**For Architects:** Click any component in the diagram. The detail panel shows configuration, platform mapping, anti-patterns, and GAIF-4 relevance.
+**For Architects:** Click any component for configuration, platform mapping, anti-patterns, GAIF-4 relevance.
 
-**For Engineers:** Run scenarios (buttons at the top). Watch data flow through the architecture. Read the log for technical details.
+**For Engineers:** Run scenarios. Watch data flow. Read the log for technical details.
 
-**For Security/Compliance:** Focus on Governance and Compliance bars. Run PHI and contamination scenarios. Check GAIF-4 metrics.
+**For Security/Compliance:** Focus on Governance bars. Run PHI and contamination scenarios.
 
-**For FinOps:** Read cost in response bar. Compare scenarios. Check Economics cross-cutting bar.
+**For FinOps:** Read cost in response bar. Compare scenarios. Check Economics bar.
 
 ---
 
 ## License
 
 MIT
-
----
 
 *Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect) | Principal Enterprise Architect AI/ML*
 *Governance: [GAIF Governance Observatory](https://github.com/aman210122/gaif-governance-observatory)*
