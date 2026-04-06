@@ -1,111 +1,169 @@
 # AI Architecture Enterprise Patterns
 
-**Production-tested architecture patterns for deploying AI/ML systems in regulated enterprises. 126 interactive visualizations across 10 patterns. Play with any of them in your browser.**
+**174 interactive SVG architecture diagrams for enterprise AI. Click any component for full details. Run scenarios to watch data flow through the architecture.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Patterns](https://img.shields.io/badge/10_patterns-126_visualizations-purple.svg)](#)
-[![Gateway](https://img.shields.io/badge/Gateway-12-blue.svg)](#pattern-01-unified-ai-gateway-12) [![RAG](https://img.shields.io/badge/RAG-12-green.svg)](#pattern-02-rag-for-regulated-data-12) [![Agents](https://img.shields.io/badge/Agents-11-orange.svg)](#pattern-03-multi-agent-safety-gates-11) [![Tools](https://img.shields.io/badge/Tools-9-purple.svg)](#pattern-04-tool-governance-9) [![LLMOps](https://img.shields.io/badge/LLMOps-12-red.svg)](#pattern-05-llmops-pipeline-12) [![Gov](https://img.shields.io/badge/Gov-15-teal.svg)](#pattern-06-governance-as-architecture-15) [![Contam](https://img.shields.io/badge/Contam-12-orange.svg)](#pattern-07-contamination-resistant-pipeline-12) [![Compliance](https://img.shields.io/badge/Compliance-14-blue.svg)](#pattern-08-compliance-aware-data-routing-14) [![Eval](https://img.shields.io/badge/Eval-15-red.svg)](#pattern-09-ai-evaluation--red-teaming-15) [![FinOps](https://img.shields.io/badge/FinOps-14-green.svg)](#pattern-10-finops-for-ai-14)
+Every diagram includes: spatial box-and-arrow layout, click-to-detail panels (configuration, platform mapping, anti-patterns, GAIF-4 relevance), 5 animated scenarios, 4 cross-cutting governance bars, and per-query cost tracking.
 
-**Industries:** Healthcare (HIPAA), Financial Services (SOX, PCI-DSS), Insurance, Government (FedRAMP), Legal.
-
-### All 126 interactive demos: `https://aman210122.github.io/ai-architecture-enterprise-patterns/`
+Governance: [GAIF Governance Observatory](https://github.com/aman210122/gaif-governance-observatory) | Author: [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)
 
 ---
 
-## Start Here
+## Patterns
 
-**New to the repo?** Pick your path:
+### Foundation Layer
 
-| Your role | Start with | Why |
-|-----------|-----------|-----|
-| **CTO / VP Eng** | [Governance Maturity](patterns/06-governance-as-architecture/governance-maturity/), [ROI Measurement](patterns/10-finops-for-ai/roi-measurement/), [Risk-Tiered](patterns/06-governance-as-architecture/risk-tiered/) | Assess governance posture, prove business value, align with EU AI Act |
-| **Platform Architect** | [Reference Architecture](REFERENCE-ARCHITECTURE.md), [Multi-Platform Gateway](patterns/01-unified-ai-gateway/multi-platform/), [Embedded Governance](patterns/06-governance-as-architecture/embedded-governance/) | Understand how 10 patterns compose, build the foundation |
-| **ML / AI Engineer** | [Standard RAG](patterns/02-rag-regulated-data/standard-rag/), [Linear Chain Agents](patterns/03-multi-agent-safety-gates/linear-chain/), [MCP Protocol](patterns/04-agentic-tool-governance/mcp-protocol/) | Build your first use cases |
-| **Security / Compliance** | [Sensitive Data RAG](patterns/02-rag-regulated-data/sensitive-data-rag/), [Compliance Evaluation](patterns/09-evaluation-red-teaming/compliance-evaluation/), [Audit Trail](patterns/06-governance-as-architecture/audit-trail/) | Protect data, pass audit |
+| # | Pattern | Variants | What It Answers |
+|---|---------|----------|-----------------|
+| 01 | [Unified AI Gateway](patterns/01-unified-ai-gateway/) | 12 | How do I route all LLM traffic through a single control point? |
+| 02 | [RAG for Regulated Data](patterns/02-rag-regulated-data/) | 12 | How do I build retrieval-augmented generation with compliance? |
+| 03 | [Multi-Agent Safety Gates](patterns/03-multi-agent-safety-gates/) | 11 | How do I chain agents with safety checkpoints between each? |
+| 04 | [Agentic Tool Governance](patterns/04-agentic-tool-governance/) | 9 | How do I govern what agents can DO, not just what they say? |
 
-**Full persona guide:** [GETTING-STARTED.md](GETTING-STARTED.md) | **How patterns fit together:** [REFERENCE-ARCHITECTURE.md](REFERENCE-ARCHITECTURE.md)
+### Operations Layer
 
----
+| # | Pattern | Variants | What It Answers |
+|---|---------|----------|-----------------|
+| 05 | [LLMOps Pipeline](patterns/05-llmops-pipeline/) | 12 | How do I manage the full lifecycle of LLMs in production? |
+| 06 | [Governance-as-Architecture](patterns/06-governance-as-architecture/) | 15 | How do I embed governance in architecture, not in PDFs? |
+| 07 | [Contamination-Resistant Pipeline](patterns/07-contamination-resistant-pipeline/) | 12 | How do I prevent contamination in multi-agent systems? |
+| 08 | [Compliance-Aware Routing](patterns/08-compliance-aware-routing/) | 14 | How do I route PHI/PII data to the right endpoints? |
 
-## Pattern 01: Unified AI Gateway (12)
-| Cloud | [Azure](patterns/01-unified-ai-gateway/azure-native/) [AWS](patterns/01-unified-ai-gateway/aws-native/) [GCP](patterns/01-unified-ai-gateway/gcp-native/) | Platform | [Databricks](patterns/01-unified-ai-gateway/databricks-native/) [Snowflake](patterns/01-unified-ai-gateway/snowflake-native/) |
-|-------|---|---------|---|
-| Multi | [Multi-Platform](patterns/01-unified-ai-gateway/multi-platform/) [Multi-Cloud](patterns/01-unified-ai-gateway/multi-cloud/) [Hybrid](patterns/01-unified-ai-gateway/hybrid/) | Self-hosted | [Open Source](patterns/01-unified-ai-gateway/open-source/) [Starter](patterns/01-unified-ai-gateway/starter/) [Federated](patterns/01-unified-ai-gateway/federated/) [Edge](patterns/01-unified-ai-gateway/edge/) |
+### Quality and Economics Layer
 
-## Pattern 02: RAG for Regulated Data (12)
-| Core | [Standard](patterns/02-rag-regulated-data/standard-rag/) [GraphRAG](patterns/02-rag-regulated-data/graph-rag/) [Agentic](patterns/02-rag-regulated-data/agentic-rag/) [Sensitive](patterns/02-rag-regulated-data/sensitive-data-rag/) |
-|------|---|
-| Specialized | [Conversational](patterns/02-rag-regulated-data/conversational-rag/) [SQL+Vector](patterns/02-rag-regulated-data/hybrid-sql-vector-rag/) [Multimodal](patterns/02-rag-regulated-data/multimodal-rag/) [Multi-Source](patterns/02-rag-regulated-data/multi-source-rag/) [Real-Time](patterns/02-rag-regulated-data/realtime-rag/) [Evaluation](patterns/02-rag-regulated-data/evaluation-rag/) |
-| Advanced | [Privacy-Preserving](patterns/02-rag-regulated-data/privacy-preserving-rag/) [Caching-Optimized](patterns/02-rag-regulated-data/caching-optimized-rag/) |
+| # | Pattern | Variants | What It Answers |
+|---|---------|----------|-----------------|
+| 09 | [AI Evaluation and Red Teaming](patterns/09-ai-evaluation-red-teaming/) | 15 | How do I test AI quality, safety, and bias systematically? |
+| 10 | [FinOps for AI](patterns/10-finops-for-ai/) | 14 | How do I track, optimize, and allocate AI costs? |
 
-## Pattern 03: Multi-Agent Safety Gates (11)
-| Gate | [Linear](patterns/03-multi-agent-safety-gates/linear-chain/) [DAG](patterns/03-multi-agent-safety-gates/dag-orchestration/) [Hierarchical](patterns/03-multi-agent-safety-gates/hierarchical/) [Human](patterns/03-multi-agent-safety-gates/human-in-the-loop/) |
-|------|---|
-| Decision | [Consensus](patterns/03-multi-agent-safety-gates/consensus/) [Adversarial](patterns/03-multi-agent-safety-gates/adversarial-red-blue/) [Debate](patterns/03-multi-agent-safety-gates/debate/) |
-| Advanced | [Reflection](patterns/03-multi-agent-safety-gates/reflection-loop/) [Swarm](patterns/03-multi-agent-safety-gates/swarm/) [Monitor](patterns/03-multi-agent-safety-gates/parallel-monitor/) [State Machine](patterns/03-multi-agent-safety-gates/state-machine-agent/) |
+### Infrastructure Layer
 
-## Pattern 04: Tool Governance (9)
-[MCP](patterns/04-agentic-tool-governance/mcp-protocol/) [A2A](patterns/04-agentic-tool-governance/a2a-protocol/) [Function Calling](patterns/04-agentic-tool-governance/function-calling/) [Compound](patterns/04-agentic-tool-governance/compound-tools/) [Sandboxed](patterns/04-agentic-tool-governance/sandboxed-execution/) [Escalation](patterns/04-agentic-tool-governance/tool-escalation/) [Multi-Tenant](patterns/04-agentic-tool-governance/multi-tenant-isolation/) [Discovery](patterns/04-agentic-tool-governance/tool-discovery/) [Versioning](patterns/04-agentic-tool-governance/tool-versioning/)
+| # | Pattern | Variants | What It Answers |
+|---|---------|----------|-----------------|
+| 11 | [AI Security Architecture](patterns/11-ai-security-architecture/) | 12 | How do I defend against AI-specific threats? |
+| 12 | [Enterprise AI Platform](patterns/12-enterprise-ai-platform/) | 12 | What infrastructure do all AI patterns run on? |
 
-## Pattern 05: LLMOps Pipeline (12)
-| Cloud | [Azure](patterns/05-llmops-pipeline/azure-llmops/) [AWS](patterns/05-llmops-pipeline/aws-llmops/) [GCP](patterns/05-llmops-pipeline/gcp-llmops/) [Databricks](patterns/05-llmops-pipeline/databricks-llmops/) |
-|-------|---|
-| Self-hosted | [Open Source](patterns/05-llmops-pipeline/open-source-llmops/) [Hybrid](patterns/05-llmops-pipeline/hybrid-llmops/) |
-| Specialized | [Prompt](patterns/05-llmops-pipeline/prompt-engineering/) [A/B Test](patterns/05-llmops-pipeline/model-ab-testing/) [Compliance-Gated](patterns/05-llmops-pipeline/compliance-gated/) [Data Pipeline](patterns/05-llmops-pipeline/data-pipeline/) |
-| Operations | [Shadow Deploy](patterns/05-llmops-pipeline/shadow-deployment/) [Incident Response](patterns/05-llmops-pipeline/incident-response/) |
+### Product Layer
 
-## Pattern 06: Governance-as-Architecture (15)
-| Measurement | [Embedded](patterns/06-governance-as-architecture/embedded-governance/) [Dashboard](patterns/06-governance-as-architecture/governance-dashboard/) [Decay](patterns/06-governance-as-architecture/decay-detection/) |
-|------------|---|
-| Automation | [Policy-as-Code](patterns/06-governance-as-architecture/policy-as-code/) [Continuous](patterns/06-governance-as-architecture/continuous-compliance/) |
-| Enterprise | [Audit Trail](patterns/06-governance-as-architecture/audit-trail/) [Risk-Tiered](patterns/06-governance-as-architecture/risk-tiered/) [Federation](patterns/06-governance-as-architecture/governance-federation/) [Maturity](patterns/06-governance-as-architecture/governance-maturity/) |
-| Development | [Shift-Left](patterns/06-governance-as-architecture/shift-left-governance/) [Model Cards](patterns/06-governance-as-architecture/model-cards/) |
-| Responsible AI | [XAI](patterns/06-governance-as-architecture/xai-explainability/) [Bias](patterns/06-governance-as-architecture/bias-fairness/) [Consent](patterns/06-governance-as-architecture/consent-data-rights/) |
-| Meta | [Gov Testing](patterns/06-governance-as-architecture/governance-testing/) |
-
-## Pattern 07: Contamination-Resistant Pipeline (12)
-Research-validated from [EMG](https://doi.org/10.5281/zenodo.19411743) and ContamPerc papers.
-| Prevention | [Isolation](patterns/07-contamination-resistant-pipeline/isolation-barriers/) [Sanitization](patterns/07-contamination-resistant-pipeline/input-sanitization/) |
-|-----------|---|
-| Detection | [Validation](patterns/07-contamination-resistant-pipeline/validation-checkpoints/) [Canary](patterns/07-contamination-resistant-pipeline/canary-pipeline/) [Percolation](patterns/07-contamination-resistant-pipeline/contamination-percolation/) [Redundant](patterns/07-contamination-resistant-pipeline/redundant-generation/) |
-| Response | [Quarantine](patterns/07-contamination-resistant-pipeline/output-quarantine/) [Degradation](patterns/07-contamination-resistant-pipeline/graceful-degradation/) |
-| Recovery | [Rollback](patterns/07-contamination-resistant-pipeline/rollback-capable/) [Lineage](patterns/07-contamination-resistant-pipeline/contamination-lineage/) [Cross-Pipeline](patterns/07-contamination-resistant-pipeline/cross-pipeline/) [Immune](patterns/07-contamination-resistant-pipeline/immune-system/) |
-
-## Pattern 08: Compliance-Aware Data Routing (14)
-| Cloud | [Azure](patterns/08-compliance-data-routing/azure-compliance/) [AWS](patterns/08-compliance-data-routing/aws-compliance/) [GCP](patterns/08-compliance-data-routing/gcp-compliance/) |
-|-------|---|
-| Multi | [Multi-Cloud](patterns/08-compliance-data-routing/multi-cloud-compliance/) [On-Prem](patterns/08-compliance-data-routing/on-prem-compliance/) |
-| Routing | [Classification](patterns/08-compliance-data-routing/sensitivity-classification/) [Residency](patterns/08-compliance-data-routing/data-residency-routing/) [Consent](patterns/08-compliance-data-routing/consent-based-routing/) [Dynamic](patterns/08-compliance-data-routing/dynamic-reclassification/) [Cross-Border](patterns/08-compliance-data-routing/cross-border-routing/) |
-| Advanced | [Multi-Regulation](patterns/08-compliance-data-routing/multi-regulation/) [Anonymization](patterns/08-compliance-data-routing/anonymization-routing/) [Lineage](patterns/08-compliance-data-routing/data-lineage-routing/) [Temporal](patterns/08-compliance-data-routing/temporal-compliance/) |
-
-## Pattern 09: AI Evaluation & Red Teaming (15)
-| Automated | [Red Teaming](patterns/09-evaluation-red-teaming/automated-red-teaming/) [RAGAS](patterns/09-evaluation-red-teaming/ragas-evaluation/) [LLM-as-Judge](patterns/09-evaluation-red-teaming/llm-as-judge/) [Adversarial](patterns/09-evaluation-red-teaming/adversarial-robustness/) |
-|-----------|---|
-| Human | [Human Eval](patterns/09-evaluation-red-teaming/human-eval/) [Domain-Specific](patterns/09-evaluation-red-teaming/domain-specific-eval/) |
-| Continuous | [Safety Bench](patterns/09-evaluation-red-teaming/safety-benchmarking/) [Continuous](patterns/09-evaluation-red-teaming/continuous-eval/) [Bias](patterns/09-evaluation-red-teaming/bias-evaluation/) [Regression](patterns/09-evaluation-red-teaming/regression-testing/) |
-| Specialized | [Prompt Leakage](patterns/09-evaluation-red-teaming/prompt-leakage/) [Hallucination](patterns/09-evaluation-red-teaming/hallucination-benchmarking/) [Multi-Model](patterns/09-evaluation-red-teaming/multi-model-comparison/) [Compliance](patterns/09-evaluation-red-teaming/compliance-evaluation/) [Synthetic Data](patterns/09-evaluation-red-teaming/synthetic-test-generation/) |
-
-## Pattern 10: FinOps for AI (14)
-| Cloud | [Azure](patterns/10-finops-for-ai/azure-finops/) [AWS](patterns/10-finops-for-ai/aws-finops/) [GCP](patterns/10-finops-for-ai/gcp-finops/) [Multi-Cloud](patterns/10-finops-for-ai/multi-cloud-finops/) |
-|-------|---|
-| Optimization | [Token-Level](patterns/10-finops-for-ai/token-level-finops/) [Model Cost](patterns/10-finops-for-ai/model-cost-optimization/) [Cache Economics](patterns/10-finops-for-ai/cache-economics/) [Inference Bench](patterns/10-finops-for-ai/inference-benchmarking/) |
-| Enterprise | [Chargeback](patterns/10-finops-for-ai/chargeback/) [Budget Gov](patterns/10-finops-for-ai/budget-governance/) [Capacity Planning](patterns/10-finops-for-ai/capacity-planning/) |
-| Advanced | [Waste Detection](patterns/10-finops-for-ai/waste-detection/) [Cost Anomaly](patterns/10-finops-for-ai/cost-anomaly/) [ROI Measurement](patterns/10-finops-for-ai/roi-measurement/) |
+| # | Pattern | Variants | What It Answers |
+|---|---------|----------|-----------------|
+| 13 | [Observability for AI](patterns/13-observability-for-ai/) | 12 | How do I know if my AI systems are working well? |
+| 14 | [AI Product Architecture](patterns/14-ai-product-architecture/) | 12 | What does a complete AI product look like? |
 
 ---
 
-## Coming Soon: Patterns 11-15
+## How Patterns Compose Together
 
-| # | Pattern | Planned Variants | Description |
-|---|---------|-----------------|-------------|
-| 11 | **AI Security Architecture** | Prompt Injection Defense, Model Theft Prevention, Training Data Poisoning, Endpoint Security, Identity & Access, Incident Response | Defense-in-depth security for AI systems |
-| 12 | **Enterprise AI Platform** | Lakehouse for AI, Workspace Design, Data Mesh, Feature Store, Networking, Compute Strategy | How to design the platform underneath the gateway |
-| 13 | **Observability for AI** | LLM Tracing, AI Metrics, Alerting, Dashboards, Feedback Loops | Full observability, not just a cross-cutting bar |
-| 14 | **AI Product Architecture** | Conversational AI, AI Search, Document Intelligence, Recommendations, Copilots | How to build AI products, not just infrastructure |
-| 15 | **Migration & Interoperability** | Cloud Migration, Model Portability, API Compatibility, Multi-Framework | Avoid vendor lock-in at every layer |
+No pattern works alone. Here is how they compose for real products:
+
+```
+                    [14. AI Products]
+                    Conversational AI, Search, Copilot, CDSS
+                           |
+              uses patterns 02-13 as building blocks
+                           |
+    +----------+-----------+----------+-----------+
+    |          |           |          |           |
+[02. RAG] [03. Agents] [04. Tools] [05. LLMOps] [09. Eval]
+    |          |           |          |           |
+    +----------+-----------+----------+-----------+
+                           |
+              governed and secured by
+                           |
+    +----------+-----------+----------+-----------+
+    |          |           |          |           |
+[06. Gov]  [07. Contam] [08. Comply] [10. FinOps] [11. Security]
+    |          |           |          |           |
+    +----------+-----------+----------+-----------+
+                           |
+              observed and operated on
+                           |
+    +----------+-----------+
+    |          |           |
+[12. Platform] [13. Observability]
+[01. Gateway]
+```
+
+### Example: Clinical Decision Support System
+
+| Layer | Pattern Used | Purpose |
+|-------|-------------|---------|
+| Product | P14 (Clinical Decision Support) | Complete CDSS product architecture |
+| Knowledge | P02 (RAG) | Retrieve clinical evidence from guidelines |
+| Agents | P03 (Multi-Agent) | Chain extraction, analysis, synthesis agents |
+| Safety | P07 (Contamination-Resistant) | Prevent drug interaction hallucinations |
+| Compliance | P08 (Compliance-Aware) | Route PHI through BAA endpoints only |
+| Quality | P09 (Evaluation) | Clinical accuracy testing with domain experts |
+| Economics | P10 (FinOps) | Track cost per clinical query |
+| Security | P11 (AI Security) | Protect against prompt injection in clinical context |
+| Platform | P12 (Enterprise Platform) | Databricks + Azure AI Foundry infrastructure |
+| Observability | P13 (Observability) | Monitor clinical quality and safety metrics |
+| Governance | P06 (Governance) | GAIF-4 metrics, HIPAA compliance, audit trail |
+| Gateway | P01 (Gateway) | Single control point for all model calls |
 
 ---
 
-## [GAIF-4](https://github.com/aman210122/gaif-governance-observatory) governance metrics in every pattern | NIST AI RMF, EU AI Act, HIPAA, SOX, PCI-DSS, GDPR, FedRAMP
+## GAIF-4 Governance Metrics
 
-**Aman Sharma** - Principal Enterprise Architect, AI/ML | 18+ years | [LinkedIn](https://linkedin.com/in/amansharmaarchitect) | [ORCID](https://orcid.org/0009-0005-5107-4485) | [GitHub](https://github.com/aman210122) | License: MIT
+Every pattern integrates [GAIF-4](https://github.com/aman210122/gaif-governance-observatory) metrics:
+
+| Metric | What It Measures | Safe | Critical |
+|--------|-----------------|------|----------|
+| **T1PR** (Type-1 Pass Rate) | Contaminated/bad outputs passing safety filters | < 0.05 | > 0.15 |
+| **CFR** (Compliance Failure Rate) | Outputs violating compliance policies | 0.00 | > 0.01 |
+| **EMR** (Emergent Misinformation Rate) | Dangerous content emerging at pipeline level | < 0.05 | > 0.15 |
+| **GDR** (Governance Decay Rate) | Governance effectiveness degrading over time | < 0.03 | > 0.05 |
+
+---
+
+## Platform Mapping
+
+| Component | Databricks | Azure | AWS | GCP | Open Source |
+|-----------|-----------|-------|-----|-----|-------------|
+| Gateway | Mosaic AI GW | API Mgmt | API GW | Apigee | Kong / Envoy |
+| Vector | Vector Search | AI Search | OpenSearch | Vertex Search | Qdrant |
+| LLM | DBRX / External | Azure OpenAI | Bedrock | Gemini | vLLM |
+| Agents | Mosaic AI Agents | Semantic Kernel | Bedrock Agents | Agent Builder | LangGraph |
+| Tools | UC Functions | Azure Functions | Lambda | Cloud Functions | MCP SDK |
+| Guardrails | Mosaic GW | Content Safety | Guardrails | Model Armor | NeMo |
+| Eval | MLflow Eval | AI Foundry Eval | Bedrock Eval | Vertex Eval | RAGAS |
+| DLP | Presidio | Purview | Macie | Cloud DLP | Presidio |
+| Observe | MLflow | App Insights | CloudWatch | Cloud Monitoring | OTel |
+| Compute | Serverless | AI Foundry | SageMaker | Vertex AI | K8s + vLLM |
+
+---
+
+## Research Basis
+
+Several patterns are directly based on published research:
+
+| Pattern | Research | Finding |
+|---------|----------|---------|
+| P07 (Contamination) | [EMG Paper](https://doi.org/10.5281/zenodo.19411743) | 74 critical drug interactions across 4,800 trials; collective delusion; gap inversion |
+| P07 (Contamination) | ContamPerc Paper | Contamination percolation in multi-agent graphs; T1PR metric |
+| P08 (Compliance) | [PHI-GUARD Paper](https://doi.org/10.36227/techrxiv.177220388.80392106/v1) | CARES algorithm; zero PHI violations across 30K MIMIC-IV queries |
+| All Patterns | [GAIF v1.0](https://doi.org/10.5281/zenodo.19341015) | Governance framework with T1PR, CFR, EMR, GDR metrics |
+
+---
+
+## Getting Started
+
+**For CTOs:** Open any pattern, glance at the spatial diagram. The architecture tells the story in 10 seconds.
+
+**For Architects:** Click any component in the diagram. The detail panel shows configuration, platform mapping, anti-patterns, and GAIF-4 relevance.
+
+**For Engineers:** Run scenarios (buttons at the top). Watch data flow through the architecture. Read the log for technical details.
+
+**For Security/Compliance:** Focus on Governance and Compliance bars. Run PHI and contamination scenarios. Check GAIF-4 metrics.
+
+**For FinOps:** Read cost in response bar. Compare scenarios. Check Economics cross-cutting bar.
+
+---
+
+## License
+
+MIT
+
+---
+
+*Designed by [Aman Sharma](https://linkedin.com/in/amansharmaarchitect) | Principal Enterprise Architect AI/ML*
+*Governance: [GAIF Governance Observatory](https://github.com/aman210122/gaif-governance-observatory)*
