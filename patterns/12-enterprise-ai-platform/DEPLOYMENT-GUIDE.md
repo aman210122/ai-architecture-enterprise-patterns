@@ -1,24 +1,16 @@
 # Deployment Guide: Enterprise AI Platform
-## Prerequisites: Cloud foundation (VNet/VPC, IAM, logging), budget approval
+## Prerequisites: Cloud foundation (VNet, IAM, logging), budget approval
 ## Steps
-1. Deploy lakehouse: Delta/Iceberg format, unified catalog, access control
-2. Configure feature store: feature definitions, compute pipeline, serving endpoint
-3. Set up data mesh: domain ownership, data product contracts, AI-specific SLAs
-4. Deploy vector storage layer: index management, versioning, monitoring
-5. Provision GPU cluster: scheduling, autoscaling, spot/reserved mix
-6. Configure inference serving: vLLM/TGI for OSS, managed for proprietary
-7. Set up training infrastructure: distributed training, checkpointing, HPO
-8. Deploy batch processing: offline inference, ETL for AI, scheduled runs
-9. Configure workspaces: team isolation, RBAC, quotas, cost allocation
-10. Deploy model serving gateway (Pattern 01): unified API, all providers
-11. Set up experiment tracking: MLflow/W&B, comparison, reproducibility
-12. Configure ML pipeline orchestration: DAG execution, scheduling
-13. Deploy private endpoints: Azure PE, AWS PrivateLink, GCP PSC
-14. Configure network isolation: VNet segmentation by sensitivity
-15. Set up egress control: whitelist model provider domains only
-16. Deploy secret management: API keys, model creds, rotation
-17. Configure AI monitoring: model latency, tokens, quality drift, cost
-18. Set up centralized logging: all AI operations, compliance retention
-19. Deploy CI/CD for AI: prompt testing, eval suites, canary deployment
-20. Platform-level GAIF-4: aggregate across all AI systems
+1. Data layer: deploy lakehouse (Delta/Iceberg), configure Unity Catalog
+2. Feature store: define features, compute pipelines, serving endpoints
+3. Vector store: index documents, configure hybrid search
+4. Semantic layer: entity resolution, business glossary API
+5. Compute: provision GPU cluster, configure autoscaling
+6. Inference: deploy vLLM/TGI endpoints for self-hosted models
+7. Training: set up distributed training infrastructure
+8. Platform: configure workspaces, MLflow, CI/CD pipelines
+9. Networking: private endpoints, VNet isolation, egress control
+10. Monitoring: AI-specific dashboards (quality, latency, cost, drift)
+11. Gateway: deploy Pattern 01, route all LLM traffic through single point
+12. Multi-cloud: map components to Databricks + Azure + AWS as needed
 *[Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*

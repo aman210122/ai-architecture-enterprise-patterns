@@ -1,28 +1,24 @@
 # Pattern 12: Enterprise AI Platform
-**The infrastructure all AI patterns run on. 12 variants. Data foundation, compute, platform services, networking. Multi-cloud: Databricks, Azure AI Foundry, Snowflake, GCP Vertex, AWS Bedrock.**
+**Infrastructure stack building upward. 15 variants. Data -> Compute -> Platform -> API. Multi-cloud mapping table. BSC Pillar 4 reference architecture.**
+
+Unique layout: vertical stack building UPWARD. Bottom (widest): Data Foundation (lakehouse, feature store, vector, semantic layer). Middle: Compute (GPU, inference, training, batch). Upper: Platform Services (workspaces, MLflow, CI/CD, monitoring). Top (narrowest): API Gateway. Right side: multi-cloud mapping table (Databricks, Azure, AWS).
 
 | Platform Layer | Variant |
 |---------------|---------|
-| Unified AI storage | [Lakehouse Architecture](lakehouse-architecture/) |
-| Multi-tenant isolation | [Workspace Management](workspace-management/) |
-| Domain data products | [Data Mesh for AI](data-mesh-for-ai/) |
+| Delta/Iceberg | [Lakehouse](lakehouse-architecture/) |
+| Multi-tenant | [Workspaces](workspace-management/) |
+| Domain products | [Data Mesh](data-mesh-for-ai/) |
 | Feature lifecycle | [Feature Store](feature-store/) |
-| GPU scheduling | [GPU Cluster Management](gpu-cluster-management/) |
-| Model serving at scale | [Inference Serving](inference-serving/) |
-| Private connectivity | [Networking Architecture](networking-architecture/) |
-| Training + batch | [Compute Orchestration](compute-orchestration/) |
-| MLflow/W&B | [Experiment Tracking](experiment-tracking/) |
-| DAG pipelines | [ML Pipeline Orchestration](ml-pipeline-orchestration/) |
-| AI-specific monitoring | [Platform Monitoring](platform-monitoring/) |
-| Eval in CI/CD | [CI/CD for AI](ci-cd-for-ai/) |
-
-## Platform Stack (BSC reference)
-| Layer | Databricks | Azure | AWS | GCP |
-|-------|-----------|-------|-----|-----|
-| Data | Unity Catalog | ADLS | S3/Glue | BigQuery |
-| Compute | Serverless | AI Foundry | SageMaker | Vertex |
-| Models | Mosaic AI | Azure OpenAI | Bedrock | Gemini |
-| Gateway | Mosaic GW | API Mgmt | API GW | Apigee |
-| Vector | Vector Search | AI Search | OpenSearch | Vertex Search |
+| GPU scheduling | [GPU Cluster](gpu-cluster-management/) |
+| vLLM/TGI | [Inference](inference-serving/) |
+| Private endpoints | [Networking](networking-architecture/) |
+| Distributed training | [Compute](compute-orchestration/) |
+| MLflow/W&B | [Experiments](experiment-tracking/) |
+| DAG pipelines | [ML Pipelines](ml-pipeline-orchestration/) |
+| AI monitoring | [Monitoring](platform-monitoring/) |
+| Eval in pipeline | [CI/CD](ci-cd-for-ai/) |
+| Business glossary | [Semantic Layer](semantic-layer/) |
+| Entity relationships | [Knowledge Graph](knowledge-graph-context/) |
+| Real-time metadata | [Active Metadata](active-metadata/) |
 
 *[GAIF Observatory](https://github.com/aman210122/gaif-governance-observatory) | [Aman Sharma](https://linkedin.com/in/amansharmaarchitect)*
