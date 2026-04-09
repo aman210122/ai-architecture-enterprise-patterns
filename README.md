@@ -1,6 +1,7 @@
 # AI Architecture Enterprise Patterns
 
 **222+ interactive SVG architecture diagrams for enterprise AI. Click any component for full details. Run scenarios to watch data flow through the architecture.**
+![Interactive Architecture Demo](demo.gif)
 
 Every diagram includes: spatial box-and-arrow layout, click-to-detail panels (configuration, platform mapping, anti-patterns, GAIF-4 relevance), 5 animated scenarios, 4 cross-cutting governance bars, and per-query cost tracking.
 
