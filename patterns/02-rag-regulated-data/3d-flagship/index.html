@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="description" content="Interactive 3D reference architecture for RAG over regulated data, with governance, PHI detection, and per query cost tracking.">
+<title>Pattern 02 RAG for Regulated Data, 3D Reference</title>
+<style>
+  :root{
+    --bg:#06080f; --bg2:#0b1020; --panel:rgba(14,20,36,0.82); --panel2:rgba(22,30,52,0.9);
+    --line:rgba(120,150,210,0.18); --text:#e6ecf7; --mute:#94a3b8; --cyan:#00d4ff; --cyan2:#5ef0ff;
+    --amber:#ffb347; --red:#ff5a6a; --green:#31e39b; --violet:#b48cff; --shadow:0 10px 40px rgba(0,0,0,0.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,-apple-system,Arial,sans-serif;overflow:hidden}
+  a{color:var(--cyan)}
+  #stage{position:fixed;inset:0}
+  #canvas-host{position:absolute;inset:0}
+  canvas{display:block;outline:none}
+  .hud{position:fixed;z-index:3;pointer-events:none}
+  .hud > *{pointer-events:auto}
+  .card{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .header{top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .title{padding:12px 16px;max-width:620px}
+  .title h1{margin:0;font-size:15px;letter-spacing:.3px}
+  .title p{margin:4px 0 0;color:var(--mute);font-size:12px;line-height:1.4}
+  .badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .badge{font-size:10.5px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--cyan);background:rgba(0,212,255,0.08)}
+  .badge.gov{color:var(--amber);background:rgba(255,179,71,0.1);border-color:rgba(255,179,71,0.25)}
+  .badge.phi{color:var(--red);background:rgba(255,90,106,0.1);border-color:rgba(255,90,106,0.25)}
+  .gov-bar{padding:10px 14px;min-width:230px}
+  .gov-bar h3{margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:.6px;color:var(--mute);text-transform:uppercase}
+  .metric{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0}
+  .metric .k{color:var(--mute)}
+  .metric .v{font-variant-numeric:tabular-nums;font-weight:600}
+  .metric .v.ok{color:var(--green)}
+  .metric .v.warn{color:var(--amber)}
+  .metric .v.bad{color:var(--red)}
+  .scenarios{position:fixed;left:14px;bottom:14px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 28px);z-index:3}
+  .btn{pointer-events:auto;font-family:inherit;font-size:12px;color:var(--text);background:var(--panel);border:1px solid var(--line);padding:9px 12px;border-radius:10px;cursor:pointer;transition:all .18s ease;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .btn:hover,.btn:focus-visible{border-color:var(--cyan);color:var(--cyan);outline:none;transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(180deg,rgba(0,212,255,0.25),rgba(0,212,255,0.08));border-color:rgba(0,212,255,0.45);color:#dff8ff}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+  .btn .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin-right:7px;vertical-align:middle;box-shadow:0 0 8px var(--cyan)}
+  .btn.phi .dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+  .btn.cost .dot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  .btn.empty .dot{background:var(--violet);box-shadow:0 0 8px var(--violet)}
+  .btn.contam .dot{background:#ff8c00;box-shadow:0 0 8px #ff8c00}
+  .logwrap{position:fixed;right:14px;bottom:14px;width:360px;max-width:calc(100% - 28px);z-index:3}
+  .logwrap header{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line)}
+  .logwrap header h3{margin:0;font-size:11px;color:var(--mute);letter-spacing:.6px;text-transform:uppercase}
+  .logwrap .log{max-height:180px;overflow:auto;padding:8px 12px;font-family:'JetBrains Mono','Fira Code',ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.5}
+  .log .row{padding:2px 0;color:var(--text);display:flex;gap:8px}
+  .log .row .t{color:var(--mute);min-width:50px}
+  .log .row.ok .m{color:var(--green)}
+  .log .row.warn .m{color:var(--amber)}
+  .log .row.err .m{color:var(--red)}
+  .log .row.info .m{color:var(--cyan)}
+  .side{position:fixed;top:80px;right:14px;width:320px;max-width:calc(100% - 28px);z-index:3;transform:translateX(360px);transition:transform .35s cubic-bezier(.2,.9,.3,1);opacity:0}
+  .side.open{transform:translateX(0);opacity:1}
+  .side header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .side header h3{margin:0;font-size:13px;letter-spacing:.3px}
+  .side .body{padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--text);max-height:55vh;overflow:auto}
+  .side .body p{margin:0 0 8px}
+  .side .body h4{margin:10px 0 4px;font-size:11.5px;color:var(--mute);letter-spacing:.6px;text-transform:uppercase}
+  .side .body ul{padding-left:18px;margin:4px 0 8px}
+  .side .body li{margin:2px 0}
+  .icon-btn{background:transparent;border:0;color:var(--mute);font-size:16px;cursor:pointer;padding:4px 6px;border-radius:6px}
+  .icon-btn:hover,.icon-btn:focus-visible{color:var(--cyan);outline:none;background:rgba(0,212,255,0.08)}
+  .cam-ctl{position:fixed;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:3}
+  .cam-ctl .btn{padding:7px 10px;font-size:11px;text-align:left;min-width:108px}
+  .legend{position:fixed;left:14px;top:80px;width:210px;z-index:3;padding:10px 12px;font-size:11px;color:var(--mute)}
+  .legend h4{margin:0 0 6px;color:var(--text);font-size:11.5px;letter-spacing:.3px}
+  .legend .key{display:flex;align-items:center;gap:7px;margin:3px 0}
+  .legend .swatch{width:10px;height:10px;border-radius:2px}
+  .kbd{display:inline-block;font-family:inherit;font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);border:1px solid var(--line);color:var(--text);margin:0 2px}
+  .loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:13px;z-index:10;transition:opacity .4s ease}
+  .loading.gone{opacity:0;pointer-events:none}
+  .loading .spin{width:38px;height:38px;border:3px solid rgba(255,255,255,0.08);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;margin-right:12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid var(--line);color:var(--mute);margin:2px 3px 2px 0}
+  .chip b{color:var(--text);font-weight:600}
+  .banner{position:fixed;top:72px;left:50%;transform:translate(-50%,-12px);background:rgba(255,90,106,0.12);border:1px solid rgba(255,90,106,0.4);color:#ffd4d9;padding:8px 14px;border-radius:10px;font-size:12px;z-index:4;opacity:0;transition:all .25s ease;pointer-events:none}
+  .banner.show{opacity:1;transform:translate(-50%,0)}
+  .banner.warn{background:rgba(255,179,71,0.12);border-color:rgba(255,179,71,0.45);color:#ffe6c4}
+  .banner.ok{background:rgba(49,227,155,0.1);border-color:rgba(49,227,155,0.45);color:#c4ffe0}
+  @media (max-width:900px){
+    .side{width:calc(100% - 28px)}
+    .legend{display:none}
+    .cam-ctl{display:none}
+    .logwrap{width:calc(100% - 28px);bottom:78px}
+    .scenarios{bottom:14px}
+    .title h1{font-size:13px}
+    .header{flex-wrap:wrap}
+    .gov-bar{min-width:unset;width:100%;order:3}
+  }
+  /* skip link for keyboard users */
+  .skip{position:absolute;left:-9999px;top:10px}
+  .skip:focus{left:14px;z-index:99;background:var(--bg2);padding:8px 12px;border-radius:8px;color:var(--cyan);text-decoration:none;border:1px solid var(--cyan)}
+</style>
+</head>
+<body>
+<a class="skip" href="#scenarios">Skip to scenarios</a>
+
+<div class="loading" id="loading" role="status" aria-live="polite">
+  <div class="spin" aria-hidden="true"></div>
+  <span>Loading 3D scene</span>
+</div>
+
+<div id="stage" role="application" aria-label="Interactive 3D architecture diagram for RAG over regulated data">
+  <div id="canvas-host" aria-hidden="true"></div>
+
+  <div class="hud header">
+    <div class="card title">
+      <h1>Pattern 02 · RAG for Regulated Data</h1>
+      <p>A spatial reference architecture for retrieval augmented generation over regulated content, with a governance plane that tracks PHI exposure, contamination, and cost per query.</p>
+      <div class="badges">
+        <span class="badge">GAIF v1.0</span>
+        <span class="badge gov">Governance embedded</span>
+        <span class="badge phi">HIPAA ready</span>
+        <span class="badge">Multi cloud</span>
+      </div>
+    </div>
+    <div class="card gov-bar" role="region" aria-label="Governance metrics">
+      <h3>Governance plane</h3>
+      <div class="metric"><span class="k">T1PR tier 1 PHI risk</span><span id="m-t1pr" class="v ok">0.02</span></div>
+      <div class="metric"><span class="k">CFR contamination</span><span id="m-cfr" class="v ok">0.00</span></div>
+      <div class="metric"><span class="k">EMR embedding misuse</span><span id="m-emr" class="v ok">0.00</span></div>
+      <div class="metric"><span class="k">GDR governance drift</span><span id="m-gdr" class="v ok">0.01</span></div>
+      <div class="metric"><span class="k">Cost this query</span><span id="m-cost" class="v ok">$0.00</span></div>
+      <div class="metric"><span class="k">Latency</span><span id="m-lat" class="v ok">0 ms</span></div>
+    </div>
+  </div>
+
+  <div class="card legend" role="region" aria-label="Legend">
+    <h4>Legend</h4>
+    <div class="key"><span class="swatch" style="background:#00d4ff"></span>Data flow</div>
+    <div class="key"><span class="swatch" style="background:#ffb347"></span>Governance overlay</div>
+    <div class="key"><span class="swatch" style="background:#31e39b"></span>Healthy metric</div>
+    <div class="key"><span class="swatch" style="background:#ff5a6a"></span>Policy violation</div>
+    <div class="key"><span class="swatch" style="background:#b48cff"></span>Fallback path</div>
+    <div style="margin-top:8px;font-size:10.5px">
+      <span class="kbd">Drag</span> orbit · <span class="kbd">Scroll</span> zoom · <span class="kbd">Click</span> a node · <span class="kbd">R</span> reset
+    </div>
+  </div>
+
+  <div class="cam-ctl">
+    <button class="btn" id="cam-top">Top view</button>
+    <button class="btn" id="cam-side">Side view</button>
+    <button class="btn" id="cam-iso">Isometric</button>
+    <button class="btn" id="cam-follow">Follow query</button>
+    <button class="btn" id="cam-reset">Reset camera</button>
+  </div>
+
+  <div id="scenarios" class="scenarios" role="toolbar" aria-label="Scenarios">
+    <button class="btn primary" id="s-standard" aria-label="Run standard query scenario"><span class="dot"></span>Standard query</button>
+    <button class="btn phi" id="s-phi" aria-label="Run PHI detection scenario"><span class="dot"></span>PHI detected</button>
+    <button class="btn empty" id="s-empty" aria-label="Run empty retrieval scenario"><span class="dot"></span>Empty retrieval</button>
+    <button class="btn contam" id="s-contam" aria-label="Run contaminated document scenario"><span class="dot"></span>Contaminated doc</button>
+    <button class="btn cost" id="s-cost" aria-label="Run high cost scenario"><span class="dot"></span>High cost query</button>
+    <button class="btn" id="s-stop" aria-label="Stop current scenario">Stop</button>
+  </div>
+
+  <div class="logwrap card" role="region" aria-label="Scenario log">
+    <header>
+      <h3>Event log</h3>
+      <button class="icon-btn" id="log-clear" aria-label="Clear log">×</button>
+    </header>
+    <div class="log" id="log" role="log" aria-live="polite"></div>
+  </div>
+
+  <aside class="side card" id="side" role="region" aria-label="Node details" aria-hidden="true">
+    <header>
+      <h3 id="side-title">Node details</h3>
+      <button class="icon-btn" id="side-close" aria-label="Close details">×</button>
+    </header>
+    <div class="body" id="side-body">
+      <p>Click any node in the 3D scene to inspect its role, platform mappings, and governance relevance.</p>
+    </div>
+  </aside>
+
+  <div class="banner" id="banner" role="alert" aria-live="assertive"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============================================================
+   Pattern 02, RAG for Regulated Data, 3D reference
+   Author: Aman Sharma. AI Architecture Enterprise Patterns.
+   Zero dependency apart from Three.js r128 (CDN).
+============================================================ */
+
+(function(){
+  'use strict';
+
+  // -------------------------------------------------------
+  // Node metadata. This is what the side panel shows on click.
+  // -------------------------------------------------------
+  const NODES = {
+    'user': {
+      title:'User Query',
+      layer:'Ingress',
+      role:'Entry point for a regulated user request. Usually a clinician, analyst, or internal app.',
+      mappings:{Azure:'Entra ID + App Gateway',AWS:'Cognito + API Gateway',GCP:'Identity Platform + Apigee',Databricks:'PAT + Unity Catalog',OSS:'Keycloak + Kong'},
+      metric:'Auth failures, session risk'
+    },
+    'gateway': {
+      title:'API Gateway',
+      layer:'Ingress',
+      role:'Policy enforcement point. Rate limits, auth, per tenant quotas, and regional routing.',
+      mappings:{Azure:'API Management',AWS:'API Gateway',GCP:'Apigee',Databricks:'Mosaic AI Gateway',OSS:'Kong, LiteLLM'},
+      metric:'Reject rate, 4xx ratio'
+    },
+    'pii': {
+      title:'Pre Query PHI Scrubber',
+      layer:'Ingress',
+      role:'First line PHI and PII detector. Redacts patient identifiers before they reach embedding.',
+      mappings:{Azure:'Content Safety + Purview',AWS:'Comprehend Medical',GCP:'Healthcare DLP',Databricks:'Lakehouse Monitoring',OSS:'Presidio'},
+      metric:'T1PR tier 1 PHI recall'
+    },
+    'token': {
+      title:'Tokenizer',
+      layer:'Embedding',
+      role:'Converts the sanitized query to tokens suitable for the embedding model.',
+      mappings:{Azure:'tiktoken in AKS',AWS:'SageMaker',GCP:'Vertex AI',Databricks:'Mosaic AI Model Serving',OSS:'HF Tokenizers'},
+      metric:'Tokens in, truncation events'
+    },
+    'embed': {
+      title:'Embedding Model',
+      layer:'Embedding',
+      role:'Produces a query vector. Model choice affects recall, cost, and data residency.',
+      mappings:{Azure:'text embedding 3',AWS:'Titan Embeddings',GCP:'Gemini embeddings',Databricks:'GTE, BGE hosted',OSS:'BGE, E5, Nomic'},
+      metric:'Vector quality, cost per 1K tokens'
+    },
+    'vdb': {
+      title:'Vector Store',
+      layer:'Retrieval',
+      role:'ANN index over regulated document chunks. Partitioned by tenant and sensitivity tier.',
+      mappings:{Azure:'AI Search',AWS:'OpenSearch, Kendra',GCP:'Vertex Vector Search',Databricks:'Vector Search',OSS:'pgvector, Qdrant, Milvus'},
+      metric:'Recall at K, index freshness'
+    },
+    'rerank': {
+      title:'Reranker',
+      layer:'Retrieval',
+      role:'Reorders ANN candidates using a cross encoder. Also runs contamination checks.',
+      mappings:{Azure:'Cohere Rerank in AI Foundry',AWS:'Rerank endpoint',GCP:'Vertex reranker',Databricks:'Custom rerank model',OSS:'bge reranker'},
+      metric:'CFR contamination flags'
+    },
+    'filter': {
+      title:'Policy Filter',
+      layer:'Retrieval',
+      role:'Drops chunks the caller is not entitled to. Tenant, region, clearance, consent.',
+      mappings:{Azure:'ABAC in AI Search',AWS:'KMS + row filters',GCP:'IAM conditions',Databricks:'Row + column masks',OSS:'OPA'},
+      metric:'Entitlement misses'
+    },
+    'llm': {
+      title:'LLM Call',
+      layer:'Generation',
+      role:'Generates the grounded answer from retrieved chunks. Uses sovereign or regional endpoint.',
+      mappings:{Azure:'Azure OpenAI, BAA',AWS:'Bedrock',GCP:'Vertex AI',Databricks:'Foundation Model API',OSS:'vLLM, TGI'},
+      metric:'Cost, latency, output tokens'
+    },
+    'guard': {
+      title:'Output Guardrails',
+      layer:'Generation',
+      role:'Final safety gate. Checks for PHI leakage, hallucination signals, and disallowed content.',
+      mappings:{Azure:'Content Safety',AWS:'Bedrock Guardrails',GCP:'Safety filters',Databricks:'AI Gateway guardrails',OSS:'NeMo Guardrails, Llama Guard'},
+      metric:'Block rate, false positive rate'
+    },
+    'resp': {
+      title:'Response',
+      layer:'Generation',
+      role:'Returned to caller with citations, confidence, and audit ID.',
+      mappings:{},
+      metric:'User satisfaction, citation coverage'
+    },
+    'audit': {
+      title:'Audit + Governance',
+      layer:'Governance plane',
+      role:'Records full provenance, scoring, and policy decisions. Source of truth for regulators.',
+      mappings:{Azure:'Purview + Monitor',AWS:'CloudTrail + Macie',GCP:'Audit Logs + DLP',Databricks:'Unity Catalog lineage',OSS:'OpenLineage'},
+      metric:'GDR governance drift'
+    }
+  };
+
+  // -------------------------------------------------------
+  // Scene setup
+  // -------------------------------------------------------
+  const host = document.getElementById('canvas-host');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x06080f);
+  scene.fog = new THREE.Fog(0x06080f, 60, 160);
+
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 400);
+  const ISO_CAM = new THREE.Vector3(28, 28, 36);
+  const TOP_CAM = new THREE.Vector3(0, 60, 0.01);
+  const SIDE_CAM = new THREE.Vector3(0, 6, 55);
+  camera.position.copy(ISO_CAM);
+  camera.lookAt(0, 4, 0);
+
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false, powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  host.appendChild(renderer.domElement);
+  renderer.domElement.setAttribute('tabindex','0');
+  renderer.domElement.setAttribute('aria-hidden','true');
+
+  // lights
+  const hemi = new THREE.HemisphereLight(0x88a8ff, 0x060810, 0.55);
+  scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xaed4ff, 1.0);
+  key.position.set(25, 35, 20);
+  key.castShadow = true;
+  key.shadow.mapSize.set(1024,1024);
+  key.shadow.camera.top = 40; key.shadow.camera.bottom = -40;
+  key.shadow.camera.left = -40; key.shadow.camera.right = 40;
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0xffb070, 0.35);
+  rim.position.set(-20, 10, -20);
+  scene.add(rim);
+  const pointCyan = new THREE.PointLight(0x00d4ff, 1.2, 70);
+  pointCyan.position.set(0, 4, 0);
+  scene.add(pointCyan);
+
+  // grid floor
+  const grid = new THREE.GridHelper(120, 48, 0x1a2540, 0x111830);
+  grid.position.y = -10;
+  grid.material.transparent = true;
+  grid.material.opacity = 0.35;
+  scene.add(grid);
+
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(120,120),
+    new THREE.MeshStandardMaterial({color:0x080c18, metalness:0.1, roughness:0.9})
+  );
+  floor.rotation.x = -Math.PI/2;
+  floor.position.y = -10.02;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // -------------------------------------------------------
+  // Layer planes, each is a translucent disk
+  // -------------------------------------------------------
+  const LAYERS = [
+    {id:'ingress', y:-6, label:'INGRESS',     color:0x1a3a5a, accent:0x00d4ff},
+    {id:'embed',   y:-2, label:'EMBEDDING',   color:0x22335a, accent:0x5ef0ff},
+    {id:'retr',    y: 2, label:'RETRIEVAL',   color:0x2a2f5a, accent:0x8ad0ff},
+    {id:'gen',     y: 6, label:'GENERATION',  color:0x30355a, accent:0xb48cff},
+    {id:'gov',     y:12, label:'GOVERNANCE',  color:0x5a4222, accent:0xffb347, gov:true}
+  ];
+
+  function makeTextSprite(text, color){
+    const cnv = document.createElement('canvas');
+    cnv.width = 512; cnv.height = 128;
+    const ctx = cnv.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0,0,512,128);
+    ctx.font = 'bold 54px Inter, Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = color || '#e6ecf7';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 8;
+    ctx.fillText(text, 12, 64);
+    const tex = new THREE.CanvasTexture(cnv);
+    tex.minFilter = THREE.LinearFilter;
+    tex.anisotropy = 4;
+    const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthWrite:false});
+    const spr = new THREE.Sprite(mat);
+    spr.scale.set(8, 2, 1);
+    return spr;
+  }
+
+  const layerPlanes = {};
+  LAYERS.forEach(L=>{
+    const geo = new THREE.RingGeometry(14, 18, 64, 1);
+    const mat = new THREE.MeshBasicMaterial({color:L.accent, transparent:true, opacity: L.gov?0.18:0.12, side:THREE.DoubleSide});
+    const ring = new THREE.Mesh(geo, mat);
+    ring.rotation.x = -Math.PI/2;
+    ring.position.y = L.y;
+    scene.add(ring);
+
+    const disk = new THREE.Mesh(
+      new THREE.CircleGeometry(14, 64),
+      new THREE.MeshBasicMaterial({color:L.color, transparent:true, opacity: L.gov?0.14:0.08, side:THREE.DoubleSide})
+    );
+    disk.rotation.x = -Math.PI/2;
+    disk.position.y = L.y;
+    scene.add(disk);
+
+    const lbl = makeTextSprite(L.label, L.gov?'#ffd591':'#9cc6ff');
+    lbl.position.set(-12, L.y+0.6, 14.2);
+    lbl.scale.set(6,1.5,1);
+    scene.add(lbl);
+
+    layerPlanes[L.id] = {ring, disk, y:L.y, accent:L.accent};
+  });
+
+  // -------------------------------------------------------
+  // Component nodes. Each is a rounded box with a glow shell.
+  // -------------------------------------------------------
+  const nodes = {};     // id -> {group, box, glow, pos}
+  const nodeMeshes = []; // for raycast
+
+  function createNode(id, label, x, y, z, color){
+    const group = new THREE.Group();
+    group.position.set(x,y,z);
+    group.userData.id = id;
+
+    // inner box
+    const boxGeo = new THREE.BoxGeometry(3.4, 1.4, 2.2);
+    const boxMat = new THREE.MeshStandardMaterial({
+      color: color, metalness:0.35, roughness:0.45, emissive: color, emissiveIntensity:0.35
+    });
+    const box = new THREE.Mesh(boxGeo, boxMat);
+    box.castShadow = true; box.receiveShadow = true;
+    box.userData.id = id;
+    group.add(box);
+
+    // glow shell
+    const glowGeo = new THREE.BoxGeometry(3.8, 1.8, 2.6);
+    const glowMat = new THREE.MeshBasicMaterial({color:color, transparent:true, opacity:0.12});
+    const glow = new THREE.Mesh(glowGeo, glowMat);
+    group.add(glow);
+
+    // underlight
+    const under = new THREE.Mesh(
+      new THREE.CircleGeometry(2.4, 32),
+      new THREE.MeshBasicMaterial({color:color, transparent:true, opacity:0.22})
+    );
+    under.rotation.x = -Math.PI/2;
+    under.position.y = -0.9;
+    group.add(under);
+
+    // label
+    const lbl = makeTextSprite(label, '#e6ecf7');
+    lbl.position.set(0, 1.6, 0);
+    lbl.scale.set(5.2, 1.3, 1);
+    group.add(lbl);
+
+    scene.add(group);
+    nodes[id] = {group, box, glow, under, pos:new THREE.Vector3(x,y,z), baseColor:color};
+    nodeMeshes.push(box);
+    return nodes[id];
+  }
+
+  // Place nodes on each layer
+  // Ingress (y = -6)
+  createNode('user',    'User',            -8, -6,  0, 0x4aa8ff);
+  createNode('gateway', 'API Gateway',      0, -6,  0, 0x00d4ff);
+  createNode('pii',     'PHI Scrubber',     8, -6,  0, 0xffb347);
+
+  // Embedding (y = -2)
+  createNode('token',   'Tokenizer',       -6, -2,  0, 0x5ef0ff);
+  createNode('embed',   'Embedding Model',  4, -2,  0, 0x5ef0ff);
+
+  // Retrieval (y = 2). Vector store center + document cloud around it.
+  createNode('vdb',     'Vector Store',    -6,  2,  0, 0x8ad0ff);
+  createNode('rerank',  'Reranker',         2,  2,  0, 0x8ad0ff);
+  createNode('filter',  'Policy Filter',    8,  2,  0, 0x8ad0ff);
+
+  // Generation (y = 6)
+  createNode('llm',     'LLM',             -4,  6,  0, 0xb48cff);
+  createNode('guard',   'Output Guardrails', 3,  6,  0, 0xb48cff);
+  createNode('resp',    'Response',         9,  6,  0, 0xb48cff);
+
+  // Governance (y = 12)
+  createNode('audit',   'Audit + Governance', 0, 12, 0, 0xffb347);
+
+  // -------------------------------------------------------
+  // Document cloud around the vector store
+  // -------------------------------------------------------
+  const docCount = 220;
+  const docGeo = new THREE.SphereGeometry(0.09, 6, 6);
+  const docMat = new THREE.MeshBasicMaterial({color:0x5ef0ff, transparent:true, opacity:0.7});
+  const docGroup = new THREE.Group();
+  const docPositions = [];
+  for(let i=0;i<docCount;i++){
+    const a = Math.random()*Math.PI*2;
+    const r = 1.8 + Math.random()*2.4;
+    const h = (Math.random()-0.5)*1.8;
+    const m = new THREE.Mesh(docGeo, docMat.clone());
+    m.position.set(Math.cos(a)*r - 6, 2 + h, Math.sin(a)*r);
+    m.userData.base = m.position.clone();
+    m.userData.seed = Math.random()*1000;
+    docPositions.push(m);
+    docGroup.add(m);
+  }
+  scene.add(docGroup);
+
+  // -------------------------------------------------------
+  // Connectors between nodes (straight beams)
+  // -------------------------------------------------------
+  function createBeam(fromId, toId, color){
+    const a = nodes[fromId].pos, b = nodes[toId].pos;
+    const pts = [a.clone(), b.clone()];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({color:color||0x2a3a6a, transparent:true, opacity:0.55});
+    const line = new THREE.Line(geo, mat);
+    line.userData.from = fromId;
+    line.userData.to = toId;
+    scene.add(line);
+    return line;
+  }
+
+  const beams = [
+    createBeam('user','gateway'),
+    createBeam('gateway','pii'),
+    createBeam('pii','token'),
+    createBeam('token','embed'),
+    createBeam('embed','vdb'),
+    createBeam('vdb','rerank'),
+    createBeam('rerank','filter'),
+    createBeam('filter','llm'),
+    createBeam('llm','guard'),
+    createBeam('guard','resp'),
+    // governance taps
+    createBeam('pii','audit', 0x4a3a1a),
+    createBeam('rerank','audit', 0x4a3a1a),
+    createBeam('guard','audit', 0x4a3a1a),
+    createBeam('resp','user', 0x2a5a3a) // return path
+  ];
+
+  // -------------------------------------------------------
+  // Query pulse (traveling sphere)
+  // -------------------------------------------------------
+  const pulseGeo = new THREE.SphereGeometry(0.35, 20, 20);
+  const pulseMat = new THREE.MeshBasicMaterial({color:0x00d4ff, transparent:true, opacity:0.95});
+  const pulse = new THREE.Mesh(pulseGeo, pulseMat);
+  const pulseHalo = new THREE.Mesh(
+    new THREE.SphereGeometry(0.7, 20, 20),
+    new THREE.MeshBasicMaterial({color:0x00d4ff, transparent:true, opacity:0.25})
+  );
+  pulse.add(pulseHalo);
+  pulse.visible = false;
+  scene.add(pulse);
+
+  // -------------------------------------------------------
+  // Basic orbit control (mouse drag + touch). Lightweight
+  // alternative to OrbitControls so we stay on one CDN file.
+  // -------------------------------------------------------
+  const orb = {target:new THREE.Vector3(0,4,0), az: Math.atan2(ISO_CAM.z,ISO_CAM.x), el:Math.PI/5, dist:ISO_CAM.length(), dragging:false, last:{x:0,y:0}, auto:true};
+  function applyOrbit(){
+    const r = orb.dist * Math.cos(orb.el);
+    camera.position.set(orb.target.x + r*Math.cos(orb.az), orb.target.y + orb.dist*Math.sin(orb.el), orb.target.z + r*Math.sin(orb.az));
+    camera.lookAt(orb.target);
+  }
+  applyOrbit();
+  renderer.domElement.addEventListener('pointerdown', e=>{orb.dragging=true; orb.auto=false; orb.last.x=e.clientX; orb.last.y=e.clientY; renderer.domElement.setPointerCapture(e.pointerId);});
+  renderer.domElement.addEventListener('pointerup', e=>{orb.dragging=false;});
+  renderer.domElement.addEventListener('pointermove', e=>{
+    if(!orb.dragging) return;
+    const dx = e.clientX - orb.last.x, dy = e.clientY - orb.last.y;
+    orb.last.x = e.clientX; orb.last.y = e.clientY;
+    orb.az -= dx * 0.008;
+    orb.el = Math.max(-Math.PI/2+0.1, Math.min(Math.PI/2-0.05, orb.el + dy*0.006));
+    applyOrbit();
+  });
+  renderer.domElement.addEventListener('wheel', e=>{
+    e.preventDefault();
+    orb.dist = Math.max(12, Math.min(120, orb.dist + e.deltaY*0.04));
+    applyOrbit();
+  }, {passive:false});
+
+  // -------------------------------------------------------
+  // Raycaster click to open side panel
+  // -------------------------------------------------------
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const side = document.getElementById('side');
+  const sideTitle = document.getElementById('side-title');
+  const sideBody = document.getElementById('side-body');
+  function openSide(id){
+    const n = NODES[id];
+    if(!n){ return; }
+    sideTitle.textContent = n.title;
+    let mapHtml = '';
+    if(n.mappings && Object.keys(n.mappings).length){
+      mapHtml = '<h4>Platform mappings</h4>';
+      Object.entries(n.mappings).forEach(([k,v])=>{ mapHtml += `<span class="chip"><b>${k}</b>${v}</span>`; });
+    }
+    sideBody.innerHTML = `
+      <p><b>Layer</b> <span class="chip">${n.layer}</span></p>
+      <p>${n.role}</p>
+      ${mapHtml}
+      <h4>Primary metric</h4>
+      <p>${n.metric}</p>
+    `;
+    side.classList.add('open');
+    side.setAttribute('aria-hidden','false');
+  }
+  function closeSide(){ side.classList.remove('open'); side.setAttribute('aria-hidden','true'); }
+  document.getElementById('side-close').addEventListener('click', closeSide);
+
+  renderer.domElement.addEventListener('click', ev=>{
+    const r = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((ev.clientX-r.left)/r.width)*2 - 1;
+    mouse.y = -((ev.clientY-r.top)/r.height)*2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(nodeMeshes, false);
+    if(hits.length){
+      const id = hits[0].object.userData.id;
+      openSide(id);
+      flashNode(id, 0x00d4ff);
+    }
+  });
+
+  // -------------------------------------------------------
+  // Log and banner helpers
+  // -------------------------------------------------------
+  const logEl = document.getElementById('log');
+  const banner = document.getElementById('banner');
+  function log(msg, cls){
+    const t = new Date();
+    const ts = `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
+    const row = document.createElement('div');
+    row.className = 'row ' + (cls||'info');
+    row.innerHTML = `<span class="t">${ts}</span><span class="m">${msg}</span>`;
+    logEl.appendChild(row);
+    logEl.scrollTop = logEl.scrollHeight;
+    while(logEl.children.length>80) logEl.removeChild(logEl.firstChild);
+  }
+  document.getElementById('log-clear').addEventListener('click', ()=>{ logEl.innerHTML=''; });
+  function showBanner(text, cls){
+    banner.textContent = text;
+    banner.className = 'banner show ' + (cls||'');
+    clearTimeout(showBanner._t);
+    showBanner._t = setTimeout(()=>{banner.classList.remove('show')}, 2600);
+  }
+
+  // -------------------------------------------------------
+  // Metrics helpers
+  // -------------------------------------------------------
+  const m = {
+    t1pr: document.getElementById('m-t1pr'),
+    cfr: document.getElementById('m-cfr'),
+    emr: document.getElementById('m-emr'),
+    gdr: document.getElementById('m-gdr'),
+    cost: document.getElementById('m-cost'),
+    lat: document.getElementById('m-lat')
+  };
+  function setMetric(el, value, level){
+    el.textContent = value;
+    el.classList.remove('ok','warn','bad');
+    el.classList.add(level||'ok');
+  }
+  function resetMetrics(){
+    setMetric(m.t1pr,'0.02','ok');
+    setMetric(m.cfr, '0.00','ok');
+    setMetric(m.emr, '0.00','ok');
+    setMetric(m.gdr, '0.01','ok');
+    setMetric(m.cost,'$0.00','ok');
+    setMetric(m.lat, '0 ms','ok');
+  }
+  resetMetrics();
+
+  // -------------------------------------------------------
+  // Scenario engine
+  // -------------------------------------------------------
+  let busy = false;
+  let stopFlag = false;
+  let followMode = false;
+
+  function wait(ms){ return new Promise(r=> setTimeout(r, ms)); }
+
+  function flashNode(id, color){
+    const n = nodes[id]; if(!n) return;
+    const orig = n.box.material.emissive.getHex();
+    n.box.material.emissive.setHex(color);
+    n.box.material.emissiveIntensity = 1.1;
+    n.glow.material.opacity = 0.35;
+    setTimeout(()=>{
+      n.box.material.emissive.setHex(orig);
+      n.box.material.emissiveIntensity = 0.35;
+      n.glow.material.opacity = 0.12;
+    }, 650);
+  }
+
+  function pulseTo(fromId, toId, color, speed){
+    return new Promise(resolve=>{
+      const a = nodes[fromId].pos.clone();
+      const b = nodes[toId].pos.clone();
+      pulse.material.color.setHex(color||0x00d4ff);
+      pulseHalo.material.color.setHex(color||0x00d4ff);
+      pulse.position.copy(a);
+      pulse.visible = true;
+      const start = performance.now();
+      const dur = speed || 650;
+      (function step(now){
+        const t = Math.min(1, (now-start)/dur);
+        const ease = t<0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+        pulse.position.lerpVectors(a, b, ease);
+        if(followMode){
+          orb.target.lerp(pulse.position, 0.12);
+          applyOrbit();
+        }
+        if(t<1){ requestAnimationFrame(step); }
+        else { resolve(); }
+      })(start);
+    });
+  }
+
+  function stopScenario(){ stopFlag = true; }
+  document.getElementById('s-stop').addEventListener('click', ()=>{ stopScenario(); log('Scenario stopped','warn'); });
+
+  async function scenarioStandard(){
+    resetMetrics(); log('Scenario: standard grounded query','info');
+    showBanner('Standard query in flight','ok');
+    let lat = 0;
+    await pulseTo('user','gateway',0x00d4ff,500); lat+=60; setMetric(m.lat, lat+' ms','ok'); log('Ingress accepted, auth ok','ok');
+    if(stopFlag)return;
+    await pulseTo('gateway','pii',0x00d4ff,500); lat+=40; setMetric(m.lat, lat+' ms','ok'); log('PHI scrub complete, 0 redactions','ok');
+    if(stopFlag)return;
+    await pulseTo('pii','token',0x00d4ff,450); lat+=35; setMetric(m.lat, lat+' ms','ok');
+    await pulseTo('token','embed',0x00d4ff,450); lat+=95; setMetric(m.lat, lat+' ms','ok'); log('Embedding produced, 1536 dims','info');
+    if(stopFlag)return;
+    await pulseTo('embed','vdb',0x00d4ff,550); lat+=70; setMetric(m.lat, lat+' ms','ok'); log('Vector search returned 12 candidates','info');
+    highlightDocs(8, 0x31e39b);
+    await pulseTo('vdb','rerank',0x00d4ff,500); lat+=80; setMetric(m.lat, lat+' ms','ok'); log('Reranker promoted 4 of 12, CFR 0.00','ok');
+    await pulseTo('rerank','filter',0x00d4ff,400); lat+=20; setMetric(m.lat, lat+' ms','ok'); log('Policy filter allowed 4 chunks','ok');
+    if(stopFlag)return;
+    await pulseTo('filter','llm',0x00d4ff,550); lat+=340; setMetric(m.lat, lat+' ms','ok'); log('LLM generated grounded answer','ok');
+    setMetric(m.cost,'$0.012','ok');
+    await pulseTo('llm','guard',0x00d4ff,400); lat+=30; setMetric(m.lat, lat+' ms','ok'); log('Guardrails: no PHI, no hallucination flag','ok');
+    await pulseTo('guard','resp',0x00d4ff,400); lat+=10; setMetric(m.lat, lat+' ms','ok');
+    flashNode('audit',0xffb347); log('Audit record written, run id 0x9f3a','info');
+    await pulseTo('resp','user',0x31e39b,600);
+    pulse.visible=false; showBanner('Query complete','ok');
+  }
+
+  async function scenarioPhi(){
+    resetMetrics(); log('Scenario: PHI detected in query','err');
+    showBanner('PHI detected, redaction triggered','');
+    banner.className = 'banner show';
+    banner.style.background='rgba(255,90,106,0.18)'; banner.style.borderColor='rgba(255,90,106,0.5)'; banner.style.color='#ffd4d9';
+    let lat = 0;
+    await pulseTo('user','gateway',0x00d4ff,500); lat+=60; setMetric(m.lat, lat+' ms','ok');
+    await pulseTo('gateway','pii',0xffb347,500); lat+=50; setMetric(m.lat, lat+' ms','ok');
+    flashNode('pii',0xff5a6a); log('PHI scrubber flagged tier 1 identifier','err');
+    setMetric(m.t1pr,'0.91','bad');
+    flashNode('audit',0xff5a6a); log('Audit: PHI incident logged','err');
+    await wait(600);
+    log('Query redacted, continuing with sanitized version','warn');
+    setMetric(m.t1pr,'0.04','ok');
+    await pulseTo('pii','token',0x00d4ff,450); lat+=35;
+    await pulseTo('token','embed',0x00d4ff,450); lat+=90; setMetric(m.lat, lat+' ms','ok');
+    await pulseTo('embed','vdb',0x00d4ff,550); lat+=70;
+    highlightDocs(6, 0x31e39b);
+    await pulseTo('vdb','rerank',0x00d4ff,500); lat+=80;
+    await pulseTo('rerank','filter',0x00d4ff,400);
+    await pulseTo('filter','llm',0x00d4ff,550); lat+=360; setMetric(m.cost,'$0.014','ok');
+    await pulseTo('llm','guard',0x00d4ff,400);
+    log('Guardrails double checked output, clean','ok');
+    await pulseTo('guard','resp',0x00d4ff,400);
+    await pulseTo('resp','user',0x31e39b,600);
+    pulse.visible=false; setMetric(m.lat, lat+' ms','ok');
+    showBanner('Delivered with PHI redaction','warn');
+  }
+
+  async function scenarioEmpty(){
+    resetMetrics(); log('Scenario: empty retrieval, fallback path','info');
+    let lat = 0;
+    await pulseTo('user','gateway',0x00d4ff,500); lat+=60;
+    await pulseTo('gateway','pii',0x00d4ff,500); lat+=40;
+    await pulseTo('pii','token',0x00d4ff,450); lat+=35;
+    await pulseTo('token','embed',0x00d4ff,450); lat+=90;
+    await pulseTo('embed','vdb',0x00d4ff,550); lat+=70;
+    setMetric(m.lat, lat+' ms','ok');
+    log('Vector search returned 0 candidates above threshold','warn');
+    flashNode('vdb',0xb48cff);
+    await wait(400);
+    log('Fallback: send query to LLM without retrieval, lower confidence','warn');
+    showBanner('Empty retrieval, fallback invoked','warn');
+    // violet fallback beam
+    await pulseTo('vdb','llm', 0xb48cff, 900);
+    lat+=360; setMetric(m.lat, lat+' ms','warn'); setMetric(m.cost,'$0.016','warn');
+    await pulseTo('llm','guard',0xb48cff,400);
+    log('Guardrails added citation warning','warn');
+    await pulseTo('guard','resp',0xb48cff,400);
+    await pulseTo('resp','user',0xb48cff,600);
+    pulse.visible=false;
+  }
+
+  async function scenarioContam(){
+    resetMetrics(); log('Scenario: contaminated document retrieved','err');
+    let lat = 0;
+    await pulseTo('user','gateway',0x00d4ff,500); lat+=60;
+    await pulseTo('gateway','pii',0x00d4ff,500); lat+=40;
+    await pulseTo('pii','token',0x00d4ff,450); lat+=35;
+    await pulseTo('token','embed',0x00d4ff,450); lat+=90;
+    await pulseTo('embed','vdb',0x00d4ff,550); lat+=70;
+    highlightDocs(10, 0xff5a6a);
+    setMetric(m.lat, lat+' ms','warn');
+    await pulseTo('vdb','rerank',0x00d4ff,500); lat+=80;
+    flashNode('rerank',0xff5a6a);
+    setMetric(m.cfr,'0.74','bad');
+    log('Reranker contamination check tripped, CFR 0.74','err');
+    flashNode('audit',0xff5a6a); log('Audit: poisoned chunk quarantined, source 0x42','err');
+    await wait(600);
+    log('Reranker removed 3 suspect chunks, kept 2 clean','warn');
+    setMetric(m.cfr,'0.09','warn');
+    await pulseTo('rerank','filter',0x00d4ff,400);
+    await pulseTo('filter','llm',0x00d4ff,550); lat+=340; setMetric(m.cost,'$0.013','ok');
+    await pulseTo('llm','guard',0x00d4ff,400);
+    await pulseTo('guard','resp',0x00d4ff,400);
+    await pulseTo('resp','user',0x31e39b,600);
+    pulse.visible=false;
+    showBanner('Contaminated docs quarantined','warn');
+  }
+
+  async function scenarioCost(){
+    resetMetrics(); log('Scenario: high cost long context query','warn');
+    let lat = 0;
+    await pulseTo('user','gateway',0x00d4ff,500); lat+=60;
+    await pulseTo('gateway','pii',0x00d4ff,500); lat+=40;
+    await pulseTo('pii','token',0x00d4ff,450); lat+=55;
+    log('Query tokens: 8,412 (large)','warn');
+    await pulseTo('token','embed',0x00d4ff,450); lat+=140;
+    await pulseTo('embed','vdb',0x00d4ff,550); lat+=90;
+    highlightDocs(14, 0x5ef0ff);
+    await pulseTo('vdb','rerank',0x00d4ff,500); lat+=110;
+    await pulseTo('rerank','filter',0x00d4ff,400); lat+=30;
+    await pulseTo('filter','llm',0x00d4ff,550); lat+=820; setMetric(m.lat, lat+' ms','warn');
+    setMetric(m.cost,'$0.184','bad');
+    log('Cost guardrail: budget consumed 37% in one call','err');
+    flashNode('audit',0xffb347); log('Audit: flagged for FinOps review','warn');
+    await pulseTo('llm','guard',0x00d4ff,400);
+    await pulseTo('guard','resp',0x00d4ff,400);
+    await pulseTo('resp','user',0xffb347,600);
+    pulse.visible=false;
+    showBanner('High cost query delivered, flagged for review','warn');
+  }
+
+  function highlightDocs(n, color){
+    // light up n random documents in the cloud
+    const shuffled = docPositions.slice().sort(()=>Math.random()-0.5);
+    shuffled.slice(0,n).forEach((d, i)=>{
+      d.material.color.setHex(color);
+      d.material.opacity = 1;
+      d.userData.glow = 1;
+    });
+    setTimeout(()=>{
+      docPositions.forEach(d=>{ d.material.color.setHex(0x5ef0ff); d.material.opacity=0.7; d.userData.glow=0; });
+    }, 1800);
+  }
+
+  async function runScenario(fn){
+    if(busy) return;
+    busy = true; stopFlag = false;
+    [...document.querySelectorAll('.scenarios .btn')].forEach(b=> b.id !== 's-stop' && (b.disabled=true));
+    try{ await fn(); } catch(e){ console.error(e); log('Scenario error','err'); }
+    busy = false;
+    [...document.querySelectorAll('.scenarios .btn')].forEach(b=> b.disabled=false);
+  }
+
+  document.getElementById('s-standard').addEventListener('click', ()=> runScenario(scenarioStandard));
+  document.getElementById('s-phi').addEventListener('click', ()=> runScenario(scenarioPhi));
+  document.getElementById('s-empty').addEventListener('click', ()=> runScenario(scenarioEmpty));
+  document.getElementById('s-contam').addEventListener('click', ()=> runScenario(scenarioContam));
+  document.getElementById('s-cost').addEventListener('click', ()=> runScenario(scenarioCost));
+
+  // -------------------------------------------------------
+  // Camera presets
+  // -------------------------------------------------------
+  function goCam(target){
+    orb.auto = false;
+    const start = camera.position.clone();
+    const t0 = performance.now();
+    const dur = 650;
+    (function step(now){
+      const t = Math.min(1, (now-t0)/dur);
+      const ease = 1 - Math.pow(1-t,3);
+      camera.position.lerpVectors(start, target, ease);
+      camera.lookAt(orb.target);
+      if(t<1) requestAnimationFrame(step);
+      else {
+        // sync orb state
+        const d = camera.position.distanceTo(orb.target);
+        orb.dist = d;
+        orb.az = Math.atan2(camera.position.z-orb.target.z, camera.position.x-orb.target.x);
+        orb.el = Math.asin((camera.position.y-orb.target.y)/d);
+      }
+    })(t0);
+  }
+  document.getElementById('cam-top').addEventListener('click',()=> goCam(TOP_CAM));
+  document.getElementById('cam-side').addEventListener('click',()=> goCam(SIDE_CAM));
+  document.getElementById('cam-iso').addEventListener('click',()=> goCam(ISO_CAM));
+  document.getElementById('cam-reset').addEventListener('click',()=>{ orb.target.set(0,4,0); goCam(ISO_CAM); });
+  document.getElementById('cam-follow').addEventListener('click', (e)=>{
+    followMode = !followMode;
+    e.currentTarget.classList.toggle('primary', followMode);
+    e.currentTarget.textContent = followMode ? 'Following query' : 'Follow query';
+  });
+
+  // -------------------------------------------------------
+  // Keyboard accessibility. Space runs standard. R resets.
+  // Arrow keys orbit. +/- zoom. Esc closes panel.
+  // -------------------------------------------------------
+  window.addEventListener('keydown', e=>{
+    if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
+    if(e.key==='Escape'){ closeSide(); }
+    if(e.key==='r' || e.key==='R'){ orb.target.set(0,4,0); goCam(ISO_CAM); }
+    if(e.key===' '){ e.preventDefault(); runScenario(scenarioStandard); }
+    if(e.key==='ArrowLeft'){ orb.az -= 0.1; applyOrbit(); }
+    if(e.key==='ArrowRight'){ orb.az += 0.1; applyOrbit(); }
+    if(e.key==='ArrowUp'){ orb.el = Math.min(Math.PI/2-0.05, orb.el+0.08); applyOrbit(); }
+    if(e.key==='ArrowDown'){ orb.el = Math.max(-Math.PI/2+0.1, orb.el-0.08); applyOrbit(); }
+    if(e.key==='+' || e.key==='='){ orb.dist = Math.max(12, orb.dist-3); applyOrbit(); }
+    if(e.key==='-' || e.key==='_'){ orb.dist = Math.min(120, orb.dist+3); applyOrbit(); }
+  });
+
+  // -------------------------------------------------------
+  // Resize handling
+  // -------------------------------------------------------
+  window.addEventListener('resize', ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // -------------------------------------------------------
+  // Animation loop
+  // -------------------------------------------------------
+  const clock = new THREE.Clock();
+  function animate(){
+    const t = clock.getElapsedTime();
+    // float nodes gently
+    Object.values(nodes).forEach((n,i)=>{
+      n.group.position.y = n.pos.y + Math.sin(t*0.8 + i)*0.06;
+      n.group.rotation.y = Math.sin(t*0.3 + i)*0.03;
+    });
+    // documents drift in the cloud
+    docPositions.forEach(d=>{
+      const s = d.userData.seed;
+      d.position.x = d.userData.base.x + Math.sin(t*0.6 + s)*0.1;
+      d.position.y = d.userData.base.y + Math.cos(t*0.8 + s)*0.08;
+      d.position.z = d.userData.base.z + Math.sin(t*0.5 + s*0.5)*0.1;
+    });
+    // pulse halo breathing
+    if(pulse.visible){
+      pulseHalo.scale.setScalar(1 + Math.sin(t*6)*0.2);
+    }
+    // governance plane subtle shimmer
+    layerPlanes.gov.ring.material.opacity = 0.16 + Math.sin(t*1.5)*0.03;
+    // slow auto rotate only when the user has not interacted
+    if(orb.auto){ orb.az += 0.0008; applyOrbit(); }
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // hide loader after first frame
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{ document.getElementById('loading').classList.add('gone'); }, 200);
+  });
+
+  // welcome log
+  log('3D scene loaded. Try a scenario or click a node.','info');
+
+})();
+</script>
+</body>
+</html>
